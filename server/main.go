@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/metadata"
@@ -66,7 +67,12 @@ func main() {
 		cmd := flag.Arg(0)
 		var ok bool
 		if ok, err = svc.Command(cmd); !ok {
-			log.Fatalln("Unknown argument:", cmd)
+			switch strings.ToLower(cmd) {
+			case "export":
+				export(time.Now().AddDate(0, -1, 0), true)
+			default:
+				log.Fatalln("Unknown argument:", cmd)
+			}
 		}
 	default:
 		log.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))

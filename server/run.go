@@ -58,12 +58,12 @@ func run() {
 	defer client.Close()
 
 	go func() {
-		ticker := time.NewTicker(24 * time.Hour)
+		ticker := time.NewTicker(12 * time.Hour)
 		defer ticker.Stop()
 
-		record()
+		record(time.Now().AddDate(0, 0, -1))
 		for range ticker.C {
-			record()
+			record(time.Now().AddDate(0, 0, -1))
 		}
 	}()
 
