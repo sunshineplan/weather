@@ -42,24 +42,23 @@ func record(day time.Time) {
 	}
 }
 
-func export(month time.Time, delete bool) {
-	if err := initWeather(); err != nil {
-		log.Fatal(err)
-	}
-
+func export(month time.Time, delete bool) (err error) {
 	var res []weather.ForecastForecastday
-	if err := client.Find(
+	if err = client.Find(
 		mongodb.M{"date": mongodb.M{"$regex": month.Format("2006-01")}},
 		&mongodb.FindOpt{Sort: mongodb.M{"date": 1}},
 		&res,
 	); err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	var output string
 	for index, i := range res {
 		i.DateEpoch = 0
-		i.Day.Condition.Icon = ""
+		if i.Day.Condition != nil {
+			i.Day.Condition.Icon = ""
+			i.Day.Condition.Code = 0
+		}
 		b, err := json.Marshal(i)
 		if err != nil {
 			log.Print(err)
@@ -71,13 +70,13 @@ func export(month time.Time, delete bool) {
 		}
 	}
 	output = fmt.Sprintf("[%s]", output)
-	if err := os.WriteFile(fmt.Sprintf("%s.json", month.Format("2006-01")), []byte(output), 0644); err != nil {
-		log.Fatal(err)
+	if err = os.WriteFile(fmt.Sprintf("%s.json", month.Format("2006-01")), []byte(output), 0644); err != nil {
+		return
 	}
 
 	if delete {
-		if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month.Format("2006-01")}}); err != nil {
-			log.Fatal(err)
-		}
+		_, err = client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month.Format("2006-01")}})
 	}
+
+	return
 }

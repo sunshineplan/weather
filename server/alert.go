@@ -30,7 +30,7 @@ func alert() {
 				startRainSnow = hour
 			}()
 			if startRainSnow == nil || startRainSnow.Time != hour.Time {
-				log.Print("降雨警报", hour) //TODO
+				log.Printf("降雨警报 %#v", hour) //TODO
 				//go sendMail("降雨警报")
 			}
 		} else {
@@ -38,7 +38,7 @@ func alert() {
 				stopRainSnow = hour
 			}()
 			if stopRainSnow == nil || stopRainSnow.Time != hour.Time {
-				log.Print("雨停预报", hour) //TODO
+				log.Printf("雨停预报 %#v", hour) //TODO
 				//go sendMail("雨停预报")
 			}
 		}
@@ -50,7 +50,7 @@ func alert() {
 				tempUp = day
 			}()
 			if tempUp == nil || tempUp.Date != day.Date {
-				log.Print("升温警报", day) //TODO
+				log.Printf("升温警报 %#v", day) //TODO
 				//go sendMail("升温警报")
 			}
 		} else {
@@ -58,7 +58,7 @@ func alert() {
 				tempDown = day
 			}()
 			if tempDown == nil || tempDown.Date != day.Date {
-				log.Print("降温警报", day) //TODO
+				log.Printf("降温警报 %#v", day) //TODO
 				//go sendMail("降温警报")
 			}
 		}

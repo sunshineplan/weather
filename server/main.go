@@ -69,7 +69,12 @@ func main() {
 		if ok, err = svc.Command(cmd); !ok {
 			switch strings.ToLower(cmd) {
 			case "export":
-				export(time.Now().AddDate(0, -1, 0), true)
+				if err := initWeather(); err != nil {
+					log.Fatal(err)
+				}
+				if err := export(time.Now().AddDate(0, -1, 0), true); err != nil {
+					log.Fatal(err)
+				}
 			default:
 				log.Fatalln("Unknown argument:", cmd)
 			}
