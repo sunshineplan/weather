@@ -18,6 +18,8 @@ func runServer() {
 		if err != nil {
 			log.Fatalln("Failed to open log file:", err)
 		}
+		gin.DefaultWriter = f
+		gin.DefaultErrorWriter = f
 		log.SetOutput(f)
 	}
 

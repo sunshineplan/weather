@@ -28,6 +28,7 @@ var svc = service.Service{
 	TestExec: test,
 	Options: service.Options{
 		Dependencies: []string{"Wants=network-online.target", "After=network.target"},
+		Environment:  map[string]string{"GIN_MODE": "release"},
 		ExcludeFiles: []string{"scripts/weather.conf"},
 	},
 }
