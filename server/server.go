@@ -28,11 +28,9 @@ func runServer() {
 	server.Handler = router
 
 	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if method := r.Header.Get("Access-Control-Request-Method"); method != "" {
-			header := w.Header()
-			header.Set("Access-Control-Allow-Methods", method)
-			header.Set("Access-Control-Allow-Origin", "*")
-		}
+		header := w.Header()
+		header.Set("Access-Control-Allow-Methods", r.Method)
+		header.Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusNoContent)
 	})
 
