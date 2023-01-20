@@ -38,7 +38,7 @@ func runServer() {
 			w.WriteHeader(500)
 			return
 		}
-		b, _ := json.Marshal(resp.Current)
+		b, _ := json.Marshal(resp)
 		w.Write(b)
 	})
 

@@ -72,7 +72,7 @@ func main() {
 				if err := initWeather(); err != nil {
 					log.Fatal(err)
 				}
-				if err := export(time.Now().AddDate(0, -1, 0), true); err != nil {
+				if err := export(time.Now().AddDate(0, -1, 0), false); err != nil {
 					log.Fatal(err)
 				}
 			default:
