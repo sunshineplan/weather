@@ -27,6 +27,15 @@ func runServer() {
 	router := httprouter.New()
 	server.Handler = router
 
+	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if method := r.Header.Get("Access-Control-Request-Method"); method != "" {
+			header := w.Header()
+			header.Set("Access-Control-Allow-Methods", method)
+			header.Set("Access-Control-Allow-Origin", "*")
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	router.POST("/current", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		q := r.FormValue("q")
 		if q == "" {
