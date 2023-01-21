@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -40,6 +42,27 @@ func runServer() {
 			return
 		}
 		c.JSON(200, resp)
+	})
+	router.POST("/history", func(c *gin.Context) {
+		month := c.Query("month")
+		if month == "" {
+			month = time.Now().AddDate(0, -1, 0).Format("2006-01")
+		}
+		if _, err := time.Parse("2006-01", month); err != nil {
+			log.Print(err)
+			c.String(400, "")
+			return
+		}
+
+		delete, _ := strconv.ParseBool("delete")
+
+		buf, err := export(month, delete)
+		if err != nil {
+			log.Print(err)
+			c.String(500, "")
+			return
+		}
+		c.String(200, buf.String())
 	})
 
 	if err := server.Run(); err != nil {

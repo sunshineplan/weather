@@ -1,18 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/weather"
 )
 
-func record(day time.Time) {
-	resp, err := weather.HistoryWeather(*query, day)
+func record(date time.Time) {
+	resp, err := weather.HistoryWeather(*query, date)
 	if err != nil {
 		if *debug {
 			log.Print(err)
@@ -42,17 +41,17 @@ func record(day time.Time) {
 	}
 }
 
-func export(month time.Time, delete bool) (err error) {
+func export(month string, delete bool) (buf bytes.Buffer, err error) {
 	var res []weather.ForecastForecastday
 	if err = client.Find(
-		mongodb.M{"date": mongodb.M{"$regex": month.Format("2006-01")}},
+		mongodb.M{"date": mongodb.M{"$regex": month}},
 		&mongodb.FindOpt{Sort: mongodb.M{"date": 1}},
 		&res,
 	); err != nil {
 		return
 	}
 
-	var output string
+	buf.WriteRune('[')
 	for index, i := range res {
 		i.DateEpoch = 0
 		if i.Day.Condition != nil {
@@ -64,18 +63,19 @@ func export(month time.Time, delete bool) (err error) {
 			log.Print(err)
 			continue
 		}
-		output += string(b)
+		buf.Write(b)
 		if index < len(res)-1 {
-			output += ",\n"
+			buf.WriteString(",\n")
 		}
 	}
-	output = fmt.Sprintf("[%s]", output)
-	if err = os.WriteFile(fmt.Sprintf("%s.json", month.Format("2006-01")), []byte(output), 0644); err != nil {
-		return
-	}
+	buf.WriteRune(']')
 
 	if delete {
-		_, err = client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month.Format("2006-01")}})
+		go func() {
+			if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
+				log.Print(err)
+			}
+		}()
 	}
 
 	return
