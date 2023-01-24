@@ -36,7 +36,6 @@ var (
 	query      = flag.String("query", "Shanghai", "weather query")
 	difference = flag.Float64("difference", 5, "temperature difference")
 	logPath    = flag.String("log", "", "Log Path")
-	debug      = flag.Bool("debug", false, "debug")
 )
 
 func main() {

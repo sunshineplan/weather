@@ -13,30 +13,19 @@ import (
 func record(date time.Time) {
 	resp, err := weather.HistoryWeather(*query, date)
 	if err != nil {
-		if *debug {
-			log.Print(err)
-		}
+		log.Print(err)
 		return
 	}
 
 	for _, i := range resp.Forecast.Forecastday {
-		res, err := client.UpdateOne(
+		if _, err := client.UpdateOne(
 			mongodb.M{"date_epoch": i.DateEpoch, "date": i.Date},
 			mongodb.M{"$set": mongodb.M{"day": i.Day}},
 			&mongodb.UpdateOpt{Upsert: true},
-		)
-		if err != nil {
-			if *debug {
-				log.Print(err)
-			}
-			return
-		}
-
-		if n := res.MatchedCount; n != 0 && *debug {
-			log.Printf("Updated %d record", n)
-		}
-		if n := res.UpsertedCount; n != 0 && *debug {
-			log.Printf("Upserted %d record", n)
+		); err != nil {
+			log.Print(err)
+		} else {
+			log.Printf("record %s %#v", i.Date, i.Day)
 		}
 	}
 }

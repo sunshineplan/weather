@@ -18,9 +18,7 @@ var (
 func alert() {
 	resp, err := weather.ForecastWeather(*query, 3)
 	if err != nil {
-		if *debug {
-			log.Print(err)
-		}
+		log.Print(err)
 		return
 	}
 

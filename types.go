@@ -62,10 +62,10 @@ type ForecastDay struct {
 	TotalprecipMm     float64    `json:"totalprecip_mm"`
 	AvgvisKm          float64    `json:"avgvis_km,omitempty"`
 	Avghumidity       float64    `json:"avghumidity,omitempty"`
-	DailyWillItRain   int        `json:"daily_will_it_rain"`
-	DailyChanceOfRain int        `json:"daily_chance_of_rain"`
-	DailyWillItSnow   int        `json:"daily_will_it_snow"`
-	DailyChanceOfSnow int        `json:"daily_chance_of_snow"`
+	DailyWillItRain   int        `json:"daily_will_it_rain,omitempty"`
+	DailyChanceOfRain int        `json:"daily_chance_of_rain,omitempty"`
+	DailyWillItSnow   int        `json:"daily_will_it_snow,omitempty"`
+	DailyChanceOfSnow int        `json:"daily_chance_of_snow,omitempty"`
 	Condition         *Condition `json:"condition,omitempty"`
 	Uv                float64    `json:"uv,omitempty"`
 }
