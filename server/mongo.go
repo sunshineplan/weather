@@ -42,12 +42,12 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 
 	buf.WriteRune('[')
 	for index, i := range res {
-		i.DateEpoch = 0
+		i.Day.Date = i.Date
 		if i.Day.Condition != nil {
-			i.Day.Condition.Icon = ""
-			i.Day.Condition.Code = 0
+			i.Day.Weather = i.Day.Condition.Text
+			i.Day.Condition = nil
 		}
-		b, err := json.Marshal(i)
+		b, err := json.Marshal(i.Day)
 		if err != nil {
 			log.Print(err)
 			continue

@@ -55,6 +55,8 @@ type ForecastForecastday struct {
 }
 
 type ForecastDay struct {
+	Date string `json:"date,omitempty"`
+
 	Maxtemp           float64    `json:"maxtemp_c"`
 	Mintemp           float64    `json:"mintemp_c"`
 	Avgtemp           float64    `json:"avgtemp_c"`
@@ -68,6 +70,8 @@ type ForecastDay struct {
 	DailyChanceOfSnow int        `json:"daily_chance_of_snow,omitempty"`
 	Condition         *Condition `json:"condition,omitempty"`
 	Uv                float64    `json:"uv,omitempty"`
+
+	Weather string `json:"weather,omitempty"`
 }
 
 type ForecastAstro struct {
