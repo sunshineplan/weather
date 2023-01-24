@@ -10,31 +10,33 @@ import (
 	"github.com/sunshineplan/weather"
 )
 
-func record(date time.Time) {
-	resp, err := weather.HistoryWeather(*query, date)
+func record(date time.Time) (err error) {
+	defer func() {
+		if err != nil {
+			log.Print(err)
+		}
+	}()
+
+	day, err := history.History(*query, date)
 	if err != nil {
-		log.Print(err)
 		return
 	}
 
-	for _, i := range resp.Forecast.Forecastday {
-		if _, err := client.UpdateOne(
-			mongodb.M{"date_epoch": i.DateEpoch, "date": i.Date},
-			mongodb.M{"$set": mongodb.M{"day": i.Day}},
-			&mongodb.UpdateOpt{Upsert: true},
-		); err != nil {
-			log.Print(err)
-		} else {
-			log.Printf("record %s %#v", i.Date, i.Day)
-		}
+	if _, err = client.UpdateOne(
+		mongodb.M{"DateEpoch": day.DateEpoch, "Date": day.Date},
+		mongodb.M{"$set": day},
+		&mongodb.UpdateOpt{Upsert: true},
+	); err == nil {
+		log.Printf("record %#v", day)
 	}
+	return
 }
 
 func export(month string, delete bool) (buf bytes.Buffer, err error) {
-	var res []weather.ForecastForecastday
+	var res []weather.Day
 	if err = client.Find(
-		mongodb.M{"date": mongodb.M{"$regex": month}},
-		&mongodb.FindOpt{Sort: mongodb.M{"date": 1}},
+		mongodb.M{"Date": mongodb.M{"$regex": month}},
+		&mongodb.FindOpt{Sort: mongodb.M{"Date": 1}},
 		&res,
 	); err != nil {
 		return
@@ -42,12 +44,10 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 
 	buf.WriteRune('[')
 	for index, i := range res {
-		i.Day.Date = i.Date
-		if i.Day.Condition != nil {
-			i.Day.Weather = i.Day.Condition.Text
-			i.Day.Condition = nil
-		}
-		b, err := json.Marshal(i.Day)
+		i.DateEpoch = 0
+		i.Hours = nil
+		i.Icon = ""
+		b, err := json.Marshal(i)
 		if err != nil {
 			log.Print(err)
 			continue
@@ -61,7 +61,7 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 
 	if delete {
 		go func() {
-			if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
+			if _, err := client.DeleteMany(mongodb.M{"Date": mongodb.M{"$regex": month}}); err != nil {
 				log.Print(err)
 			}
 		}()

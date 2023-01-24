@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/httpsvr"
-	"github.com/sunshineplan/weather"
 )
 
 var server = httpsvr.New()
@@ -35,7 +35,7 @@ func runServer() {
 		if q == "" {
 			q = c.ClientIP()
 		}
-		resp, err := weather.RealtimeWeather(q)
+		resp, err := realtime.Request("current.json", fmt.Sprintf("q=%s", q))
 		if err != nil {
 			log.Print(err)
 			c.String(500, "")

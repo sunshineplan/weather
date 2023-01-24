@@ -1,40 +1,83 @@
 package weather
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"errors"
+	"math"
 	"time"
 )
 
-var ApiKey string
+type API interface {
+	Realtime(string) (Current, error)
+	Forecast(string, int) (Current, []Day, error)
+	History(string, time.Time) (Day, error)
+}
 
-const baseURL = "https://api.weatherapi.com/v1"
+type Weather struct {
+	API
+}
 
-func weather(api, query string) (res Response, err error) {
-	resp, err := http.Get(baseURL + fmt.Sprintf("/%s?key=%s&%s", api, ApiKey, query))
+func New(api API) *Weather {
+	return &Weather{api}
+}
+
+func (w Weather) WillRainSnow(query string, n int) (hour *Hour, start bool, err error) {
+	current, days, err := w.Forecast(query, n)
 	if err != nil {
 		return
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("status code: %d", resp.StatusCode)
-		return
+	var hours []Hour
+	for _, i := range days {
+		for _, ii := range i.Hours {
+			if ii.TimeEpoch > i.DateEpoch {
+				hours = append(hours, ii)
+			}
+		}
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&res)
+	for _, i := range hours {
+		switch current.PrecipMm {
+		case 0:
+			if i.WillItRain+i.WillItSnow > 0 {
+				hour = &i
+				start = true
+				return
+			}
+		default:
+			if i.WillItRain+i.WillItSnow == 0 {
+				hour = &i
+				return
+			}
+		}
+	}
 	return
 }
 
-func RealtimeWeather(q string) (Response, error) {
-	return weather("current.json", fmt.Sprintf("q=%s", q))
-}
+func (w Weather) WillUpDown(difference float64, query string, n int) (day *Day, up bool, err error) {
+	_, days, err := w.Forecast(query, n)
+	if err != nil {
+		return
+	}
+	if len(days) == 0 {
+		err = errors.New("length of forecast days is zero")
+		return
+	}
 
-func ForecastWeather(q string, days int) (Response, error) {
-	return weather("forecast.json", fmt.Sprintf("q=%s&days=%d", q, days))
-}
-
-func HistoryWeather(q string, day time.Time) (Response, error) {
-	return weather("history.json", fmt.Sprintf("q=%s&dt=%s", q, day.Format("2006-01-02")))
+	today := days[0]
+	for _, i := range days[1:] {
+		if math.Abs(today.MaxTemp-i.MaxTemp) >= difference {
+			if today.MaxTemp < i.MaxTemp {
+				up = true
+			}
+		} else if math.Abs(today.MinTemp-i.MinTemp) >= difference {
+			if today.MinTemp < i.MinTemp {
+				up = true
+			}
+		} else {
+			continue
+		}
+		day = &i
+		return
+	}
+	return
 }

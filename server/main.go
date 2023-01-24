@@ -12,12 +12,16 @@ import (
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/utils/flags"
 	"github.com/sunshineplan/utils/mail"
+	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/weatherapi"
 )
 
 var (
-	meta   metadata.Server
-	client mongodb.Client
-	dialer mail.Dialer
+	meta     metadata.Server
+	client   mongodb.Client
+	dialer   mail.Dialer
+	realtime *weatherapi.WeatherAPI
+	history  *weather.Weather
 )
 
 var svc = service.Service{

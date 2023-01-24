@@ -9,21 +9,24 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/weatherapi"
 )
 
 func initWeather() error {
 	var res struct {
-		Key        string
-		Mongo      api.Client
-		Dialer     mail.Dialer
-		Subscriber []string
+		WeatherAPI     string
+		VisualCrossing string
+		Mongo          api.Client
+		Dialer         mail.Dialer
+		Subscriber     []string
 	}
 	if err := retry.Do(func() error {
 		return meta.Get("weather", &res)
 	}, 3, 20); err != nil {
 		return err
 	}
-	weather.ApiKey = res.Key
+	realtime = weatherapi.New(res.WeatherAPI)
+	history = weather.New(weatherapi.New(res.WeatherAPI))
 	client = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber
@@ -39,7 +42,7 @@ func test() (err error) {
 		client.Close()
 	}
 
-	_, e2 := weather.RealtimeWeather("Shanghai")
+	_, e2 := realtime.Realtime("Shanghai")
 	if e2 != nil {
 		fmt.Println("Failed to fetch weather:", e2)
 	}

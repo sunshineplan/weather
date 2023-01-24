@@ -8,21 +8,17 @@ import (
 )
 
 var (
-	startRainSnow *weather.ForecastHour
-	stopRainSnow  *weather.ForecastHour
+	startRainSnow *weather.Hour
+	stopRainSnow  *weather.Hour
 
-	tempUp   *weather.ForecastForecastday
-	tempDown *weather.ForecastForecastday
+	tempUp   *weather.Day
+	tempDown *weather.Day
 )
 
 func alert() {
-	resp, err := weather.ForecastWeather(*query, 3)
-	if err != nil {
+	if hour, start, err := history.WillRainSnow(*query, 3); err != nil {
 		log.Print(err)
-		return
-	}
-
-	if hour, start := resp.WillRainSnow(); hour != nil {
+	} else if hour != nil {
 		if start {
 			defer func() {
 				startRainSnow = hour
@@ -42,7 +38,9 @@ func alert() {
 		}
 	}
 
-	if day, up := resp.WillUpDown(*difference); day != nil {
+	if day, up, err := history.WillUpDown(*difference, *query, 3); err != nil {
+		log.Print(err)
+	} else if day != nil {
 		if up {
 			defer func() {
 				tempUp = day
