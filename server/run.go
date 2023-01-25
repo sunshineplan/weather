@@ -9,6 +9,7 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/visualcrossing"
 	"github.com/sunshineplan/weather/weatherapi"
 )
 
@@ -26,7 +27,15 @@ func initWeather() error {
 		return err
 	}
 	realtime = weatherapi.New(res.WeatherAPI)
-	history = weather.New(weatherapi.New(res.WeatherAPI))
+	var api weather.API
+	switch *provider {
+	case "weatherapi":
+		api = weatherapi.New(res.WeatherAPI)
+	default:
+		api = visualcrossing.New(res.VisualCrossing)
+	}
+	forecast = weather.New(api)
+	history = api
 	client = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber
@@ -44,10 +53,15 @@ func test() (err error) {
 
 	_, e2 := realtime.Realtime("Shanghai")
 	if e2 != nil {
-		fmt.Println("Failed to fetch weather:", e2)
+		fmt.Println("Failed to fetch realtime weather:", e2)
 	}
 
-	if e1 != nil || e2 != nil {
+	_, e3 := history.History("Shanghai", time.Now().AddDate(0, 0, -1))
+	if e3 != nil {
+		fmt.Println("Failed to fetch history weather:", e2)
+	}
+
+	if e1 != nil || e2 != nil || e3 != nil {
 		err = fmt.Errorf("test is failed")
 	}
 

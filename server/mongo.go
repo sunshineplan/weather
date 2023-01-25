@@ -23,7 +23,7 @@ func record(date time.Time) (err error) {
 	}
 
 	if _, err = client.UpdateOne(
-		mongodb.M{"DateEpoch": day.DateEpoch, "Date": day.Date},
+		mongodb.M{"dateEpoch": day.DateEpoch, "date": day.Date},
 		mongodb.M{"$set": day},
 		&mongodb.UpdateOpt{Upsert: true},
 	); err == nil {
@@ -35,8 +35,8 @@ func record(date time.Time) (err error) {
 func export(month string, delete bool) (buf bytes.Buffer, err error) {
 	var res []weather.Day
 	if err = client.Find(
-		mongodb.M{"Date": mongodb.M{"$regex": month}},
-		&mongodb.FindOpt{Sort: mongodb.M{"Date": 1}},
+		mongodb.M{"date": mongodb.M{"$regex": month}},
+		&mongodb.FindOpt{Sort: mongodb.M{"date": 1}},
 		&res,
 	); err != nil {
 		return
@@ -61,7 +61,7 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 
 	if delete {
 		go func() {
-			if _, err := client.DeleteMany(mongodb.M{"Date": mongodb.M{"$regex": month}}); err != nil {
+			if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
 				log.Print(err)
 			}
 		}()

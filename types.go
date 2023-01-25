@@ -1,66 +1,78 @@
 package weather
 
 type Current struct {
-	LastUpdatedEpoch int64
-	LastUpdated      string
-	Temp             float64
-	FeelsLike        float64
-	WindKph          float64
-	WindDegree       int
-	WindDir          string
-	PressureMb       float64
-	PrecipMm         float64
-	Humidity         int
-	Cloud            int
-	VisKm            float64
-	Uv               float64
-	GustKph          float64
-	Condition        string
-	Icon             string
+	Datetime      string   `json:"datetime,omitempty"`
+	DatetimeEpoch int64    `json:"datetimeEpoch,omitempty"`
+	Temp          float64  `json:"temp"`
+	FeelsLike     float64  `json:"feelslike"`
+	Humidity      float64  `json:"humidity,omitempty"`
+	Dew           float64  `json:"dew"`
+	Precip        float64  `json:"precip,omitempty"`
+	PrecipType    []string `json:"preciptype,omitempty"`
+	WindGust      float64  `json:"windgust,omitempty"`
+	WindSpeed     float64  `json:"windspeed,omitempty"`
+	WindDegree    float64  `json:"winddegree,omitempty"`
+	WindDir       string   `json:"winddir,omitempty"`
+	Pressure      float64  `json:"pressure,omitempty"`
+	Visibility    float64  `json:"visibility,omitempty"`
+	CloudCover    float64  `json:"cloudcover"`
+	UVIndex       float64  `json:"uvindex,omitempty"`
+	Condition     string   `json:"condition,omitempty"`
+	Icon          string   `json:"icon,omitempty"`
 }
 
 type Day struct {
-	Date              string
-	DateEpoch         int64 `json:",omitempty"`
-	MaxTemp           float64
-	MinTemp           float64
-	AvgTemp           float64
-	MaxWindKph        float64
-	TotalPrecipMm     float64
-	AvgVisKm          float64
-	AvgHumidity       float64
-	DailyWillItRain   int     `json:",omitempty"`
-	DailyChanceOfRain int     `json:",omitempty"`
-	DailyWillItSnow   int     `json:",omitempty"`
-	DailyChanceOfSnow int     `json:",omitempty"`
-	Uv                float64 `json:",omitempty"`
-	Condition         string
-	Icon              string `json:",omitempty"`
-	Hours             []Hour `json:",omitempty"`
+	Date         string   `json:"date,omitempty"`
+	DateEpoch    int64    `json:"dateEpoch,omitempty"`
+	TempMax      float64  `json:"tempmax"`
+	TempMin      float64  `json:"tempmin"`
+	Temp         float64  `json:"temp"`
+	FeelsLikeMax float64  `json:"feelslikemax"`
+	FeelsLikeMin float64  `json:"feelslikemin"`
+	FeelsLike    float64  `json:"feelslike"`
+	Humidity     float64  `json:"humidity,omitempty"`
+	Dew          float64  `json:"dew"`
+	Precip       float64  `json:"precip,omitempty"`
+	PrecipProb   float64  `json:"precipprob,omitempty"`
+	PrecipCover  float64  `json:"precipcover,omitempty"`
+	Snow         float64  `json:"snow,omitempty"`
+	SnowDepth    float64  `json:"snowdepth,omitempty"`
+	PrecipType   []string `json:"preciptype,omitempty"`
+	WindGust     float64  `json:"windgust,omitempty"`
+	WindSpeed    float64  `json:"windspeed,omitempty"`
+	WindDir      float64  `json:"winddir,omitempty"`
+	Pressure     float64  `json:"pressure,omitempty"`
+	CloudCover   float64  `json:"cloudcover"`
+	Visibility   float64  `json:"visibility,omitempty"`
+	UVIndex      float64  `json:"uvindex,omitempty"`
+	SevereRisk   float64  `json:"severerisk,omitempty"`
+	Condition    string   `json:"condition,omitempty"`
+	Icon         string   `json:"icon,omitempty"`
+	Hours        []Hour   `json:"hours,omitempty"`
 }
 
 type Hour struct {
-	TimeEpoch    int64
-	Time         string
-	Temp         float64
-	WindKph      float64
-	WindDegree   int
-	WindDir      string
-	PressureMb   float64
-	PrecipMm     float64
-	Humidity     int
-	Cloud        int
-	FeelsLike    float64
-	WindChill    float64
-	HeatIndex    float64
-	DewPoint     float64
-	WillItRain   int
-	ChanceOfRain int
-	WillItSnow   int
-	ChanceOfSnow int
-	VisKm        float64
-	GustKph      float64
-	Uv           float64
-	Condition    string
-	Icon         string
+	Time           string   `json:"time,omitempty"`
+	TimeEpoch      int64    `json:"timeEpoch,omitempty"`
+	Temp           float64  `json:"temp"`
+	FeelsLike      float64  `json:"feelslike"`
+	Humidity       float64  `json:"humidity"`
+	Dew            float64  `json:"dew"`
+	Precip         float64  `json:"precip,omitempty"`
+	PrecipProb     float64  `json:"precipprob,omitempty"`
+	Snow           float64  `json:"snow,omitempty"`
+	SnowDepth      float64  `json:"snowdepth,omitempty"`
+	PrecipType     []string `json:"preciptype,omitempty"`
+	WindGust       float64  `json:"windgust,omitempty"`
+	WindSpeed      float64  `json:"windspeed,omitempty"`
+	WindDir        float64  `json:"winddir,omitempty"`
+	Pressure       float64  `json:"pressure,omitempty"`
+	Visibility     float64  `json:"visibility,omitempty"`
+	CloudCover     float64  `json:"cloudcover"`
+	SolarRadiation float64  `json:"solarradiation,omitempty"`
+	SolarEnergy    float64  `json:"solarenergy,omitempty"`
+	UVIndex        float64  `json:"uvindex,omitempty"`
+	SevereRisk     float64  `json:"severerisk,omitempty"`
+	Condition      string   `json:"condition,omitempty"`
+	Icon           string   `json:"icon,omitempty"`
 }

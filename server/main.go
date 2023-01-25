@@ -17,11 +17,13 @@ import (
 )
 
 var (
-	meta     metadata.Server
-	client   mongodb.Client
-	dialer   mail.Dialer
+	meta   metadata.Server
+	client mongodb.Client
+	dialer mail.Dialer
+
 	realtime *weatherapi.WeatherAPI
-	history  *weather.Weather
+	forecast *weather.Weather
+	history  weather.API
 )
 
 var svc = service.Service{
@@ -38,7 +40,9 @@ var svc = service.Service{
 
 var (
 	query      = flag.String("query", "Shanghai", "weather query")
+	days       = flag.Int("days", 3, "forecast days")
 	difference = flag.Float64("difference", 5, "temperature difference")
+	provider   = flag.String("provider", "visualcrossing", "weather provider")
 	logPath    = flag.String("log", "", "Log Path")
 )
 

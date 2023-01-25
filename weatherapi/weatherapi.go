@@ -57,8 +57,8 @@ func (api *WeatherAPI) Forecast(query string, n int) (current weather.Current, d
 	return
 }
 
-func (api *WeatherAPI) History(q string, date time.Time) (day weather.Day, err error) {
-	resp, err := api.Request("history.json", fmt.Sprintf("q=%s&dt=%s", q, date.Format("2006-01-02")))
+func (api *WeatherAPI) History(query string, date time.Time) (day weather.Day, err error) {
+	resp, err := api.Request("history.json", fmt.Sprintf("q=%s&dt=%s", query, date.Format("2006-01-02")))
 	if err != nil {
 		return
 	}

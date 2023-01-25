@@ -36,15 +36,15 @@ func (w Weather) WillRainSnow(query string, n int) (hour *Hour, start bool, err 
 	}
 
 	for _, i := range hours {
-		switch current.PrecipMm {
+		switch current.Precip {
 		case 0:
-			if i.WillItRain+i.WillItSnow > 0 {
+			if i.PrecipProb > 0 {
 				hour = &i
 				start = true
 				return
 			}
 		default:
-			if i.WillItRain+i.WillItSnow == 0 {
+			if i.PrecipProb == 0 {
 				hour = &i
 				return
 			}
@@ -65,12 +65,12 @@ func (w Weather) WillUpDown(difference float64, query string, n int) (day *Day, 
 
 	today := days[0]
 	for _, i := range days[1:] {
-		if math.Abs(today.MaxTemp-i.MaxTemp) >= difference {
-			if today.MaxTemp < i.MaxTemp {
+		if math.Abs(today.TempMax-i.TempMax) >= difference {
+			if today.TempMax < i.TempMax {
 				up = true
 			}
-		} else if math.Abs(today.MinTemp-i.MinTemp) >= difference {
-			if today.MinTemp < i.MinTemp {
+		} else if math.Abs(today.TempMin-i.TempMin) >= difference {
+			if today.TempMin < i.TempMin {
 				up = true
 			}
 		} else {

@@ -16,7 +16,7 @@ var (
 )
 
 func alert() {
-	if hour, start, err := history.WillRainSnow(*query, 3); err != nil {
+	if hour, start, err := forecast.WillRainSnow(*query, *days); err != nil {
 		log.Print(err)
 	} else if hour != nil {
 		if start {
@@ -38,7 +38,7 @@ func alert() {
 		}
 	}
 
-	if day, up, err := history.WillUpDown(*difference, *query, 3); err != nil {
+	if day, up, err := forecast.WillUpDown(*difference, *query, *days); err != nil {
 		log.Print(err)
 	} else if day != nil {
 		if up {
