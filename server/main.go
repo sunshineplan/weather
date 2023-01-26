@@ -28,7 +28,7 @@ var (
 
 var svc = service.Service{
 	Name:     "Weather",
-	Desc:     "weather api",
+	Desc:     "weather service",
 	Exec:     run,
 	TestExec: test,
 	Options: service.Options{

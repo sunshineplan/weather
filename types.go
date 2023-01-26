@@ -1,5 +1,9 @@
 package weather
 
+import (
+	"encoding/json"
+)
+
 type Current struct {
 	Datetime      string   `json:"datetime,omitempty"`
 	DatetimeEpoch int64    `json:"datetimeEpoch,omitempty"`
@@ -51,6 +55,30 @@ type Day struct {
 	Hours        []Hour   `json:"hours,omitempty"`
 }
 
+func (day Day) String() string {
+	var format struct {
+		Date         string  `json:"date"`
+		TempMax      float64 `json:"tempmax"`
+		TempMin      float64 `json:"tempmin"`
+		Temp         float64 `json:"temp"`
+		FeelsLikeMax float64 `json:"feelslikemax"`
+		FeelsLikeMin float64 `json:"feelslikemin"`
+		Humidity     float64 `json:"humidity"`
+		Dew          float64 `json:"dew"`
+		Precip       float64 `json:"precip"`
+		PrecipCover  float64 `json:"precipcover"`
+		WindSpeed    float64 `json:"windspeed"`
+		Pressure     float64 `json:"pressure"`
+		Visibility   float64 `json:"visibility"`
+		UVIndex      float64 `json:"uvindex"`
+		Condition    string  `json:"condition"`
+	}
+	b, _ := json.Marshal(day)
+	json.Unmarshal(b, &format)
+	b, _ = json.Marshal(format)
+	return string(b)
+}
+
 type Hour struct {
 	Time           string   `json:"time,omitempty"`
 	TimeEpoch      int64    `json:"timeEpoch,omitempty"`
@@ -75,4 +103,29 @@ type Hour struct {
 	SevereRisk     float64  `json:"severerisk,omitempty"`
 	Condition      string   `json:"condition,omitempty"`
 	Icon           string   `json:"icon,omitempty"`
+}
+
+func (hour Hour) String() string {
+	var format struct {
+		Time       string  `json:"time"`
+		Temp       float64 `json:"temp"`
+		FeelsLike  float64 `json:"feelslike"`
+		Humidity   float64 `json:"humidity"`
+		Dew        float64 `json:"dew"`
+		Precip     float64 `json:"precip"`
+		PrecipProb float64 `json:"precipprob"`
+		WindGust   float64 `json:"windgust"`
+		WindSpeed  float64 `json:"windspeed"`
+		WindDir    float64 `json:"winddir"`
+		Pressure   float64 `json:"pressure"`
+		Visibility float64 `json:"visibility"`
+		CloudCover float64 `json:"cloudcover"`
+		UVIndex    float64 `json:"uvindex"`
+		SevereRisk float64 `json:"severerisk"`
+		Condition  string  `json:"condition"`
+	}
+	b, _ := json.Marshal(hour)
+	json.Unmarshal(b, &format)
+	b, _ = json.Marshal(format)
+	return string(b)
 }

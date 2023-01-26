@@ -27,7 +27,7 @@ func record(date time.Time) (err error) {
 		mongodb.M{"$set": day},
 		&mongodb.UpdateOpt{Upsert: true},
 	); err == nil {
-		log.Printf("record %#v", day)
+		log.Println("record", day)
 	}
 	return
 }

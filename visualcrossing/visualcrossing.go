@@ -23,9 +23,11 @@ func New(key string) *VisualCrossing {
 }
 
 func (api *VisualCrossing) Request(endpoint, include, query string) (res Response, err error) {
-	resp, err := http.Get(
-		fmt.Sprintf("%s/%s/%s?unitGroup=metric&contentType=json&include=%s&key=%s", baseURL, query, endpoint, include, api.key),
-	)
+	url := fmt.Sprintf("%s/%s/%s?unitGroup=metric&key=%s", baseURL, query, endpoint, api.key)
+	if include != "" {
+		url += "&include=" + include
+	}
+	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
