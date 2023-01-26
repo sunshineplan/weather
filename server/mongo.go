@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"log"
 	"time"
 
@@ -22,13 +21,11 @@ func record(date time.Time) (err error) {
 		return
 	}
 
-	if _, err = client.UpdateOne(
+	_, err = client.UpdateOne(
 		mongodb.M{"dateEpoch": day.DateEpoch, "date": day.Date},
 		mongodb.M{"$set": day},
 		&mongodb.UpdateOpt{Upsert: true},
-	); err == nil {
-		log.Println("record", day)
-	}
+	)
 	return
 }
 
@@ -44,15 +41,7 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 
 	buf.WriteRune('[')
 	for index, i := range res {
-		i.DateEpoch = 0
-		i.Hours = nil
-		i.Icon = ""
-		b, err := json.Marshal(i)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		buf.Write(b)
+		buf.WriteString(i.String())
 		if index < len(res)-1 {
 			buf.WriteString(",\n")
 		}
@@ -66,6 +55,5 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 			}
 		}()
 	}
-
 	return
 }
