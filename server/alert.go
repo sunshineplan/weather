@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/sunshineplan/utils/mail"
@@ -8,56 +9,62 @@ import (
 )
 
 var (
-	startRainSnow *weather.Hour
-	stopRainSnow  *weather.Hour
-
-	tempUp   *weather.Day
-	tempDown *weather.Day
+	rainSnow     *weather.RainSnow
+	tempRiseFall *weather.TempRiseFall
 )
 
 func alert() {
-	if hour, start, err := forecast.WillRainSnow(*query, *days); err != nil {
-		log.Print(err)
-	} else if hour != nil {
-		if start {
-			defer func() {
-				startRainSnow = hour
-			}()
-			if startRainSnow == nil || startRainSnow.Time != hour.Time {
-				log.Println("降雨警报", hour) //TODO
-				//go sendMail("降雨警报")
-			}
-		} else {
-			defer func() {
-				stopRainSnow = hour
-			}()
-			if stopRainSnow == nil || stopRainSnow.Time != hour.Time {
-				log.Println("雨停预报", hour) //TODO
-				//go sendMail("雨停预报")
-			}
-		}
+	if rainSnow != nil {
+		//TODO: check rainSnow and tempRiseFall expired
 	}
 
-	if day, up, err := forecast.WillUpDown(*difference, *query, *days); err != nil {
+	if res, err := forecast.WillRainSnow(*query, *days); err != nil {
 		log.Print(err)
-	} else if day != nil {
-		if up {
-			defer func() {
-				tempUp = day
-			}()
-			if tempUp == nil || tempUp.Date != day.Date {
-				log.Println("升温警报", day) //TODO
-				//go sendMail("升温警报")
+	} else if len(res) > 0 {
+		var alert bool
+		var output string
+		for index, i := range res {
+			if index == 1 {
+				defer func() {
+					rainSnow = i
+				}()
+				if (rainSnow == nil || rainSnow.Start().Date != i.Start().Date) || rainSnow.End() != i.End() ||
+					(rainSnow.End() != nil && i.End() != nil && rainSnow.End().Date != i.End().Date) {
+					alert = true
+				}
 			}
-		} else {
-			defer func() {
-				tempDown = day
-			}()
-			if tempDown == nil || tempDown.Date != day.Date {
-				log.Println("降温警报", day) //TODO
-				//go sendMail("降温警报")
-			}
+			output += fmt.Sprintln(i)
 		}
+		if alert {
+			log.Print(output) //TODO
+			//go sendMail(output)
+		}
+	} else {
+		rainSnow = nil
+	}
+
+	if res, err := forecast.WillTempRiseFall(*difference, *query, *days); err != nil {
+		log.Print(err)
+	} else if len(res) > 0 {
+		var alert bool
+		var output string
+		for index, i := range res {
+			if index == 1 {
+				defer func() {
+					tempRiseFall = i
+				}()
+				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
+					alert = true
+				}
+			}
+			output += fmt.Sprintln(i)
+		}
+		if alert {
+			log.Print(output) //TODO
+			//go sendMail(output)
+		}
+	} else {
+		tempRiseFall = nil
 	}
 }
 
