@@ -70,7 +70,9 @@ func (api *VisualCrossing) Forecast(query string, n int) (current weather.Curren
 		return
 	}
 	current = resp.CurrentConditions.Convert()
-	days = ConvertDays(resp.Days)
+	if days = ConvertDays(resp.Days); len(days) < n {
+		err = fmt.Errorf("bad forecast number: %d", len(days))
+	}
 	return
 }
 

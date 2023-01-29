@@ -53,7 +53,9 @@ func (api *WeatherAPI) Forecast(query string, n int) (current weather.Current, d
 		return
 	}
 	current = resp.Current.Convert()
-	days = resp.Forecast.Convert()
+	if days = resp.Forecast.Convert(); len(days) < n {
+		err = fmt.Errorf("bad forecast number: %d", len(days))
+	}
 	return
 }
 
