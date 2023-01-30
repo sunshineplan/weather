@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"time"
 
-	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 )
 
@@ -15,7 +14,9 @@ var (
 
 func alert() {
 	if rainSnow != nil {
-		//TODO: check rainSnow and tempRiseFall expired
+		if rainSnow.Start().IsExpired() && !rainSnow.End().IsExpired() {
+			rainSnow.Start().Date = time.Now().Format("2006-01-02")
+		}
 	}
 
 	if res, err := forecast.WillRainSnow(*query, *days); err != nil {
@@ -28,12 +29,13 @@ func alert() {
 				defer func() {
 					rainSnow = i
 				}()
-				if (rainSnow == nil || rainSnow.Start().Date != i.Start().Date) || rainSnow.End() != i.End() ||
+				if (rainSnow == nil || rainSnow.Start().Date != i.Start().Date) ||
+					(rainSnow.End() == nil && i.End() != nil) || (rainSnow.End() != nil && i.End() == nil) ||
 					(rainSnow.End() != nil && i.End() != nil && rainSnow.End().Date != i.End().Date) {
 					alert = true
 				}
 			}
-			output += fmt.Sprintln(i)
+			output += i.String()
 		}
 		if alert {
 			log.Print(output) //TODO
@@ -57,7 +59,7 @@ func alert() {
 					alert = true
 				}
 			}
-			output += fmt.Sprintln(i)
+			output += i.String()
 		}
 		if alert {
 			log.Print(output) //TODO
@@ -65,22 +67,5 @@ func alert() {
 		}
 	} else {
 		tempRiseFall = nil
-	}
-}
-
-var to []string
-
-func sendMail(subject, body string) {
-	for _, to := range to {
-		if err := dialer.Send(
-			&mail.Message{
-				To:          []string{to},
-				Subject:     subject,
-				Body:        body,
-				ContentType: mail.TextHTML,
-			},
-		); err != nil {
-			log.Print(err)
-		}
 	}
 }

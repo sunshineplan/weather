@@ -2,6 +2,7 @@ package weather
 
 import (
 	"encoding/json"
+	"time"
 )
 
 type Current struct {
@@ -53,6 +54,22 @@ type Day struct {
 	Condition    string   `json:"condition,omitempty"`
 	Icon         string   `json:"icon,omitempty"`
 	Hours        []Hour   `json:"hours,omitempty"`
+}
+
+func (w *Day) Before(date time.Time) bool {
+	year, month, day := date.Date()
+	y, m, d := time.Unix(w.DateEpoch, 0).Date()
+	if year == y {
+		if month == m {
+			return day > d
+		}
+		return month > m
+	}
+	return year > y
+}
+
+func (day *Day) IsExpired() bool {
+	return day.Before(time.Now())
 }
 
 func (day Day) String() string {

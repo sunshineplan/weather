@@ -1,6 +1,7 @@
 package weather
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -30,6 +31,15 @@ func (t *TempRiseFall) IsRise() bool {
 		return t.day.TempMax > t.previous.TempMax
 	}
 	return t.day.Temp > t.previous.Temp
+}
+
+func (t TempRiseFall) String() string {
+	diff1, diff2 := t.Difference()
+	return fmt.Sprintf(`
+Date: %s
+TempMaxDiff: %g
+TempMinDiff: %g
+`, t.Day().Date, diff1, diff2)
 }
 
 func WillTempRiseFall(api API, difference float64, query string, n int) (res []*TempRiseFall, err error) {

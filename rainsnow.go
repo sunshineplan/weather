@@ -1,6 +1,7 @@
 package weather
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -27,6 +28,20 @@ func (s *RainSnow) Duration() string {
 		}
 	}
 	return "unknown"
+}
+
+func (rainsnow RainSnow) String() string {
+	if rainsnow.end == nil {
+		return fmt.Sprintf(`
+Begin at: %s
+Duration: unknown
+`, rainsnow.start.Date)
+	}
+	return fmt.Sprintf(`
+Begin at: %s
+End at: %s
+Duration: %s
+`, rainsnow.start.Date, rainsnow.end.Date, rainsnow.Duration())
 }
 
 func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
