@@ -30,7 +30,7 @@ func initWeather() error {
 	var api weather.API
 	switch *provider {
 	case "weatherapi":
-		api = weatherapi.New(res.WeatherAPI)
+		api = realtime
 	default:
 		api = visualcrossing.New(res.VisualCrossing)
 	}

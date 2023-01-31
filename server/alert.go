@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -23,7 +24,7 @@ func alert() {
 		log.Print(err)
 	} else if len(res) > 0 {
 		var alert bool
-		var output string
+		var title, output string
 		for index, i := range res {
 			if index == 1 {
 				defer func() {
@@ -33,13 +34,14 @@ func alert() {
 					(rainSnow.End() == nil && i.End() != nil) || (rainSnow.End() != nil && i.End() == nil) ||
 					(rainSnow.End() != nil && i.End() != nil && rainSnow.End().Date != i.End().Date) {
 					alert = true
+					title = fmt.Sprintf("[Weather]Rain Snow Alert - %s", i.Start().Date)
 				}
 			}
 			output += i.String()
 		}
 		if alert {
-			log.Print(output) //TODO
-			//go sendMail(output)
+			log.Print(output)
+			go sendMail(title, output)
 		}
 	} else {
 		rainSnow = nil
@@ -49,7 +51,7 @@ func alert() {
 		log.Print(err)
 	} else if len(res) > 0 {
 		var alert bool
-		var output string
+		var title, output string
 		for index, i := range res {
 			if index == 1 {
 				defer func() {
@@ -57,13 +59,18 @@ func alert() {
 				}()
 				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
 					alert = true
+					if i.IsRise() {
+						title = fmt.Sprintf("[Weather]Temperature Rise Alert - %s", i.Day().Date)
+					} else {
+						title = fmt.Sprintf("[Weather]Temperature Fall Alert - %s", i.Day().Date)
+					}
 				}
 			}
 			output += i.String()
 		}
 		if alert {
-			log.Print(output) //TODO
-			//go sendMail(output)
+			log.Print(output)
+			go sendMail(title, output)
 		}
 	} else {
 		tempRiseFall = nil

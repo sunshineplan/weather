@@ -6,12 +6,11 @@ import (
 )
 
 type TempRiseFall struct {
-	baseDiff      float64
 	day, previous *Day
 }
 
-func NewTempRiseFall(baseDiff float64, day, previous *Day) *TempRiseFall {
-	return &TempRiseFall{baseDiff, day, previous}
+func NewTempRiseFall(day, previous *Day) *TempRiseFall {
+	return &TempRiseFall{day, previous}
 }
 
 func (t *TempRiseFall) Day() *Day {
@@ -39,7 +38,8 @@ func (t TempRiseFall) String() string {
 Date: %s
 TempMaxDiff: %g
 TempMinDiff: %g
-`, t.Day().Date, diff1, diff2)
+Detail: %s
+`, t.day.Date, diff1, diff2, t.day)
 }
 
 func WillTempRiseFall(api API, difference float64, query string, n int) (res []*TempRiseFall, err error) {
@@ -53,7 +53,7 @@ func WillTempRiseFall(api API, difference float64, query string, n int) (res []*
 		day = &i
 		if previous != nil {
 			if math.Abs(day.TempMax-previous.TempMax) >= difference || math.Abs(day.TempMin-previous.TempMin) >= difference {
-				res = append(res, NewTempRiseFall(difference, day, previous))
+				res = append(res, NewTempRiseFall(day, previous))
 			}
 		}
 		previous = &i

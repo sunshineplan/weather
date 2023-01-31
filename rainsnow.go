@@ -33,15 +33,17 @@ func (s *RainSnow) Duration() string {
 func (rainsnow RainSnow) String() string {
 	if rainsnow.end == nil {
 		return fmt.Sprintf(`
-Begin at: %s
+Begin: %s
 Duration: unknown
-`, rainsnow.start.Date)
+First Day: %s
+`, rainsnow.start.Date, rainsnow.start)
 	}
 	return fmt.Sprintf(`
-Begin at: %s
-End at: %s
+Begin: %s
+End: %s
 Duration: %s
-`, rainsnow.start.Date, rainsnow.end.Date, rainsnow.Duration())
+First Day: %s
+`, rainsnow.start.Date, rainsnow.end.Date, rainsnow.Duration(), rainsnow.start)
 }
 
 func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
