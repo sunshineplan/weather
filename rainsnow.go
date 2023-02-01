@@ -7,23 +7,23 @@ import (
 )
 
 type RainSnow struct {
-	start, end *Day
+	start, end Day
 }
 
-func NewRainSnow(start, end *Day) *RainSnow {
-	return &RainSnow{start, end}
+func NewRainSnow(start, end Day) RainSnow {
+	return RainSnow{start, end}
 }
 
 func (rainsnow *RainSnow) Start() *Day {
-	return rainsnow.start
+	return &rainsnow.start
 }
 
 func (rainsnow *RainSnow) End() *Day {
-	return rainsnow.end
+	return &rainsnow.end
 }
 
 func (s *RainSnow) Duration() string {
-	if s.start != nil && s.end != nil {
+	if s.start.DateEpoch != 0 && s.end.DateEpoch != 0 {
 		if start, end := time.Unix(s.start.DateEpoch, 0), time.Unix(s.end.DateEpoch, 0); !start.IsZero() && !end.IsZero() {
 			return fmtDuration(end.Sub(start))
 		}
@@ -34,7 +34,7 @@ func (s *RainSnow) Duration() string {
 func (rainsnow RainSnow) String() string {
 	var b strings.Builder
 	fmt.Fprintln(&b, "Begin:", rainsnow.start.Date)
-	if rainsnow.end != nil {
+	if rainsnow.end.Date != "" {
 		fmt.Fprintln(&b, "End:", rainsnow.end.Date)
 	}
 	if duration := time.Until(time.Unix(rainsnow.start.DateEpoch, 0)); duration > 0 {
@@ -43,11 +43,15 @@ func (rainsnow RainSnow) String() string {
 	if duration := rainsnow.Duration(); duration != "0s" {
 		fmt.Fprintln(&b, "Duration:", duration)
 	}
-	fmt.Fprintln(&b, "First Day:", rainsnow.start)
+	fmt.Fprintln(&b, "Detail:")
+	fmt.Fprintln(&b, rainsnow.start)
+	if rainsnow.end.Date != "" {
+		fmt.Fprintln(&b, rainsnow.end)
+	}
 	return b.String()
 }
 
-func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
+func WillRainSnow(api API, query string, n int) (res []RainSnow, err error) {
 	_, days, err := api.Forecast(query, n)
 	if err != nil {
 		return
@@ -58,7 +62,7 @@ func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
 		switch i.Precip {
 		case 0:
 			if start.Date != "" {
-				res = append(res, NewRainSnow(&start, &last))
+				res = append(res, NewRainSnow(start, last))
 				start = Day{}
 			}
 		default:
@@ -69,11 +73,11 @@ func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
 		last = i
 	}
 	if start.Date != "" {
-		res = append(res, NewRainSnow(&start, nil))
+		res = append(res, NewRainSnow(start, Day{}))
 	}
 	return
 }
 
-func (api Weather) WillRainSnow(query string, n int) ([]*RainSnow, error) {
+func (api Weather) WillRainSnow(query string, n int) ([]RainSnow, error) {
 	return WillRainSnow(api, query, n)
 }
