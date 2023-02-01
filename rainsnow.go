@@ -2,6 +2,7 @@ package weather
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -24,26 +25,26 @@ func (rainsnow *RainSnow) End() *Day {
 func (s *RainSnow) Duration() string {
 	if s.start != nil && s.end != nil {
 		if start, end := time.Unix(s.start.DateEpoch, 0), time.Unix(s.end.DateEpoch, 0); !start.IsZero() && !end.IsZero() {
-			return end.Sub(start).String()
+			return fmtDuration(end.Sub(start))
 		}
 	}
 	return "unknown"
 }
 
 func (rainsnow RainSnow) String() string {
-	if rainsnow.end == nil {
-		return fmt.Sprintf(`
-Begin: %s
-Duration: unknown
-First Day: %s
-`, rainsnow.start.Date, rainsnow.start)
+	var b strings.Builder
+	fmt.Fprintln(&b, "Begin:", rainsnow.start.Date)
+	if rainsnow.end != nil {
+		fmt.Fprintln(&b, "End:", rainsnow.end.Date)
 	}
-	return fmt.Sprintf(`
-Begin: %s
-End: %s
-Duration: %s
-First Day: %s
-`, rainsnow.start.Date, rainsnow.end.Date, rainsnow.Duration(), rainsnow.start)
+	if duration := time.Until(time.Unix(rainsnow.start.DateEpoch, 0)); duration > 0 {
+		fmt.Fprintln(&b, "Next:", fmtDuration(duration.Truncate(24*time.Hour)+24*time.Hour))
+	}
+	if duration := rainsnow.Duration(); duration != "0s" {
+		fmt.Fprintln(&b, "Duration:", duration)
+	}
+	fmt.Fprintln(&b, "First Day:", rainsnow.start)
+	return b.String()
 }
 
 func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
@@ -52,23 +53,23 @@ func WillRainSnow(api API, query string, n int) (res []*RainSnow, err error) {
 		return
 	}
 
-	var start, last *Day
+	var start, last Day
 	for _, i := range days {
 		switch i.Precip {
 		case 0:
-			if start != nil {
-				res = append(res, NewRainSnow(start, last))
-				start = nil
+			if start.Date != "" {
+				res = append(res, NewRainSnow(&start, &last))
+				start = Day{}
 			}
 		default:
-			if start == nil {
-				start = &i
+			if start.Date == "" {
+				start = i
 			}
 		}
-		last = &i
+		last = i
 	}
-	if start != nil {
-		res = append(res, NewRainSnow(start, nil))
+	if start.Date != "" {
+		res = append(res, NewRainSnow(&start, nil))
 	}
 	return
 }

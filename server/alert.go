@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/sunshineplan/weather"
@@ -24,7 +25,8 @@ func alert() {
 		log.Print(err)
 	} else if len(res) > 0 {
 		var alert bool
-		var title, output string
+		var title string
+		var b strings.Builder
 		for index, i := range res {
 			if index == 1 {
 				defer func() {
@@ -37,11 +39,12 @@ func alert() {
 					title = fmt.Sprintf("[Weather]Rain Snow Alert - %s", i.Start().Date)
 				}
 			}
-			output += i.String()
+			fmt.Fprintln(&b, i.String())
+			b.WriteRune('\n')
 		}
 		if alert {
-			log.Print(output)
-			go sendMail(title, output)
+			log.Print(title)
+			go sendMail(title, b.String())
 		}
 	} else {
 		rainSnow = nil
@@ -51,7 +54,8 @@ func alert() {
 		log.Print(err)
 	} else if len(res) > 0 {
 		var alert bool
-		var title, output string
+		var title string
+		var b strings.Builder
 		for index, i := range res {
 			if index == 1 {
 				defer func() {
@@ -66,11 +70,12 @@ func alert() {
 					}
 				}
 			}
-			output += i.String()
+			fmt.Fprintln(&b, i.String())
+			b.WriteRune('\n')
 		}
 		if alert {
-			log.Print(output)
-			go sendMail(title, output)
+			log.Print(title)
+			go sendMail(title, b.String())
 		}
 	} else {
 		tempRiseFall = nil
