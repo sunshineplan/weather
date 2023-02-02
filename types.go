@@ -84,7 +84,7 @@ func (day *Day) Weekday() string {
 
 func (day Day) Temperature() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, "Date:", day.Date, day.Weekday(), day.Condition)
+	fmt.Fprintf(&b, "Date: %s %s (%s)\n", day.Date, day.Weekday(), day.Condition)
 	fmt.Fprintf(&b, "TempMax: %g°C, TempMin: %g°C, Temp: %g°C\n", day.TempMax, day.TempMin, day.Temp)
 	fmt.Fprintf(&b, "FeelsLikeMax: %g°C, FeelsLikeMin: %g°C, FeelsLike: %g°C", day.FeelsLikeMax, day.FeelsLikeMin, day.FeelsLike)
 	return b.String()
@@ -92,7 +92,7 @@ func (day Day) Temperature() string {
 
 func (day Day) Precipitation() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, "Date:", day.Date, day.Weekday(), day.Condition)
+	fmt.Fprintf(&b, "Date: %s %s (%s)\n", day.Date, day.Weekday(), day.Condition)
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %g%%, PrecipCover: %g%%", day.Precip, day.PrecipProb, day.PrecipCover)
 	if len(day.PrecipType) > 0 {
 		fmt.Fprintf(&b, "\nPrecipType: %s", strings.Join(day.PrecipType, ", "))
