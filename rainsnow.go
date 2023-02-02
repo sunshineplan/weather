@@ -46,21 +46,20 @@ func (rainsnow *RainSnow) Duration() int {
 
 func (rainsnow RainSnow) String() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, "Begin:", rainsnow.Start().Date)
+	fmt.Fprintf(&b, "Date: %s %s (%s later)", rainsnow.Start().Date, rainsnow.Start().Weekday(),
+		fmtDuration(time.Until(rainsnow.Start().Time()).Truncate(24*time.Hour)+24*time.Hour))
 	if rainsnow.isEnd {
-		fmt.Fprintln(&b, "End:", rainsnow.End().Date)
-	}
-	if duration := time.Until(time.Unix(rainsnow.Start().DateEpoch, 0)); duration > 0 {
-		fmt.Fprintln(&b, "Until:", fmtDuration(duration.Truncate(24*time.Hour)+24*time.Hour))
-	}
-	if duration := rainsnow.Duration(); duration != 0 {
-		fmt.Fprintf(&b, "Duration: %dd\n", duration)
+		if rainsnow.Duration() != 0 {
+			fmt.Fprintf(&b, " ~ %s %s (last %dd)\n", rainsnow.End().Date, rainsnow.End().Weekday(), rainsnow.Duration())
+		} else {
+			fmt.Fprint(&b, "\n")
+		}
 	} else {
-		fmt.Fprintln(&b, "Duration: unknown")
+		fmt.Fprintln(&b, " ~ unknown")
 	}
-	fmt.Fprintln(&b, "Detail:")
+	fmt.Fprintln(&b, "Forecast:")
 	for index, i := range rainsnow.days {
-		fmt.Fprintf(&b, "#%d %s\n", index+1, i)
+		fmt.Fprintf(&b, "#%d %s\n", index+1, i.Precipitation())
 	}
 	return b.String()
 }

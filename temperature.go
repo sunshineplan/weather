@@ -36,14 +36,13 @@ func (t *TempRiseFall) IsRise() bool {
 
 func (t TempRiseFall) String() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, "Date:", t.day.Date)
-	fmt.Fprintln(&b, "Until:", fmtDuration(time.Until(time.Unix(t.day.DateEpoch, 0)).Truncate(24*time.Hour)+24*time.Hour))
+	fmt.Fprintf(&b, "Date: %s %s (%s later)\n", t.day.Date, t.day.Weekday(),
+		fmtDuration(time.Until(t.day.Time()).Truncate(24*time.Hour)+24*time.Hour))
 	diff1, diff2 := t.Difference()
-	fmt.Fprintf(&b, "TempMaxDiff: %.1f\n", diff1)
-	fmt.Fprintf(&b, "TempMinDiff: %.1f\n", diff2)
-	fmt.Fprintln(&b, "Detail:")
-	fmt.Fprintln(&b, "#0", t.previous)
-	fmt.Fprintln(&b, "#1", t.day)
+	fmt.Fprintf(&b, "TempMaxDiff: %.1f°C, TempMinDiff: %.1f°C\n", diff1, diff2)
+	fmt.Fprintln(&b, "Forecast:")
+	fmt.Fprintln(&b, "#0", t.previous.Temperature())
+	fmt.Fprintln(&b, "#1", t.day.Temperature())
 	return b.String()
 }
 
