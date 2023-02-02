@@ -43,7 +43,7 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 		log.Print(err)
 	} else if len(res) > 0 {
 		for index, i := range res {
-			if index == 1 {
+			if index == 0 {
 				defer func() {
 					rainSnow = &i
 				}()
@@ -65,7 +65,7 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 		log.Print(err)
 	} else if len(res) > 0 {
 		for index, i := range res {
-			if index == 1 {
+			if index == 0 {
 				defer func() {
 					tempRiseFall = &i
 				}()
