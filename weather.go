@@ -6,7 +6,7 @@ import (
 
 type API interface {
 	Realtime(string) (Current, error)
-	Forecast(string, int) (Current, []Day, error)
+	Forecast(string, int) ([]Day, error)
 	History(string, time.Time) (Day, error)
 }
 

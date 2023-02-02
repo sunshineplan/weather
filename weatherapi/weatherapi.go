@@ -47,12 +47,11 @@ func (api *WeatherAPI) Realtime(query string) (current weather.Current, err erro
 	return
 }
 
-func (api *WeatherAPI) Forecast(query string, n int) (current weather.Current, days []weather.Day, err error) {
+func (api *WeatherAPI) Forecast(query string, n int) (days []weather.Day, err error) {
 	resp, err := api.Request("forecast.json", fmt.Sprintf("q=%s&days=%d", query, n))
 	if err != nil {
 		return
 	}
-	current = resp.Current.Convert()
 	if days = resp.Forecast.Convert(); len(days) < n {
 		err = fmt.Errorf("bad forecast number: %d", len(days))
 	}

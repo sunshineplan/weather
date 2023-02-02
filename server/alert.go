@@ -15,25 +15,31 @@ var (
 )
 
 func alert() {
-	if subject, body, alert := alertRainSnow(); alert {
-		log.Print(subject)
-		go sendMail(subject, body.String())
+	days, err := forecast.Forecast(*query, *days)
+	if err != nil {
+		log.Print(err)
+		return
 	}
 
-	if subject, body, alert := alertTempRiseFall(); alert {
+	go runAlert(days, alertRainSnow)
+	go runAlert(days, alertTempRiseFall)
+}
+
+func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
+	if subject, body := fn(days); subject != "" {
 		log.Print(subject)
 		go sendMail(subject, body.String())
 	}
 }
 
-func alertRainSnow() (subject string, body strings.Builder, alert bool) {
+func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 	if rainSnow != nil {
 		if rainSnow.Start().IsExpired() && !rainSnow.End().IsExpired() {
 			rainSnow.Start().Date = time.Now().Format("2006-01-02")
 		}
 	}
 
-	if res, err := forecast.WillRainSnow(*query, *days); err != nil {
+	if res, err := weather.WillRainSnow(days); err != nil {
 		log.Print(err)
 	} else if len(res) > 0 {
 		for index, i := range res {
@@ -42,9 +48,7 @@ func alertRainSnow() (subject string, body strings.Builder, alert bool) {
 					rainSnow = &i
 				}()
 				if (rainSnow == nil || rainSnow.Start().Date != i.Start().Date) ||
-					(rainSnow.End() == nil && i.End() != nil) || (rainSnow.End() != nil && i.End() == nil) ||
-					(rainSnow.End() != nil && i.End() != nil && rainSnow.End().Date != i.End().Date) {
-					alert = true
+					rainSnow.Duration() != i.Duration() {
 					subject = fmt.Sprintf("[Weather]Rain Snow Alert - %s", i.Start().Date)
 				}
 			}
@@ -56,8 +60,8 @@ func alertRainSnow() (subject string, body strings.Builder, alert bool) {
 	return
 }
 
-func alertTempRiseFall() (subject string, body strings.Builder, alert bool) {
-	if res, err := forecast.WillTempRiseFall(*difference, *query, *days); err != nil {
+func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder) {
+	if res, err := weather.WillTempRiseFall(days, *difference); err != nil {
 		log.Print(err)
 	} else if len(res) > 0 {
 		for index, i := range res {
@@ -66,7 +70,6 @@ func alertTempRiseFall() (subject string, body strings.Builder, alert bool) {
 					tempRiseFall = &i
 				}()
 				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
-					alert = true
 					if i.IsRise() {
 						subject = fmt.Sprintf("[Weather]Temperature Rise Alert - %s", i.Day().Date)
 					} else {

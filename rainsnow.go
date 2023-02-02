@@ -7,77 +7,79 @@ import (
 )
 
 type RainSnow struct {
-	start, end Day
+	days  []Day
+	isEnd bool
 }
 
-func NewRainSnow(start, end Day) RainSnow {
-	return RainSnow{start, end}
+func NewRainSnow(days []Day, isEnd bool) RainSnow {
+	return RainSnow{days, isEnd}
+}
+
+func (rainsnow *RainSnow) Days() []Day {
+	return rainsnow.days
 }
 
 func (rainsnow *RainSnow) Start() *Day {
-	return &rainsnow.start
+	if len(rainsnow.days) > 0 {
+		return &rainsnow.days[0]
+	}
+	return nil
 }
 
 func (rainsnow *RainSnow) End() *Day {
-	return &rainsnow.end
+	if length := len(rainsnow.days); rainsnow.isEnd && length > 0 {
+		return &rainsnow.days[length-1]
+	}
+	return nil
 }
 
-func (s *RainSnow) Duration() string {
-	if s.start.DateEpoch != 0 && s.end.DateEpoch != 0 {
-		if start, end := time.Unix(s.start.DateEpoch, 0), time.Unix(s.end.DateEpoch, 0); !start.IsZero() && !end.IsZero() {
-			return fmtDuration(end.Sub(start))
-		}
+func (rainsnow *RainSnow) IsEnd() bool {
+	return rainsnow.isEnd
+}
+
+func (rainsnow *RainSnow) Duration() int {
+	if rainsnow.isEnd {
+		return len(rainsnow.days)
 	}
-	return "unknown"
+	return 0
 }
 
 func (rainsnow RainSnow) String() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, "Begin:", rainsnow.start.Date)
-	if rainsnow.end.Date != "" {
-		fmt.Fprintln(&b, "End:", rainsnow.end.Date)
+	fmt.Fprintln(&b, "Begin:", rainsnow.Start().Date)
+	if rainsnow.isEnd {
+		fmt.Fprintln(&b, "End:", rainsnow.End().Date)
 	}
-	if duration := time.Until(time.Unix(rainsnow.start.DateEpoch, 0)); duration > 0 {
-		fmt.Fprintln(&b, "Next:", fmtDuration(duration.Truncate(24*time.Hour)+24*time.Hour))
+	if duration := time.Until(time.Unix(rainsnow.Start().DateEpoch, 0)); duration > 0 {
+		fmt.Fprintln(&b, "Until:", fmtDuration(duration.Truncate(24*time.Hour)+24*time.Hour))
 	}
-	if duration := rainsnow.Duration(); duration != "0s" {
-		fmt.Fprintln(&b, "Duration:", duration)
+	if duration := rainsnow.Duration(); duration != 0 {
+		fmt.Fprintf(&b, "Duration: %dd\n", duration)
+	} else {
+		fmt.Fprintln(&b, "Duration: unknown")
 	}
 	fmt.Fprintln(&b, "Detail:")
-	fmt.Fprintln(&b, rainsnow.start)
-	if rainsnow.end.Date != "" {
-		fmt.Fprintln(&b, rainsnow.end)
+	for index, i := range rainsnow.days {
+		fmt.Fprintf(&b, "#%d %s\n", index+1, i)
 	}
 	return b.String()
 }
 
-func WillRainSnow(api API, query string, n int) (res []RainSnow, err error) {
-	_, days, err := api.Forecast(query, n)
-	if err != nil {
-		return
-	}
-
-	var start, last Day
+func WillRainSnow(days []Day) (res []RainSnow, err error) {
+	var rainDays []Day
 	for _, i := range days {
 		switch i.Precip {
 		case 0:
-			if start.Date != "" {
-				res = append(res, NewRainSnow(start, last))
-				start = Day{}
+			if len(rainDays) > 0 {
+				res = append(res, NewRainSnow(rainDays, true))
+				rainDays = nil
 			}
 		default:
-			if start.Date == "" {
-				start = i
-			}
+			rainDays = append(rainDays, i)
 		}
-		last = i
 	}
-	if start.Date != "" {
-		res = append(res, NewRainSnow(start, Day{}))
+	if len(rainDays) > 0 {
+		res = append(res, NewRainSnow(rainDays, false))
 	}
 	return
-}
-
-func (api Weather) WillRainSnow(query string, n int) ([]RainSnow, error) {
-	return WillRainSnow(api, query, n)
 }

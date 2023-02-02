@@ -51,7 +51,7 @@ func (api *VisualCrossing) Realtime(query string) (current weather.Current, err 
 	return
 }
 
-func (api *VisualCrossing) Forecast(query string, n int) (current weather.Current, days []weather.Day, err error) {
+func (api *VisualCrossing) Forecast(query string, n int) (days []weather.Day, err error) {
 	var endpoint string
 	switch n {
 	case 1:
@@ -65,11 +65,10 @@ func (api *VisualCrossing) Forecast(query string, n int) (current weather.Curren
 		now := time.Now()
 		endpoint = fmt.Sprintf("%s/%s", now.Format("2006-01-02"), now.AddDate(0, 0, n).Format("2006-01-02"))
 	}
-	resp, err := api.Request(endpoint, "hours%2Ccurrent", query)
+	resp, err := api.Request(endpoint, "hours", query)
 	if err != nil {
 		return
 	}
-	current = resp.CurrentConditions.Convert()
 	if days = ConvertDays(resp.Days); len(days) < n {
 		err = fmt.Errorf("bad forecast number: %d", len(days))
 	}

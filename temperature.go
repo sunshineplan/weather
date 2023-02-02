@@ -3,6 +3,8 @@ package weather
 import (
 	"fmt"
 	"math"
+	"strings"
+	"time"
 )
 
 type TempRiseFall struct {
@@ -33,21 +35,19 @@ func (t *TempRiseFall) IsRise() bool {
 }
 
 func (t TempRiseFall) String() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, "Date:", t.day.Date)
+	fmt.Fprintln(&b, "Until:", fmtDuration(time.Until(time.Unix(t.day.DateEpoch, 0)).Truncate(24*time.Hour)+24*time.Hour))
 	diff1, diff2 := t.Difference()
-	return fmt.Sprintf(`
-Date: %s
-TempMaxDiff: %.1f
-TempMinDiff: %.1f
-Detail: %s
-`, t.day.Date, diff1, diff2, t.day)
+	fmt.Fprintf(&b, "TempMaxDiff: %.1f\n", diff1)
+	fmt.Fprintf(&b, "TempMinDiff: %.1f\n", diff2)
+	fmt.Fprintln(&b, "Detail:")
+	fmt.Fprintln(&b, "#0", t.previous)
+	fmt.Fprintln(&b, "#1", t.day)
+	return b.String()
 }
 
-func WillTempRiseFall(api API, difference float64, query string, n int) (res []TempRiseFall, err error) {
-	_, days, err := api.Forecast(query, n)
-	if err != nil {
-		return
-	}
-
+func WillTempRiseFall(days []Day, difference float64) (res []TempRiseFall, err error) {
 	var day, previous Day
 	for _, i := range days {
 		day = i
@@ -59,8 +59,4 @@ func WillTempRiseFall(api API, difference float64, query string, n int) (res []T
 		previous = i
 	}
 	return
-}
-
-func (api Weather) WillTempRiseFall(difference float64, query string, n int) ([]TempRiseFall, error) {
-	return WillTempRiseFall(api, difference, query, n)
 }
