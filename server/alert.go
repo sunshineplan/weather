@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/sunshineplan/weather"
 )
@@ -34,8 +33,8 @@ func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builde
 
 func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 	if rainSnow != nil {
-		if rainSnow.Start().IsExpired() && !rainSnow.End().IsExpired() {
-			rainSnow.Start().Date = time.Now().Format("2006-01-02")
+		if rainSnow.IsExpired() {
+			rainSnow = nil
 		}
 	}
 
@@ -61,6 +60,12 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 }
 
 func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder) {
+	if tempRiseFall != nil {
+		if tempRiseFall.IsExpired() {
+			tempRiseFall = nil
+		}
+	}
+
 	if res, err := weather.WillTempRiseFall(days, *difference); err != nil {
 		log.Print(err)
 	} else if len(res) > 0 {

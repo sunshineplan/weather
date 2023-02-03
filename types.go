@@ -58,11 +58,15 @@ type Day struct {
 	Hours        []Hour   `json:"hours,omitempty"`
 }
 
-func (day *Day) Time() time.Time {
+func (day Day) Time() time.Time {
 	return time.Unix(day.DateEpoch, 0)
 }
 
-func (w *Day) Before(date time.Time) bool {
+func (day Day) Until() time.Duration {
+	return time.Until(day.Time().AddDate(0, 0, 1)).Truncate(24 * time.Hour)
+}
+
+func (w Day) Before(date time.Time) bool {
 	year, month, day := date.Date()
 	y, m, d := w.Time().Date()
 	if year == y {
@@ -74,11 +78,14 @@ func (w *Day) Before(date time.Time) bool {
 	return year > y
 }
 
-func (day *Day) IsExpired() bool {
-	return day.Before(time.Now())
+func (day Day) IsExpired() bool {
+	if day.Date != "" {
+		return day.Before(time.Now())
+	}
+	return true
 }
 
-func (day *Day) Weekday() string {
+func (day Day) Weekday() string {
 	return day.Time().Weekday().String()[:3]
 }
 
@@ -93,11 +100,21 @@ func (day Day) Temperature() string {
 func (day Day) Precipitation() string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "Date: %s %s (%s)\n", day.Date, day.Weekday(), day.Condition)
-	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %g%%, PrecipCover: %g%%", day.Precip, day.PrecipProb, day.PrecipCover)
+	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %g%%, PrecipCover: %g%%\n", day.Precip, day.PrecipProb, day.PrecipCover)
+	fmt.Fprint(&b, "PrecipHours: ", strings.Join(day.PrecipHours(), ", "))
 	if len(day.PrecipType) > 0 {
 		fmt.Fprintf(&b, "\nPrecipType: %s", strings.Join(day.PrecipType, ", "))
 	}
 	return b.String()
+}
+
+func (day Day) PrecipHours() (hours []string) {
+	for _, i := range day.Hours {
+		if i.Precip > 0 {
+			hours = append(hours, fmt.Sprintf("%s(%gmm,%g%%)", i.Time[:2], i.Precip, i.PrecipProb))
+		}
+	}
+	return
 }
 
 func (day Day) String() string {

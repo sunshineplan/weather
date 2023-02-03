@@ -3,7 +3,6 @@ package weather
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 type RainSnow struct {
@@ -19,35 +18,50 @@ func (rainsnow *RainSnow) Days() []Day {
 	return rainsnow.days
 }
 
-func (rainsnow *RainSnow) Start() *Day {
+func (rainsnow *RainSnow) Start() Day {
 	if len(rainsnow.days) > 0 {
-		return &rainsnow.days[0]
+		return rainsnow.days[0]
 	}
-	return nil
+	return Day{}
 }
 
-func (rainsnow *RainSnow) End() *Day {
+func (rainsnow *RainSnow) End() Day {
 	if length := len(rainsnow.days); rainsnow.isEnd && length > 0 {
-		return &rainsnow.days[length-1]
+		return rainsnow.days[length-1]
 	}
-	return nil
+	return Day{}
 }
 
-func (rainsnow *RainSnow) IsEnd() bool {
+func (rainsnow RainSnow) IsEnd() bool {
 	return rainsnow.isEnd
 }
 
-func (rainsnow *RainSnow) Duration() int {
+func (rainsnow RainSnow) Duration() int {
 	if rainsnow.isEnd {
 		return len(rainsnow.days)
 	}
 	return 0
 }
 
+func (rainsnow *RainSnow) IsExpired() bool {
+	for day := rainsnow.Start(); day.Date != ""; day = rainsnow.Start() {
+		if day.IsExpired() {
+			rainsnow.days = rainsnow.days[1:]
+		} else {
+			return false
+		}
+	}
+	return true
+}
+
 func (rainsnow RainSnow) String() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Date: %s %s (%s later)", rainsnow.Start().Date, rainsnow.Start().Weekday(),
-		fmtDuration(time.Until(rainsnow.Start().Time()).Truncate(24*time.Hour)+24*time.Hour))
+	fmt.Fprintf(&b, "Date: %s %s", rainsnow.Start().Date, rainsnow.Start().Weekday())
+	if until := rainsnow.Start().Until(); until == 0 {
+		fmt.Fprint(&b, " (today)")
+	} else {
+		fmt.Fprintf(&b, " (%s later)", fmtDuration(until))
+	}
 	if rainsnow.isEnd {
 		if rainsnow.Duration() != 0 {
 			fmt.Fprintf(&b, " ~ %s %s (last %dd)\n", rainsnow.End().Date, rainsnow.End().Weekday(), rainsnow.Duration())
