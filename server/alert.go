@@ -41,18 +41,20 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 	if res, err := weather.WillRainSnow(days); err != nil {
 		log.Print(err)
 	} else if len(res) > 0 {
+		var first weather.RainSnow
 		for index, i := range res {
 			if index == 0 {
-				defer func() {
-					rainSnow = &i
-				}()
-				if (rainSnow == nil || rainSnow.Start().Date != i.Start().Date) ||
-					rainSnow.Duration() != i.Duration() {
+				first = i
+				if rainSnow == nil || rainSnow.Start().Date != i.Start().Date || rainSnow.Duration() != i.Duration() {
+					if rainSnow != nil {
+						log.Println(rainSnow.Start().Date, i.Start().Date) //test
+					}
 					subject = fmt.Sprintf("[Weather]Rain Snow Alert - %s", i.Start().Date)
 				}
 			}
 			fmt.Fprintln(&body, i.String())
 		}
+		rainSnow = &first
 	} else {
 		rainSnow = nil
 	}
@@ -69,11 +71,10 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 	if res, err := weather.WillTempRiseFall(days, *difference); err != nil {
 		log.Print(err)
 	} else if len(res) > 0 {
+		var first weather.TempRiseFall
 		for index, i := range res {
 			if index == 0 {
-				defer func() {
-					tempRiseFall = &i
-				}()
+				first = i
 				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
 					if i.IsRise() {
 						subject = fmt.Sprintf("[Weather]Temperature Rise Alert - %s", i.Day().Date)
@@ -84,6 +85,7 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 			}
 			fmt.Fprintln(&body, i.String())
 		}
+		tempRiseFall = &first
 	} else {
 		tempRiseFall = nil
 	}
