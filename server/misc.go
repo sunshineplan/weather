@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -25,6 +24,5 @@ func sendMail(subject, body string) {
 }
 
 func timestamp() string {
-	now := time.Now()
-	return fmt.Sprintf("(%02d:%02d)", now.Hour(), now.Minute())
+	return time.Now().Format("(20060102 15:04)")
 }
