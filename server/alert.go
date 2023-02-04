@@ -46,10 +46,7 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 			if index == 0 {
 				first = i
 				if rainSnow == nil || rainSnow.Start().Date != i.Start().Date || rainSnow.Duration() != i.Duration() {
-					if rainSnow != nil {
-						log.Println(rainSnow.Start().Date, i.Start().Date) //test
-					}
-					subject = fmt.Sprintf("[Weather]Rain Snow Alert - %s", i.Start().Date)
+					subject = fmt.Sprintf("[Weather]Rain Snow Alert - %s%s", i.Start().Date, timestamp())
 				}
 			}
 			fmt.Fprintln(&body, i.String())
@@ -77,9 +74,9 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 				first = i
 				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
 					if i.IsRise() {
-						subject = fmt.Sprintf("[Weather]Temperature Rise Alert - %s", i.Day().Date)
+						subject = fmt.Sprintf("[Weather]Temperature Rise Alert - %s%s", i.Day().Date, timestamp())
 					} else {
-						subject = fmt.Sprintf("[Weather]Temperature Fall Alert - %s", i.Day().Date)
+						subject = fmt.Sprintf("[Weather]Temperature Fall Alert - %s%s", i.Day().Date, timestamp())
 					}
 				}
 			}

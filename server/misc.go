@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/sunshineplan/utils/mail"
 )
@@ -20,4 +22,9 @@ func sendMail(subject, body string) {
 			log.Print(err)
 		}
 	}
+}
+
+func timestamp() string {
+	now := time.Now()
+	return fmt.Sprintf("(%02d:%02d)", now.Hour(), now.Minute())
 }
