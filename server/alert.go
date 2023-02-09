@@ -46,13 +46,15 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 			if index == 0 {
 				first = i
 				if rainSnow == nil || rainSnow.Start().Date != i.Start().Date || rainSnow.Duration() != i.Duration() {
-					subject = fmt.Sprintf("[Weather]Rain Snow Alert - %s%s", i.Start().Date, timestamp())
+					subject = "Weather]Rain Snow Alert - " + i.Start().Date + timestamp()
 				}
 			}
 			fmt.Fprintln(&body, i.String())
 		}
 		rainSnow = &first
-	} else {
+	} else if rainSnow != nil {
+		subject = "[Weather]Rain Snow Alert - Canceled" + timestamp()
+		body.WriteString("No more rain snow")
 		rainSnow = nil
 	}
 	return
@@ -74,16 +76,23 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 				first = i
 				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
 					if i.IsRise() {
-						subject = fmt.Sprintf("[Weather]Temperature Rise Alert - %s%s", i.Day().Date, timestamp())
+						subject = "[Weather]Temperature Rise Alert - " + i.Day().Date + timestamp()
 					} else {
-						subject = fmt.Sprintf("[Weather]Temperature Fall Alert - %s%s", i.Day().Date, timestamp())
+						subject = "[Weather]Temperature Fall Alert - " + i.Day().Date + timestamp()
 					}
 				}
 			}
 			fmt.Fprintln(&body, i.String())
 		}
 		tempRiseFall = &first
-	} else {
+	} else if tempRiseFall != nil {
+		if tempRiseFall.IsRise() {
+			subject = "[Weather]Temperature Rise Alert - Canceled" + timestamp()
+			body.WriteString("No more temperature rise")
+		} else {
+			subject = "[Weather]Temperature Fall Alert- Canceled" + timestamp()
+			body.WriteString("No more temperature fall")
+		}
 		tempRiseFall = nil
 	}
 	return
