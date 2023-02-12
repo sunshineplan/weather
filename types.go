@@ -118,6 +118,16 @@ func (day Day) PrecipHours() (hours []string) {
 }
 
 func (day Day) String() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, day.Temperature())
+	fmt.Fprintf(&b, "Humidity: %g%%, Dew Point: %g°C, Pressure: %ghPa\n", day.Humidity, day.Dew, day.Pressure)
+	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %g%%, PrecipCover: %g%%\n", day.Precip, day.PrecipProb, day.PrecipCover)
+	fmt.Fprintf(&b, "WindGust: %gkph, WindSpeed: %gkph, WindDir: %g°\n", day.WindGust, day.WindSpeed, day.WindDir)
+	fmt.Fprintf(&b, "CloudCover: %g%%, Visibility: %gkm, UVIndex: %g\n", day.CloudCover, day.Visibility, day.UVIndex)
+	return b.String()
+}
+
+func (day Day) JSON() string {
 	var format struct {
 		Date         string  `json:"date"`
 		TempMax      float64 `json:"tempmax"`

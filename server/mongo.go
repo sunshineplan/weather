@@ -41,7 +41,7 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 
 	buf.WriteRune('[')
 	for index, i := range res {
-		buf.WriteString(i.String())
+		buf.WriteString(i.JSON())
 		if index < len(res)-1 {
 			buf.WriteString(",\n")
 		}

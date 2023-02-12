@@ -13,6 +13,30 @@ var (
 	tempRiseFall *weather.TempRiseFall
 )
 
+func daily() {
+	days, err := forecast.Forecast(*query, 1)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	var body strings.Builder
+	fmt.Fprintln(&body, days[0].String())
+	if rainSnow != nil {
+		fmt.Fprintln(&body, "Recent Rain Snow Alert:")
+		fmt.Fprintln(&body, rainSnow.String())
+	}
+	if tempRiseFall != nil {
+		if tempRiseFall.IsRise() {
+			fmt.Fprintln(&body, "Recent Temperature Rise Alert:")
+		} else {
+			fmt.Fprintln(&body, "Recent Temperature Fall Alert:")
+		}
+		fmt.Fprintln(&body, tempRiseFall.String())
+	}
+	go sendMail("[Weather]Daily Report"+timestamp(), body.String())
+}
+
 func alert() {
 	days, err := forecast.Forecast(*query, *days)
 	if err != nil {
@@ -46,7 +70,7 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 			if index == 0 {
 				first = i
 				if rainSnow == nil || rainSnow.Start().Date != i.Start().Date || rainSnow.Duration() != i.Duration() {
-					subject = "Weather]Rain Snow Alert - " + i.Start().Date + timestamp()
+					subject = "[Weather]Rain Snow Alert - " + i.Start().Date + timestamp()
 				}
 			}
 			fmt.Fprintln(&body, i.String())

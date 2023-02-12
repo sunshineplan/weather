@@ -39,8 +39,9 @@ var svc = service.Service{
 }
 
 var (
-	query      = flag.String("query", "Shanghai", "weather query")
-	days       = flag.Int("days", 7, "forecast days")
+	query      = flag.String("query", "", "weather query")
+	clock      = flag.String("clock", "7:00", "daily report time")
+	days       = flag.Int("days", 15, "forecast days")
 	difference = flag.Float64("difference", 5, "temperature difference")
 	provider   = flag.String("provider", "visualcrossing", "weather provider")
 	logPath    = flag.String("log", "", "Log Path")

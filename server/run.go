@@ -8,6 +8,7 @@ import (
 	"github.com/sunshineplan/database/mongodb/api"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
+	"github.com/sunshineplan/utils/scheduler"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/visualcrossing"
 	"github.com/sunshineplan/weather/weatherapi"
@@ -74,25 +75,19 @@ func run() {
 	}
 	defer client.Close()
 
-	go func() {
-		ticker := time.NewTicker(12 * time.Hour)
-		defer ticker.Stop()
+	go daily()
+	go alert()
+	go record(time.Now().AddDate(0, 0, -1))
 
-		record(time.Now().AddDate(0, 0, -1))
-		for range ticker.C {
-			record(time.Now().AddDate(0, 0, -1))
-		}
-	}()
-
-	go func() {
-		ticker := time.NewTicker(time.Hour)
-		defer ticker.Stop()
-
+	scheduler.NewScheduler().At(scheduler.ScheduleFromString(*clock)).Do(func(t time.Time) {
+		daily()
+	})
+	scheduler.NewScheduler().At(scheduler.AtMinute(0)).Do(func(t time.Time) {
 		alert()
-		for range ticker.C {
-			alert()
-		}
-	}()
+	})
+	scheduler.NewScheduler().At(scheduler.AtHour(9), scheduler.AtHour(23)).Do(func(t time.Time) {
+		record(time.Now().AddDate(0, 0, -1))
+	})
 
 	runServer()
 }
