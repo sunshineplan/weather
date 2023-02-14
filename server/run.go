@@ -79,15 +79,12 @@ func run() {
 	go alert()
 	go record(time.Now().AddDate(0, 0, -1))
 
-	scheduler.NewScheduler().At(scheduler.ScheduleFromString(*clock)).Do(func(t time.Time) {
-		daily()
-	})
-	scheduler.NewScheduler().At(scheduler.AtMinute(0)).Do(func(t time.Time) {
-		alert()
-	})
-	scheduler.NewScheduler().At(scheduler.AtHour(9), scheduler.AtHour(23)).Do(func(t time.Time) {
-		record(time.Now().AddDate(0, 0, -1))
-	})
+	scheduler.NewScheduler().At(scheduler.ScheduleFromString(*dailyReport)).
+		Do(func(_ time.Time) { daily() })
+	scheduler.NewScheduler().At(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).
+		Do(func(_ time.Time) { alert() })
+	scheduler.NewScheduler().At(scheduler.HourSchedule(9, 23)).
+		Do(func(_ time.Time) { record(time.Now().AddDate(0, 0, -1)) })
 
 	runServer()
 }

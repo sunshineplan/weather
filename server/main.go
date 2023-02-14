@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/metadata"
@@ -39,12 +40,15 @@ var svc = service.Service{
 }
 
 var (
-	query      = flag.String("query", "", "weather query")
-	clock      = flag.String("clock", "7:00", "daily report time")
-	days       = flag.Int("days", 15, "forecast days")
-	difference = flag.Float64("difference", 5, "temperature difference")
-	provider   = flag.String("provider", "visualcrossing", "weather provider")
-	logPath    = flag.String("log", "", "Log Path")
+	query       = flag.String("query", "", "weather query")
+	dailyReport = flag.String("daily", "7:00", "daily report time")
+	start       = flag.String("start", "6:00", "alert start time")
+	end         = flag.String("end", "22:00", "alert end time")
+	interval    = flag.Duration("interval", time.Hour, "alert interval")
+	days        = flag.Int("days", 15, "forecast days")
+	difference  = flag.Float64("difference", 5, "temperature difference")
+	provider    = flag.String("provider", "visualcrossing", "weather provider")
+	logPath     = flag.String("log", "", "Log Path")
 )
 
 func main() {
