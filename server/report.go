@@ -14,14 +14,14 @@ var (
 	tempRiseFall *weather.TempRiseFall
 )
 
-func daily() {
+func daily(t time.Time) {
 	days, err := forecast.Forecast(*query, 1)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	date := time.Now().Format("01-02")
+	date := t.Format("01-02")
 	avg, err := average(date, 2)
 	if err != nil {
 		log.Print(err)
