@@ -48,8 +48,10 @@ func (t TempRiseFall) String() string {
 	diff1, diff2 := t.Difference()
 	fmt.Fprintf(&b, "TempMaxDiff: %.1f°C, TempMinDiff: %.1f°C\n", diff1, diff2)
 	fmt.Fprintln(&b, "Forecast:")
-	fmt.Fprintln(&b, "#0", t.previous.Temperature())
-	fmt.Fprintln(&b, "#1", t.day.Temperature())
+	fmt.Fprintln(&b, "#0", t.previous.DateInfo(true))
+	fmt.Fprintln(&b, t.previous.Temperature())
+	fmt.Fprintln(&b, "#1", t.day.DateInfo(true))
+	fmt.Fprintln(&b, t.day.Temperature())
 	return b.String()
 }
 

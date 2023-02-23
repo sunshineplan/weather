@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/sunshineplan/weather"
 )
@@ -20,11 +21,24 @@ func daily() {
 		return
 	}
 
+	date := time.Now().Format("01-02")
+	avg, err := average(date, 2)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	var body strings.Builder
 	fmt.Fprintln(&body, days[0].String())
+	fmt.Fprintln(&body, "Historical Average Temperature of", date)
+	fmt.Fprintln(&body, avg.Temperature())
+	fmt.Fprintln(&body)
 	if rainSnow != nil {
 		fmt.Fprintln(&body, "Recent Rain Snow Alert:")
 		fmt.Fprintln(&body, rainSnow.String())
+	} else {
+		fmt.Fprintln(&body, "No Rain Snow Alert.")
+		fmt.Fprintln(&body)
 	}
 	if tempRiseFall != nil {
 		if tempRiseFall.IsRise() {
@@ -33,6 +47,9 @@ func daily() {
 			fmt.Fprintln(&body, "Recent Temperature Fall Alert:")
 		}
 		fmt.Fprintln(&body, tempRiseFall.String())
+	} else {
+		fmt.Fprintln(&body, "No Temperature Alert.")
+		fmt.Fprintln(&body)
 	}
 	go sendMail("[Weather]Daily Report"+timestamp(), body.String())
 }

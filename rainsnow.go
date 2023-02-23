@@ -73,7 +73,8 @@ func (rainsnow RainSnow) String() string {
 	}
 	fmt.Fprintln(&b, "Forecast:")
 	for index, i := range rainsnow.days {
-		fmt.Fprintf(&b, "#%d %s\n", index+1, i.Precipitation())
+		fmt.Fprintf(&b, "#%d %s\n", index+1, i.DateInfo(true))
+		fmt.Fprintln(&b, i.Precipitation())
 	}
 	return b.String()
 }

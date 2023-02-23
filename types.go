@@ -89,9 +89,17 @@ func (day Day) Weekday() string {
 	return day.Time().Weekday().String()[:3]
 }
 
+func (day Day) DateInfo(condition bool) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "Date: %s %s", day.Date, day.Weekday())
+	if condition {
+		fmt.Fprintf(&b, " (%s)", day.Condition)
+	}
+	return b.String()
+}
+
 func (day Day) Temperature() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Date: %s %s (%s)\n", day.Date, day.Weekday(), day.Condition)
 	fmt.Fprintf(&b, "TempMax: %g°C, TempMin: %g°C, Temp: %g°C\n", day.TempMax, day.TempMin, day.Temp)
 	fmt.Fprintf(&b, "FeelsLikeMax: %g°C, FeelsLikeMin: %g°C, FeelsLike: %g°C", day.FeelsLikeMax, day.FeelsLikeMin, day.FeelsLike)
 	return b.String()
@@ -99,7 +107,6 @@ func (day Day) Temperature() string {
 
 func (day Day) Precipitation() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Date: %s %s (%s)\n", day.Date, day.Weekday(), day.Condition)
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %g%%, PrecipCover: %g%%\n", day.Precip, day.PrecipProb, day.PrecipCover)
 	fmt.Fprint(&b, "PrecipHours: ", strings.Join(day.PrecipHours(), ", "))
 	if len(day.PrecipType) > 0 {
@@ -119,6 +126,7 @@ func (day Day) PrecipHours() (hours []string) {
 
 func (day Day) String() string {
 	var b strings.Builder
+	fmt.Fprintln(&b, day.DateInfo(true))
 	fmt.Fprintln(&b, day.Temperature())
 	fmt.Fprintf(&b, "Humidity: %g%%, Dew Point: %g°C, Pressure: %ghPa\n", day.Humidity, day.Dew, day.Pressure)
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %g%%, PrecipCover: %g%%\n", day.Precip, day.PrecipProb, day.PrecipCover)
