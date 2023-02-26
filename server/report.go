@@ -28,18 +28,29 @@ func daily(t time.Time) {
 		return
 	}
 
+	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	var body strings.Builder
 	fmt.Fprintln(&body, days[0].String())
+	fmt.Fprintln(&body)
+	fmt.Fprintln(&body, "Compared with Yesterday")
+	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], yesterday).DiffInfo())
+	fmt.Fprintln(&body)
 	fmt.Fprintln(&body, "Historical Average Temperature of", date)
 	fmt.Fprintln(&body, avg.Temperature())
+	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], avg).DiffInfo())
 	fmt.Fprintln(&body)
 	if rainSnow != nil {
 		fmt.Fprintln(&body, "Recent Rain Snow Alert:")
 		fmt.Fprintln(&body, rainSnow.String())
 	} else {
 		fmt.Fprintln(&body, "No Rain Snow Alert.")
-		fmt.Fprintln(&body)
 	}
+	fmt.Fprintln(&body)
 	if tempRiseFall != nil {
 		if tempRiseFall.IsRise() {
 			fmt.Fprintln(&body, "Recent Temperature Rise Alert:")
@@ -49,7 +60,6 @@ func daily(t time.Time) {
 		fmt.Fprintln(&body, tempRiseFall.String())
 	} else {
 		fmt.Fprintln(&body, "No Temperature Alert.")
-		fmt.Fprintln(&body)
 	}
 	go sendMail("[Weather]Daily Report"+timestamp(), body.String())
 }
@@ -91,6 +101,9 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 				}
 			}
 			fmt.Fprintln(&body, i.String())
+			if index < len(res)-1 {
+				fmt.Fprintln(&body)
+			}
 		}
 		rainSnow = &first
 	} else if rainSnow != nil {
@@ -124,6 +137,9 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 				}
 			}
 			fmt.Fprintln(&body, i.String())
+			if index < len(res)-1 {
+				fmt.Fprintln(&body)
+			}
 		}
 		tempRiseFall = &first
 	} else if tempRiseFall != nil {
