@@ -75,10 +75,10 @@ func run() {
 	}
 	defer client.Close()
 
-	scheduler.NewScheduler().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
-	scheduler.NewScheduler().At(scheduler.HourSchedule(9, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
-	scheduler.NewScheduler().At(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).
-		Do(func(_ time.Time) { alert() })
+	at := scheduler.NewScheduler().At
+	at(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
+	at(scheduler.HourSchedule(9, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
+	at(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).Do(alert)
 
 	runServer()
 }

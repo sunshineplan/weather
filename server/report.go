@@ -64,15 +64,20 @@ func daily(t time.Time) {
 	go sendMail("[Weather]Daily Report"+timestamp(), body.String())
 }
 
-func alert() {
+func alert(t time.Time) {
 	days, err := forecast.Forecast(*query, *days)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
 	go runAlert(days, alertRainSnow)
-	go runAlert(days, alertTempRiseFall)
+	go runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
 }
 
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
