@@ -34,7 +34,7 @@ func average(date string, round int) (weather.Day, error) {
 	var res []weather.Day
 	if err := client.Aggregate(
 		[]mongodb.M{
-			{"$match": mongodb.M{"date": mongodb.M{"$regex": date}}},
+			{"$match": mongodb.M{"date": mongodb.M{"$regex": date + "$"}}},
 			{"$group": mongodb.M{
 				"_id":          mongodb.M{"$substr": []any{"$date", 5, -1}},
 				"tempmax":      mongodb.M{"$avg": "$tempmax"},

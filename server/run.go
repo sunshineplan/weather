@@ -77,7 +77,7 @@ func run() {
 
 	run := scheduler.NewScheduler
 	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
-	run().At(scheduler.HourSchedule(9, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
+	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
 	run().At(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).Do(alert)
 
 	runServer()

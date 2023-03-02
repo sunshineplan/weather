@@ -76,10 +76,17 @@ func main() {
 	case 0:
 		run()
 	case 1:
-		cmd := flag.Arg(0)
+		cmd := strings.ToLower(flag.Arg(0))
 		var ok bool
 		if ok, err = svc.Command(cmd); !ok {
-			log.Fatalln("Unknown argument:", cmd)
+			if cmd == "report" {
+				if err := initWeather(); err != nil {
+					log.Fatal(err)
+				}
+				report(time.Now())
+			} else {
+				log.Fatalln("Unknown argument:", cmd)
+			}
 		}
 	default:
 		log.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))

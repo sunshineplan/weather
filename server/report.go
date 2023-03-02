@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sunshineplan/weather"
@@ -14,35 +15,67 @@ var (
 	tempRiseFall *weather.TempRiseFall
 )
 
+func report(t time.Time) {
+	date := t.Format("01-02")
+	days, err := forecast.Forecast(*query, *days)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	if !strings.HasSuffix(days[0].Date, date) {
+		log.Println("first forecast is not today:", days[0].Date)
+		return
+	}
+	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	avg, err := average(date, 2)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	runAlert(days, alertRainSnow)
+	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+	today(days[0], yesterday, avg, t)
+}
+
 func daily(t time.Time) {
+	date := t.Format("01-02")
 	days, err := forecast.Forecast(*query, 1)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-
-	date := t.Format("01-02")
+	if !strings.HasSuffix(days[0].Date, date) {
+		log.Println("first forecast is not today:", days[0].Date)
+		return
+	}
+	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
+	if err != nil {
+		log.Print(err)
+		return
+	}
 	avg, err := average(date, 2)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
-	if err != nil {
-		log.Print(err)
-		return
-	}
+	today(days[0], yesterday, avg, t)
+}
 
+func today(today, yesterday, avg weather.Day, t time.Time) {
 	var body strings.Builder
-	fmt.Fprintln(&body, days[0].String())
+	fmt.Fprintln(&body, today.String())
 	fmt.Fprintln(&body)
 	fmt.Fprintln(&body, "Compared with Yesterday")
-	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], yesterday).DiffInfo())
+	fmt.Fprintln(&body, weather.NewTempRiseFall(today, yesterday).DiffInfo())
 	fmt.Fprintln(&body)
-	fmt.Fprintln(&body, "Historical Average Temperature of", date)
+	fmt.Fprintln(&body, "Historical Average Temperature of", t.Format("01-02"))
 	fmt.Fprintln(&body, avg.Temperature())
-	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], avg).DiffInfo())
+	fmt.Fprintln(&body, weather.NewTempRiseFall(today, avg).DiffInfo())
 	fmt.Fprintln(&body)
 	if rainSnow != nil {
 		fmt.Fprintln(&body, "Recent Rain Snow Alert:")
@@ -61,7 +94,7 @@ func daily(t time.Time) {
 	} else {
 		fmt.Fprintln(&body, "No Temperature Alert.")
 	}
-	go sendMail("[Weather]Daily Report"+timestamp(), body.String())
+	sendMail("[Weather]Daily Report"+timestamp(), body.String())
 }
 
 func alert(t time.Time) {
@@ -76,14 +109,23 @@ func alert(t time.Time) {
 		return
 	}
 
-	go runAlert(days, alertRainSnow)
-	go runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		runAlert(days, alertRainSnow)
+	}()
+	go func() {
+		defer wg.Done()
+		runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+	}()
+	wg.Wait()
 }
 
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
 	if subject, body := fn(days); subject != "" {
 		log.Print(subject)
-		go sendMail(subject, body.String())
+		sendMail(subject, body.String())
 	}
 }
 
@@ -152,7 +194,7 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 			subject = "[Weather]Temperature Rise Alert - Canceled" + timestamp()
 			body.WriteString("No more temperature rise")
 		} else {
-			subject = "[Weather]Temperature Fall Alert- Canceled" + timestamp()
+			subject = "[Weather]Temperature Fall Alert - Canceled" + timestamp()
 			body.WriteString("No more temperature fall")
 		}
 		tempRiseFall = nil
