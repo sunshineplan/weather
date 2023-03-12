@@ -2,7 +2,6 @@ package weather
 
 import (
 	"fmt"
-	"math"
 	"strings"
 )
 
@@ -22,8 +21,8 @@ func (t TempRiseFall) Previous() Day {
 	return t.previous
 }
 
-func (t TempRiseFall) Difference() [][]float64 {
-	return [][]float64{
+func (t TempRiseFall) Difference() [][]Temperature {
+	return [][]Temperature{
 		{t.day.TempMax - t.previous.TempMax, t.day.TempMin - t.previous.TempMin, t.day.Temp - t.previous.Temp},
 		{t.day.FeelsLikeMax - t.previous.FeelsLikeMax, t.day.FeelsLikeMin - t.previous.FeelsLikeMin, t.day.FeelsLike - t.previous.FeelsLike},
 	}
@@ -76,10 +75,10 @@ func WillTempRiseFall(days []Day, difference float64) (res []TempRiseFall, err e
 	for _, i := range days {
 		day = i
 		if previous.Date != "" {
-			if math.Abs(day.TempMax-previous.TempMax) >= difference ||
-				math.Abs(day.TempMin-previous.TempMin) >= difference ||
-				math.Abs(day.FeelsLikeMax-previous.FeelsLikeMax) >= difference ||
-				math.Abs(day.FeelsLikeMin-previous.FeelsLikeMin) >= difference {
+			if day.TempMax.AbsDiff(previous.TempMax) >= difference ||
+				day.TempMin.AbsDiff(previous.TempMin) >= difference ||
+				day.FeelsLikeMax.AbsDiff(previous.FeelsLikeMax) >= difference ||
+				day.FeelsLikeMin.AbsDiff(previous.FeelsLikeMin) >= difference {
 				res = append(res, NewTempRiseFall(day, previous))
 			}
 		}

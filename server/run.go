@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb/api"
@@ -69,9 +68,9 @@ func test() (err error) {
 	return
 }
 
-func run() {
+func run() error {
 	if err := initWeather(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer client.Close()
 
@@ -80,5 +79,5 @@ func run() {
 	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
 	run().At(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).Do(alert)
 
-	runServer()
+	return runServer()
 }

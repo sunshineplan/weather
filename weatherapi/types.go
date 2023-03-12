@@ -1,5 +1,7 @@
 package weatherapi
 
+import "github.com/sunshineplan/weather"
+
 type Response struct {
 	Location *Location `json:"location,omitempty"`
 	Current  *Current  `json:"current,omitempty"`
@@ -18,28 +20,28 @@ type Location struct {
 }
 
 type Current struct {
-	LastUpdatedEpoch int64      `json:"last_updated_epoch,omitempty"`
-	LastUpdated      string     `json:"last_updated,omitempty"`
-	Temp             float64    `json:"temp_c"`
-	IsDay            int        `json:"is_day"`
-	Condition        *Condition `json:"condition,omitempty"`
-	WindKph          float64    `json:"wind_kph,omitempty"`
-	WindDegree       float64    `json:"wind_degree,omitempty"`
-	WindDir          string     `json:"wind_dir,omitempty"`
-	PressureMb       float64    `json:"pressure_mb,omitempty"`
-	PrecipMm         float64    `json:"precip_mm,omitempty"`
-	Humidity         float64    `json:"humidity,omitempty"`
-	Cloud            float64    `json:"cloud"`
-	FeelsLike        float64    `json:"feelslike_c"`
-	VisKm            float64    `json:"vis_km,omitempty"`
-	UV               float64    `json:"uv,omitempty"`
-	GustKph          float64    `json:"gust_kph,omitempty"`
+	LastUpdatedEpoch int64               `json:"last_updated_epoch,omitempty"`
+	LastUpdated      string              `json:"last_updated,omitempty"`
+	Temp             weather.Temperature `json:"temp_c"`
+	IsDay            int                 `json:"is_day"`
+	Condition        *Condition          `json:"condition,omitempty"`
+	WindKph          float64             `json:"wind_kph,omitempty"`
+	WindDegree       float64             `json:"wind_degree,omitempty"`
+	WindDir          string              `json:"wind_dir,omitempty"`
+	PressureMb       float64             `json:"pressure_mb,omitempty"`
+	PrecipMm         float64             `json:"precip_mm,omitempty"`
+	Humidity         weather.Percent     `json:"humidity,omitempty"`
+	Cloud            weather.Percent     `json:"cloud"`
+	FeelsLike        weather.Temperature `json:"feelslike_c"`
+	VisKm            float64             `json:"vis_km,omitempty"`
+	UV               float64             `json:"uv,omitempty"`
+	GustKph          float64             `json:"gust_kph,omitempty"`
 }
 
 type Condition struct {
-	Text string `json:"text,omitempty"`
-	Icon string `json:"icon,omitempty"`
-	Code int    `json:"code,omitempty"`
+	Text weather.Condition `json:"text,omitempty"`
+	Icon string            `json:"icon,omitempty"`
+	Code int               `json:"code,omitempty"`
 }
 
 type Forecast struct {
@@ -55,19 +57,19 @@ type ForecastForecastday struct {
 }
 
 type ForecastDay struct {
-	MaxTemp           float64    `json:"maxtemp_c"`
-	MinTemp           float64    `json:"mintemp_c"`
-	AvgTemp           float64    `json:"avgtemp_c"`
-	MaxWindKph        float64    `json:"maxwind_kph,omitempty"`
-	TotalPrecipMm     float64    `json:"totalprecip_mm"`
-	AvgVisKm          float64    `json:"avgvis_km,omitempty"`
-	AvgHumidity       float64    `json:"avghumidity,omitempty"`
-	DailyWillItRain   int        `json:"daily_will_it_rain,omitempty"`
-	DailyChanceOfRain float64    `json:"daily_chance_of_rain,omitempty"`
-	DailyWillItSnow   int        `json:"daily_will_it_snow,omitempty"`
-	DailyChanceOfSnow float64    `json:"daily_chance_of_snow,omitempty"`
-	Condition         *Condition `json:"condition,omitempty"`
-	UV                float64    `json:"uv,omitempty"`
+	MaxTemp           weather.Temperature `json:"maxtemp_c"`
+	MinTemp           weather.Temperature `json:"mintemp_c"`
+	AvgTemp           weather.Temperature `json:"avgtemp_c"`
+	MaxWindKph        float64             `json:"maxwind_kph,omitempty"`
+	TotalPrecipMm     float64             `json:"totalprecip_mm"`
+	AvgVisKm          float64             `json:"avgvis_km,omitempty"`
+	AvgHumidity       weather.Percent     `json:"avghumidity,omitempty"`
+	DailyWillItRain   int                 `json:"daily_will_it_rain,omitempty"`
+	DailyChanceOfRain weather.Percent     `json:"daily_chance_of_rain,omitempty"`
+	DailyWillItSnow   int                 `json:"daily_will_it_snow,omitempty"`
+	DailyChanceOfSnow weather.Percent     `json:"daily_chance_of_snow,omitempty"`
+	Condition         *Condition          `json:"condition,omitempty"`
+	UV                float64             `json:"uv,omitempty"`
 }
 
 type ForecastAstro struct {
@@ -80,27 +82,27 @@ type ForecastAstro struct {
 }
 
 type ForecastHour struct {
-	Time         string     `json:"time,omitempty"`
-	TimeEpoch    int64      `json:"time_epoch,omitempty"`
-	Temp         float64    `json:"temp_c"`
-	IsDay        int        `json:"is_day"`
-	Condition    *Condition `json:"condition,omitempty"`
-	WindKph      float64    `json:"wind_kph,omitempty"`
-	WindDegree   float64    `json:"wind_degree,omitempty"`
-	WindDir      string     `json:"wind_dir,omitempty"`
-	PressureMb   float64    `json:"pressure_mb,omitempty"`
-	PrecipMm     float64    `json:"precip_mm"`
-	Humidity     float64    `json:"humidity,omitempty"`
-	Cloud        float64    `json:"cloud"`
-	FeelsLike    float64    `json:"feelslike_c"`
-	WindChill    float64    `json:"windchill_c"`
-	HeatIndex    float64    `json:"heatindex_c"`
-	DewPoint     float64    `json:"dewpoint_c"`
-	WillItRain   int        `json:"will_it_rain"`
-	ChanceOfRain float64    `json:"chance_of_rain"`
-	WillItSnow   int        `json:"will_it_snow"`
-	ChanceOfSnow float64    `json:"chance_of_snow"`
-	VisKm        float64    `json:"vis_km,omitempty"`
-	GustKph      float64    `json:"gust_kph,omitempty"`
-	UV           float64    `json:"uv,omitempty"`
+	Time         string              `json:"time,omitempty"`
+	TimeEpoch    int64               `json:"time_epoch,omitempty"`
+	Temp         weather.Temperature `json:"temp_c"`
+	IsDay        int                 `json:"is_day"`
+	Condition    *Condition          `json:"condition,omitempty"`
+	WindKph      float64             `json:"wind_kph,omitempty"`
+	WindDegree   float64             `json:"wind_degree,omitempty"`
+	WindDir      string              `json:"wind_dir,omitempty"`
+	PressureMb   float64             `json:"pressure_mb,omitempty"`
+	PrecipMm     float64             `json:"precip_mm"`
+	Humidity     weather.Percent     `json:"humidity,omitempty"`
+	Cloud        weather.Percent     `json:"cloud"`
+	FeelsLike    weather.Temperature `json:"feelslike_c"`
+	WindChill    weather.Temperature `json:"windchill_c"`
+	HeatIndex    weather.Temperature `json:"heatindex_c"`
+	DewPoint     weather.Temperature `json:"dewpoint_c"`
+	WillItRain   int                 `json:"will_it_rain"`
+	ChanceOfRain weather.Percent     `json:"chance_of_rain"`
+	WillItSnow   int                 `json:"will_it_snow"`
+	ChanceOfSnow weather.Percent     `json:"chance_of_snow"`
+	VisKm        float64             `json:"vis_km,omitempty"`
+	GustKph      float64             `json:"gust_kph,omitempty"`
+	UV           float64             `json:"uv,omitempty"`
 }

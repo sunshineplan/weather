@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/sunshineplan/weather"
 )
@@ -15,71 +15,60 @@ var (
 	tempRiseFall *weather.TempRiseFall
 )
 
-func report(t time.Time) {
+func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, err error) {
 	date := t.Format("01-02")
-	days, err := forecast.Forecast(*query, *days)
+	forecasts, err = forecast.Forecast(*query, *days)
 	if err != nil {
-		log.Print(err)
 		return
 	}
-	if !strings.HasSuffix(days[0].Date, date) {
-		log.Println("first forecast is not today:", days[0].Date)
+	if !strings.HasSuffix(forecasts[0].Date, date) {
+		err = fmt.Errorf("first forecast is not today: %s", forecasts[0].Date)
 		return
 	}
-	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
+	yesterday, err = history.History(*query, t.AddDate(0, 0, -1))
 	if err != nil {
-		log.Print(err)
 		return
 	}
-	avg, err := average(date, 2)
+	avg, err = average(date, 2)
+	return
+}
+
+func report(t time.Time) {
+	days, yesterday, avg, err := prepare(t)
 	if err != nil {
-		log.Print(err)
+		svc.Print(err)
 		return
 	}
 	runAlert(days, alertRainSnow)
 	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
-	today(days[0], yesterday, avg, t)
+	today(days, yesterday, avg, t)
 }
 
 func daily(t time.Time) {
-	date := t.Format("01-02")
-	days, err := forecast.Forecast(*query, 1)
+	days, yesterday, avg, err := prepare(t)
 	if err != nil {
-		log.Print(err)
+		svc.Print(err)
 		return
 	}
-	if !strings.HasSuffix(days[0].Date, date) {
-		log.Println("first forecast is not today:", days[0].Date)
-		return
-	}
-	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	avg, err := average(date, 2)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-
-	today(days[0], yesterday, avg, t)
+	today(days, yesterday, avg, t)
 }
 
-func today(today, yesterday, avg weather.Day, t time.Time) {
+func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	var body strings.Builder
-	fmt.Fprintln(&body, today.String())
+	fmt.Fprintln(&body, days[0])
 	fmt.Fprintln(&body)
 	fmt.Fprintln(&body, "Compared with Yesterday")
-	fmt.Fprintln(&body, weather.NewTempRiseFall(today, yesterday).DiffInfo())
+	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], yesterday).DiffInfo())
 	fmt.Fprintln(&body)
 	fmt.Fprintln(&body, "Historical Average Temperature of", t.Format("01-02"))
 	fmt.Fprintln(&body, avg.Temperature())
-	fmt.Fprintln(&body, weather.NewTempRiseFall(today, avg).DiffInfo())
+	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], avg).DiffInfo())
 	fmt.Fprintln(&body)
+	fmt.Fprintln(&body, "Forecast:")
+	fmt.Fprintln(&body, table(days))
 	if rainSnow != nil {
 		fmt.Fprintln(&body, "Recent Rain Snow Alert:")
-		fmt.Fprintln(&body, rainSnow.String())
+		fmt.Fprintln(&body, rainSnow)
 	} else {
 		fmt.Fprintln(&body, "No Rain Snow Alert.")
 	}
@@ -90,7 +79,7 @@ func today(today, yesterday, avg weather.Day, t time.Time) {
 		} else {
 			fmt.Fprintln(&body, "Recent Temperature Fall Alert:")
 		}
-		fmt.Fprintln(&body, tempRiseFall.String())
+		fmt.Fprintln(&body, tempRiseFall)
 	} else {
 		fmt.Fprintln(&body, "No Temperature Alert.")
 	}
@@ -100,12 +89,12 @@ func today(today, yesterday, avg weather.Day, t time.Time) {
 func alert(t time.Time) {
 	days, err := forecast.Forecast(*query, *days)
 	if err != nil {
-		log.Print(err)
+		svc.Print(err)
 		return
 	}
 	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
 	if err != nil {
-		log.Print(err)
+		svc.Print(err)
 		return
 	}
 
@@ -124,7 +113,7 @@ func alert(t time.Time) {
 
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
 	if subject, body := fn(days); subject != "" {
-		log.Print(subject)
+		svc.Print(subject)
 		sendMail(subject, body.String())
 	}
 }
@@ -137,7 +126,7 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 	}
 
 	if res, err := weather.WillRainSnow(days); err != nil {
-		log.Print(err)
+		svc.Print(err)
 	} else if len(res) > 0 {
 		var first weather.RainSnow
 		for index, i := range res {
@@ -169,7 +158,7 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 	}
 
 	if res, err := weather.WillTempRiseFall(days, *difference); err != nil {
-		log.Print(err)
+		svc.Print(err)
 	} else if len(res) > 0 {
 		var first weather.TempRiseFall
 		for index, i := range res {
@@ -200,4 +189,56 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 		tempRiseFall = nil
 	}
 	return
+}
+
+func table(days []weather.Day) string {
+	if len(days) > 7 {
+		days = days[:7]
+	}
+	lenMax := 9
+	var date, tempMax, tempMin, feelslikeMax, feelslikeMin, precipProb, condition []string
+	appendAndCalcLen := func(slice []string, elem string) []string {
+		if l := utf8.RuneCountInString(elem); l > lenMax {
+			lenMax = l
+		}
+		return append(slice, elem)
+	}
+	for _, day := range days {
+		date = appendAndCalcLen(date, day.DateInfo(false)[11:])
+		tempMax = appendAndCalcLen(tempMax, day.TempMax.String())
+		tempMin = appendAndCalcLen(tempMin, day.TempMin.String())
+		feelslikeMax = appendAndCalcLen(feelslikeMax, day.FeelsLikeMax.String())
+		feelslikeMin = appendAndCalcLen(feelslikeMin, day.FeelsLikeMin.String())
+		precipProb = appendAndCalcLen(precipProb, day.PrecipProb.String())
+		condition = appendAndCalcLen(condition, day.Condition.Short())
+	}
+	if lenMax = lenMax + 2; (lenMax-9)%2 == 1 {
+		lenMax++
+	}
+	print := func(str string) string {
+		spaces := lenMax - utf8.RuneCountInString(str)
+		prefix := strings.Repeat(" ", spaces-spaces/2)
+		suffix := strings.Repeat(" ", spaces/2)
+		return prefix + str + suffix
+	}
+	println := func(field string, slice []string) string {
+		var b strings.Builder
+		b.WriteString(field)
+		b.WriteString(strings.Repeat(" ", 13-len(field)))
+		for _, s := range slice {
+			b.WriteRune('|')
+			b.WriteString(print(s))
+		}
+		b.WriteRune('\n')
+		return b.String()
+	}
+	var b strings.Builder
+	b.WriteString(println("Date", date))
+	b.WriteString(println("TempMax", tempMax))
+	b.WriteString(println("TempMin", tempMin))
+	b.WriteString(println("FeelsLikeMax", feelslikeMax))
+	b.WriteString(println("FeelsLikeMin", feelslikeMin))
+	b.WriteString(println("PrecipProb", precipProb))
+	b.WriteString(println("Condition", condition))
+	return b.String()
 }

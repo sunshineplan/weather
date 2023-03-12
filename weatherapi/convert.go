@@ -1,8 +1,6 @@
 package weatherapi
 
 import (
-	"math"
-
 	"github.com/sunshineplan/weather"
 )
 
@@ -37,7 +35,7 @@ func (forecast *Forecast) Convert() (days []weather.Day) {
 			Temp:       i.Day.AvgTemp,
 			WindSpeed:  i.Day.MaxWindKph,
 			Precip:     i.Day.TotalPrecipMm,
-			PrecipProb: math.Max(i.Day.DailyChanceOfRain, i.Day.DailyChanceOfSnow),
+			PrecipProb: i.Day.DailyChanceOfRain.Max(i.Day.DailyChanceOfSnow),
 			Visibility: i.Day.AvgVisKm,
 			Humidity:   i.Day.AvgHumidity,
 			UVIndex:    i.Day.UV,
@@ -59,7 +57,7 @@ func ConvertHours(src []ForecastHour) (hours []weather.Hour) {
 			Humidity:   i.Humidity,
 			Dew:        i.DewPoint,
 			Precip:     i.PrecipMm,
-			PrecipProb: math.Max(i.ChanceOfRain, i.ChanceOfSnow),
+			PrecipProb: i.ChanceOfRain.Max(i.ChanceOfSnow),
 			WindGust:   i.GustKph,
 			WindSpeed:  i.WindKph,
 			WindDir:    i.WindDegree,

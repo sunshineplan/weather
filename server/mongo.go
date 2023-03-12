@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb"
@@ -13,7 +12,7 @@ import (
 func record(date time.Time) (err error) {
 	defer func() {
 		if err != nil {
-			log.Print(err)
+			svc.Print(err)
 		}
 	}()
 
@@ -85,7 +84,7 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 	if delete {
 		go func() {
 			if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
-				log.Print(err)
+				svc.Print(err)
 			}
 		}()
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/sunshineplan/utils/mail"
@@ -18,7 +17,7 @@ func sendMail(subject, body string) {
 				Body:    body,
 			},
 		); err != nil {
-			log.Print(err)
+			svc.Print(err)
 		}
 	}
 }
