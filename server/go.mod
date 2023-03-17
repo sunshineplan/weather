@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/metadata v1.1.1
-	github.com/sunshineplan/service v1.0.8
+	github.com/sunshineplan/service v1.0.11
 	github.com/sunshineplan/utils v0.1.29
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 )
