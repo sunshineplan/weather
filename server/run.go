@@ -19,7 +19,7 @@ func initWeather() error {
 		VisualCrossing string
 		Mongo          api.Client
 		Dialer         mail.Dialer
-		Subscriber     []string
+		Subscriber     mail.Receipts
 	}
 	if err := retry.Do(func() error {
 		return meta.Get("weather", &res)

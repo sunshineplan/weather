@@ -6,13 +6,13 @@ import (
 	"github.com/sunshineplan/utils/mail"
 )
 
-var to []string
+var to mail.Receipts
 
 func sendMail(subject, body string) {
 	for _, to := range to {
 		if err := dialer.Send(
 			&mail.Message{
-				To:      []string{to},
+				To:      mail.Receipts{to},
 				Subject: subject,
 				Body:    body,
 			},

@@ -4,7 +4,6 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb"
@@ -37,6 +36,13 @@ func init() {
 		Environment:  map[string]string{"GIN_MODE": "release"},
 		ExcludeFiles: []string{"scripts/weather.conf"},
 	}
+	svc.RegisterCommand("report", "report", func(_ ...string) error {
+		if err := initWeather(); err != nil {
+			return err
+		}
+		report(time.Now())
+		return nil
+	}, 0)
 }
 
 var (
@@ -73,26 +79,7 @@ func main() {
 		return
 	}
 
-	switch flag.NArg() {
-	case 0:
-		err = svc.Run()
-	case 1:
-		cmd := strings.ToLower(flag.Arg(0))
-		var ok bool
-		if ok, err = svc.Command(cmd); !ok {
-			if cmd == "report" {
-				if err := initWeather(); err != nil {
-					svc.Fatal(err)
-				}
-				report(time.Now())
-			} else {
-				svc.Fatalln("Unknown argument:", cmd)
-			}
-		}
-	default:
-		svc.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))
-	}
-	if err != nil {
-		svc.Printf("failed to %s: %v", flag.Arg(0), err)
+	if err := svc.ParseAndRun(flag.Args()); err != nil {
+		svc.Fatal(err)
 	}
 }
