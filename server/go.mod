@@ -8,7 +8,7 @@ require (
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.12
-	github.com/sunshineplan/utils v0.1.30
+	github.com/sunshineplan/utils v0.1.31
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 )
 

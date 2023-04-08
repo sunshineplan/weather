@@ -45,6 +45,7 @@ func report(t time.Time) {
 }
 
 func daily(t time.Time) {
+	svc.Print("Start sending daily report...")
 	days, yesterday, avg, err := prepare(t)
 	if err != nil {
 		svc.Print(err)
@@ -87,6 +88,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 }
 
 func alert(t time.Time) {
+	svc.Print("Start alerting...")
 	days, err := forecast.Forecast(*query, *days)
 	if err != nil {
 		svc.Print(err)

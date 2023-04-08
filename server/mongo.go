@@ -16,6 +16,7 @@ func record(date time.Time) (err error) {
 		}
 	}()
 
+	svc.Printf("Start recording %s's weather...", date.Format("2006-01-02"))
 	day, err := history.History(*query, date)
 	if err != nil {
 		return

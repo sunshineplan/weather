@@ -43,6 +43,16 @@ func init() {
 		report(time.Now())
 		return nil
 	}, 0)
+	svc.RegisterCommand("record", "record", func(arg ...string) error {
+		if err := initWeather(); err != nil {
+			return err
+		}
+		date, err := time.Parse("2006-01-02", arg[0])
+		if err != nil {
+			return err
+		}
+		return record(date)
+	}, 1)
 }
 
 var (
