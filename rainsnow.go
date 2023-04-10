@@ -59,6 +59,8 @@ func (rainsnow RainSnow) DateInfo() string {
 	fmt.Fprintf(&b, "Date: %s %s", rainsnow.Start().Date, rainsnow.Start().Weekday())
 	if until := rainsnow.Start().Until(); until == 0 {
 		fmt.Fprint(&b, " (today)")
+	} else if until == 1 {
+		fmt.Fprint(&b, " (tomorrow)")
 	} else {
 		fmt.Fprintf(&b, " (%s later)", fmtDuration(until))
 	}

@@ -44,6 +44,8 @@ func (t TempRiseFall) DateInfo() string {
 	fmt.Fprintf(&b, "Date: %s %s", t.day.Date, t.day.Weekday())
 	if until := t.day.Until(); until == 0 {
 		fmt.Fprint(&b, " (today)")
+	} else if until == 1 {
+		fmt.Fprint(&b, " (tomorrow)")
 	} else {
 		fmt.Fprintf(&b, " (%s later)", fmtDuration(until))
 	}
