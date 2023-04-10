@@ -63,7 +63,7 @@ func (rainsnow RainSnow) DateInfo() string {
 	} else if until == 24*time.Hour {
 		fmt.Fprint(&b, " (tomorrow)")
 	} else {
-		fmt.Fprintf(&b, " (%sd later)", until/(24*time.Hour))
+		fmt.Fprintf(&b, " (%dd later)", until/(24*time.Hour))
 	}
 	if rainsnow.isEnd {
 		if rainsnow.Duration() != 0 {
