@@ -117,7 +117,7 @@ func alert(t time.Time) {
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
 	if subject, body := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, body.String())
+		sendMail(subject, `<pre style="font-family:system-ui">`+body.String()+"</pre>")
 	}
 }
 
