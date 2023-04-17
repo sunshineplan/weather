@@ -14,9 +14,11 @@ import (
 var server = httpsvr.New()
 
 func runServer() error {
-	svc.Logger = log.New(*logPath, "", log.LstdFlags)
-	gin.DefaultWriter = svc.Logger
-	gin.DefaultErrorWriter = svc.Logger
+	if *logPath != "" {
+		svc.Logger = log.New(*logPath, "", log.LstdFlags)
+		gin.DefaultWriter = svc.Logger
+		gin.DefaultErrorWriter = svc.Logger
+	}
 
 	router := gin.Default()
 	router.Use(cors.Default())

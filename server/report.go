@@ -5,7 +5,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/sunshineplan/weather"
 )
@@ -56,6 +55,7 @@ func daily(t time.Time) {
 
 func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	var body strings.Builder
+	fmt.Fprintln(&body, `<pre style="font-family:system-ui">`)
 	fmt.Fprintln(&body, days[0])
 	fmt.Fprintln(&body)
 	fmt.Fprintln(&body, "Compared with Yesterday")
@@ -84,6 +84,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	} else {
 		fmt.Fprintln(&body, "No Temperature Alert.")
 	}
+	fmt.Fprintln(&body, "</pre>")
 	sendMail("[Weather]Daily Report"+timestamp(), body.String())
 }
 
@@ -197,50 +198,32 @@ func table(days []weather.Day) string {
 	if len(days) > 7 {
 		days = days[:7]
 	}
-	lenMax := 9
-	var date, tempMax, tempMin, feelslikeMax, feelslikeMin, precipProb, condition []string
-	appendAndCalcLen := func(slice []string, elem string) []string {
-		if l := utf8.RuneCountInString(elem); l > lenMax {
-			lenMax = l
-		}
-		return append(slice, elem)
-	}
-	for _, day := range days {
-		date = appendAndCalcLen(date, day.DateInfo(false)[11:])
-		tempMax = appendAndCalcLen(tempMax, day.TempMax.String())
-		tempMin = appendAndCalcLen(tempMin, day.TempMin.String())
-		feelslikeMax = appendAndCalcLen(feelslikeMax, day.FeelsLikeMax.String())
-		feelslikeMin = appendAndCalcLen(feelslikeMin, day.FeelsLikeMin.String())
-		precipProb = appendAndCalcLen(precipProb, day.PrecipProb.String())
-		condition = appendAndCalcLen(condition, day.Condition.Short())
-	}
-	if lenMax = lenMax + 2; (lenMax-9)%2 == 1 {
-		lenMax++
-	}
-	print := func(str string) string {
-		spaces := lenMax - utf8.RuneCountInString(str)
-		prefix := strings.Repeat(" ", spaces-spaces/2)
-		suffix := strings.Repeat(" ", spaces/2)
-		return prefix + str + suffix
-	}
-	println := func(field string, slice []string) string {
-		var b strings.Builder
-		b.WriteString(field)
-		b.WriteString(strings.Repeat(" ", 13-len(field)))
-		for _, s := range slice {
-			b.WriteRune('|')
-			b.WriteString(print(s))
-		}
-		b.WriteRune('\n')
-		return b.String()
-	}
 	var b strings.Builder
-	b.WriteString(println("Date", date))
-	b.WriteString(println("TempMax", tempMax))
-	b.WriteString(println("TempMin", tempMin))
-	b.WriteString(println("FeelsLikeMax", feelslikeMax))
-	b.WriteString(println("FeelsLikeMin", feelslikeMin))
-	b.WriteString(println("PrecipProb", precipProb))
-	b.WriteString(println("Condition", condition))
+	fmt.Fprintln(&b, `<table border="1" cellspacing="0">`)
+	fmt.Fprintln(&b, "<thead>")
+	fmt.Fprintln(&b, "<tr>")
+	fmt.Fprintln(&b, "<th>Date</th>")
+	fmt.Fprintln(&b, "<th>Max</th>")
+	fmt.Fprintln(&b, "<th>Min</th>")
+	fmt.Fprintln(&b, "<th>FLMax</th>")
+	fmt.Fprintln(&b, "<th>FLMin</th>")
+	fmt.Fprintln(&b, "<th>Rain%</th>")
+	fmt.Fprintln(&b, "<th>Condition</th>")
+	fmt.Fprintln(&b, "</tr>")
+	fmt.Fprintln(&b, "</thead>")
+	fmt.Fprintln(&b, "<tbody>")
+	for _, day := range days {
+		fmt.Fprintln(&b, "<tr>")
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.DateInfo(false)[11:])
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.TempMax)
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.TempMin)
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.FeelsLikeMax)
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.FeelsLikeMin)
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.PrecipProb)
+		fmt.Fprintf(&b, "<td>%s</td>\n", day.Condition)
+		fmt.Fprintln(&b, "</tr>")
+	}
+	fmt.Fprintln(&b, "</tbody>")
+	fmt.Fprint(&b, "</table>")
 	return b.String()
 }

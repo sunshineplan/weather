@@ -12,9 +12,10 @@ func sendMail(subject, body string) {
 	for _, to := range to {
 		if err := dialer.Send(
 			&mail.Message{
-				To:      mail.Receipts{to},
-				Subject: subject,
-				Body:    body,
+				To:          mail.Receipts{to},
+				Subject:     subject,
+				Body:        body,
+				ContentType: mail.TextHTML,
 			},
 		); err != nil {
 			svc.Print(err)
