@@ -54,38 +54,46 @@ func daily(t time.Time) {
 }
 
 func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
-	var body strings.Builder
-	fmt.Fprintln(&body, `<pre style="font-family:system-ui">`)
-	fmt.Fprintln(&body, days[0])
-	fmt.Fprintln(&body)
-	fmt.Fprintln(&body, "Compared with Yesterday")
-	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], yesterday).DiffInfo())
-	fmt.Fprintln(&body)
-	fmt.Fprintln(&body, "Historical Average Temperature of", t.Format("01-02"))
-	fmt.Fprintln(&body, avg.Temperature())
-	fmt.Fprintln(&body, weather.NewTempRiseFall(days[0], avg).DiffInfo())
-	fmt.Fprintln(&body)
-	fmt.Fprintln(&body, "Forecast:")
-	fmt.Fprintln(&body, table(days))
+	var b strings.Builder
+	fmt.Fprint(&b, `<pre style="font-family:system-ui;margin:0">`)
+	fmt.Fprint(&b, days[0].HTML())
+	fmt.Fprintln(&b)
+	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Compared with Yesterday", "</div>")
+	fmt.Fprint(&b, "<table><tbody>")
+	fmt.Fprint(&b, yesterday.TemperatureHTML())
+	fmt.Fprint(&b, weather.NewTempRiseFall(days[0], yesterday).DiffInfoHTML())
+	fmt.Fprint(&b, "</tbody></table>")
+	fmt.Fprintln(&b)
+	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Historical Average Temperature of ", t.Format("01-02"), "</div>")
+	fmt.Fprint(&b, "<table><tbody>")
+	fmt.Fprint(&b, avg.TemperatureHTML())
+	fmt.Fprint(&b, weather.NewTempRiseFall(days[0], avg).DiffInfoHTML())
+	fmt.Fprint(&b, "</tbody></table>")
+	fmt.Fprintln(&b)
+	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Forecast", "</div>")
+	fmt.Fprint(&b, table(days))
 	if rainSnow != nil {
-		fmt.Fprintln(&body, "Recent Rain Snow Alert:")
-		fmt.Fprintln(&body, rainSnow)
+		fmt.Fprintln(&b)
+		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Rain Snow Alert", "</div>")
+		fmt.Fprint(&b, rainSnow.HTML())
 	} else {
-		fmt.Fprintln(&body, "No Rain Snow Alert.")
+		fmt.Fprintln(&b)
+		fmt.Fprint(&b, "No Rain Snow Alert.")
 	}
-	fmt.Fprintln(&body)
 	if tempRiseFall != nil {
+		fmt.Fprintln(&b)
 		if tempRiseFall.IsRise() {
-			fmt.Fprintln(&body, "Recent Temperature Rise Alert:")
+			fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Temperature Rise Alert", "</div>")
 		} else {
-			fmt.Fprintln(&body, "Recent Temperature Fall Alert:")
+			fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Temperature Fall Alert", "</div>")
 		}
-		fmt.Fprintln(&body, tempRiseFall)
+		fmt.Fprint(&b, tempRiseFall.HTML())
 	} else {
-		fmt.Fprintln(&body, "No Temperature Alert.")
+		fmt.Fprintln(&b)
+		fmt.Fprint(&b, "No Temperature Alert.")
 	}
-	fmt.Fprintln(&body, "</pre>")
-	sendMail("[Weather]Daily Report"+timestamp(), body.String())
+	fmt.Fprint(&b, "</pre>")
+	sendMail("[Weather]Daily Report"+timestamp(), b.String())
 }
 
 func alert(t time.Time) {
@@ -117,11 +125,11 @@ func alert(t time.Time) {
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
 	if subject, body := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, `<pre style="font-family:system-ui">`+body.String()+"</pre>")
+		sendMail(subject, `<pre style="font-family:system-ui;margin:0">`+body.String()+"</pre>")
 	}
 }
 
-func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
+func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 	if rainSnow != nil {
 		if rainSnow.IsExpired() {
 			rainSnow = nil
@@ -139,21 +147,21 @@ func alertRainSnow(days []weather.Day) (subject string, body strings.Builder) {
 					subject = "[Weather]Rain Snow Alert - " + i.Start().Date + timestamp()
 				}
 			}
-			fmt.Fprintln(&body, i.String())
+			fmt.Fprint(&b, i.HTML())
 			if index < len(res)-1 {
-				fmt.Fprintln(&body)
+				fmt.Fprintln(&b)
 			}
 		}
 		rainSnow = &first
 	} else if rainSnow != nil {
 		subject = "[Weather]Rain Snow Alert - Canceled" + timestamp()
-		body.WriteString("No more rain snow")
+		b.WriteString("No more rain snow")
 		rainSnow = nil
 	}
 	return
 }
 
-func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder) {
+func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
 	if tempRiseFall != nil {
 		if tempRiseFall.IsExpired() {
 			tempRiseFall = nil
@@ -175,19 +183,19 @@ func alertTempRiseFall(days []weather.Day) (subject string, body strings.Builder
 					}
 				}
 			}
-			fmt.Fprintln(&body, i.String())
+			fmt.Fprint(&b, i.HTML())
 			if index < len(res)-1 {
-				fmt.Fprintln(&body)
+				fmt.Fprintln(&b)
 			}
 		}
 		tempRiseFall = &first
 	} else if tempRiseFall != nil {
 		if tempRiseFall.IsRise() {
 			subject = "[Weather]Temperature Rise Alert - Canceled" + timestamp()
-			body.WriteString("No more temperature rise")
+			b.WriteString("No more temperature rise")
 		} else {
 			subject = "[Weather]Temperature Fall Alert - Canceled" + timestamp()
-			body.WriteString("No more temperature fall")
+			b.WriteString("No more temperature fall")
 		}
 		tempRiseFall = nil
 	}
@@ -199,31 +207,17 @@ func table(days []weather.Day) string {
 		days = days[:7]
 	}
 	var b strings.Builder
-	fmt.Fprintln(&b, `<table border="1" cellspacing="0">`)
-	fmt.Fprintln(&b, "<thead>")
-	fmt.Fprintln(&b, "<tr>")
-	fmt.Fprintln(&b, "<th>Date</th>")
-	fmt.Fprintln(&b, "<th>Max</th>")
-	fmt.Fprintln(&b, "<th>Min</th>")
-	fmt.Fprintln(&b, "<th>FLMax</th>")
-	fmt.Fprintln(&b, "<th>FLMin</th>")
-	fmt.Fprintln(&b, "<th>Rain%</th>")
-	fmt.Fprintln(&b, "<th>Condition</th>")
-	fmt.Fprintln(&b, "</tr>")
-	fmt.Fprintln(&b, "</thead>")
-	fmt.Fprintln(&b, "<tbody>")
+	fmt.Fprint(&b, "<table border=1 cellspacing=0>")
+	fmt.Fprint(&b, "<thead><tr><th>Date</th><th>Max</th><th>Min</th><th>FLMax</th><th>FLMin</th><th>Rain%</th></tr></thead>")
+	fmt.Fprint(&b, "<tbody>")
 	for _, day := range days {
-		fmt.Fprintln(&b, "<tr>")
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.DateInfo(false)[11:])
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.TempMax)
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.TempMin)
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.FeelsLikeMax)
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.FeelsLikeMin)
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.PrecipProb)
-		fmt.Fprintf(&b, "<td>%s</td>\n", day.Condition)
-		fmt.Fprintln(&b, "</tr>")
+		fmt.Fprintf(&b, "<tr><td>%s %s</td>", day.DateInfo(false)[11:], day.Condition.Image(day.Icon))
+		fmt.Fprintf(&b, "<td>%s</td>", day.TempMax)
+		fmt.Fprintf(&b, "<td>%s</td>", day.TempMin)
+		fmt.Fprintf(&b, "<td>%s</td>", day.FeelsLikeMax)
+		fmt.Fprintf(&b, "<td>%s</td>", day.FeelsLikeMin)
+		fmt.Fprintf(&b, "<td>%s</td></tr>", day.PrecipProb)
 	}
-	fmt.Fprintln(&b, "</tbody>")
-	fmt.Fprint(&b, "</table>")
+	fmt.Fprint(&b, "</tbody></table>")
 	return b.String()
 }

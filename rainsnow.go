@@ -57,7 +57,7 @@ func (rainsnow *RainSnow) IsExpired() bool {
 
 func (rainsnow RainSnow) DateInfo() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Date: %s %s", rainsnow.Start().Date, rainsnow.Start().Weekday())
+	fmt.Fprintf(&b, "%s %s", rainsnow.Start().Date, rainsnow.Start().Weekday())
 	if until := rainsnow.Start().Until(); until == 0 {
 		fmt.Fprint(&b, " (today)")
 	} else if until == 24*time.Hour {
@@ -77,11 +77,20 @@ func (rainsnow RainSnow) DateInfo() string {
 
 func (rainsnow RainSnow) String() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, rainsnow.DateInfo())
-	fmt.Fprint(&b, "Forecast:")
+	fmt.Fprintln(&b, "Date:", rainsnow.DateInfo())
 	for index, i := range rainsnow.days {
 		fmt.Fprintf(&b, "\n#%d %s\n", index+1, i.DateInfo(true))
 		fmt.Fprint(&b, i.Precipitation())
+	}
+	return b.String()
+}
+
+func (rainsnow RainSnow) HTML() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">%s</div>`, rainsnow.DateInfo())
+	for index, i := range rainsnow.days {
+		fmt.Fprintf(&b, "%d.  %s\n", index+1, i.DateInfoHTML())
+		fmt.Fprintln(&b, i.Precipitation())
 	}
 	return b.String()
 }

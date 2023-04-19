@@ -22,8 +22,8 @@ func (t TempRiseFall) Previous() Day {
 	return t.previous
 }
 
-func (t TempRiseFall) Difference() [][]Temperature {
-	return [][]Temperature{
+func (t TempRiseFall) Difference() [2][3]Temperature {
+	return [2][3]Temperature{
 		{t.day.TempMax - t.previous.TempMax, t.day.TempMin - t.previous.TempMin, t.day.Temp - t.previous.Temp},
 		{t.day.FeelsLikeMax - t.previous.FeelsLikeMax, t.day.FeelsLikeMin - t.previous.FeelsLikeMin, t.day.FeelsLike - t.previous.FeelsLike},
 	}
@@ -42,7 +42,7 @@ func (t TempRiseFall) IsExpired() bool {
 
 func (t TempRiseFall) DateInfo() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Date: %s %s", t.day.Date, t.day.Weekday())
+	fmt.Fprintf(&b, "%s %s", t.day.Date, t.day.Weekday())
 	if until := t.day.Until(); until == 0 {
 		fmt.Fprint(&b, " (today)")
 	} else if until == 24*time.Hour {
@@ -54,22 +54,52 @@ func (t TempRiseFall) DateInfo() string {
 }
 
 func (t TempRiseFall) DiffInfo() string {
-	var b strings.Builder
 	diff := t.Difference()
-	fmt.Fprintf(&b, "TempMaxDiff: %.1f°C, TempMinDiff: %.1f°C, TempDiff: %.1f°C\n", diff[0][0], diff[0][1], diff[0][2])
-	fmt.Fprintf(&b, "FeelsLikeMaxDiff: %.1f°C, FeelsLikeMinDiff: %.1f°C, FeelsLikeDiff: %.1f°C", diff[1][0], diff[1][1], diff[1][2])
+	var b strings.Builder
+	fmt.Fprintf(&b, "TempMaxDiff: %s, TempMinDiff: %s, TempDiff: %s\n", diff[0][0], diff[0][1], diff[0][2])
+	fmt.Fprintf(&b, "FeelsLikeMaxDiff: %s, FeelsLikeMinDiff: %s, FeelsLikeDiff: %s", diff[1][0], diff[1][1], diff[1][2])
+	return b.String()
+}
+
+func (t TempRiseFall) DiffInfoHTML() string {
+	diff := t.Difference()
+	var b strings.Builder
+	fmt.Fprintf(&b, "<tr><td>TempMax:</td><td>%s</td>", diff[0][0].DiffHTML())
+	fmt.Fprintf(&b, "<td>TempMin:</td><td>%s</td>", diff[0][1].DiffHTML())
+	fmt.Fprintf(&b, "<td>Temp:</td><td>%s</td></tr>", diff[0][2].DiffHTML())
+	fmt.Fprintf(&b, "<tr><td>FeelsLikeMax:</td><td>%s</td>", diff[1][0].DiffHTML())
+	fmt.Fprintf(&b, "<td>FeelsLikeMin:</td><td>%s</td>", diff[1][1].DiffHTML())
+	fmt.Fprintf(&b, "<td>FeelsLike:</td><td>%s</td></tr>", diff[1][2].DiffHTML())
 	return b.String()
 }
 
 func (t TempRiseFall) String() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, t.DateInfo())
+	fmt.Fprintln(&b, "Date: ", t.DateInfo())
 	fmt.Fprintln(&b, t.DiffInfo())
 	fmt.Fprintln(&b, "Forecast:")
 	fmt.Fprintln(&b, "#0", t.previous.DateInfo(true))
 	fmt.Fprintln(&b, t.previous.Temperature())
 	fmt.Fprintln(&b, "#1", t.day.DateInfo(true))
 	fmt.Fprint(&b, t.day.Temperature())
+	return b.String()
+}
+
+func (t TempRiseFall) HTML() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`)
+	fmt.Fprintf(&b, "%s %s", t.DateInfo(), t.day.Condition.Image(t.day.Icon))
+	fmt.Fprint(&b, "</div>")
+	fmt.Fprint(&b, "<table><tbody>")
+	fmt.Fprint(&b, t.day.TemperatureHTML())
+	fmt.Fprint(&b, t.DiffInfoHTML())
+	fmt.Fprint(&b, "</tbody></table>")
+	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:circle">`)
+	fmt.Fprint(&b, "Previous Day: ", t.previous.DateInfoHTML())
+	fmt.Fprint(&b, "</div>")
+	fmt.Fprint(&b, "<table><tbody>")
+	fmt.Fprint(&b, t.previous.TemperatureHTML())
+	fmt.Fprint(&b, "</tbody></table>")
 	return b.String()
 }
 

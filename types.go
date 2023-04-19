@@ -98,10 +98,25 @@ func (day Day) DateInfo(condition bool) string {
 	return b.String()
 }
 
+func (day Day) DateInfoHTML() string {
+	return fmt.Sprintf("%s %s %s", day.Date, day.Weekday(), day.Condition.Image(day.Icon))
+}
+
 func (day Day) Temperature() string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "TempMax: %s, TempMin: %s, Temp: %s\n", day.TempMax, day.TempMin, day.Temp)
 	fmt.Fprintf(&b, "FeelsLikeMax: %s, FeelsLikeMin: %s, FeelsLike: %s", day.FeelsLikeMax, day.FeelsLikeMin, day.FeelsLike)
+	return b.String()
+}
+
+func (day Day) TemperatureHTML() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "<tr><td>TempMax:</td><td>%s</td>", day.TempMax)
+	fmt.Fprintf(&b, "<td>TempMin:</td><td>%s</td>", day.TempMin)
+	fmt.Fprintf(&b, "<td>Temp:</td><td>%s</td></tr>", day.Temp)
+	fmt.Fprintf(&b, "<tr><td>FeelsLikeMax:</td><td>%s</td>", day.FeelsLikeMax)
+	fmt.Fprintf(&b, "<td>FeelsLikeMin:</td><td>%s</td>", day.FeelsLikeMin)
+	fmt.Fprintf(&b, "<td>FeelsLike:</td><td>%s</td></tr>", day.FeelsLike)
 	return b.String()
 }
 
@@ -132,6 +147,27 @@ func (day Day) String() string {
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
 	fmt.Fprintf(&b, "WindGust: %gkph, WindSpeed: %gkph, WindDir: %g°\n", day.WindGust, day.WindSpeed, day.WindDir)
 	fmt.Fprintf(&b, "CloudCover: %s, Visibility: %gkm, UVIndex: %g", day.CloudCover, day.Visibility, day.UVIndex)
+	return b.String()
+}
+
+func (day Day) HTML() string {
+	var b strings.Builder
+	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`, day.DateInfoHTML(), "</div>")
+	fmt.Fprint(&b, "<table><tbody>")
+	fmt.Fprint(&b, day.TemperatureHTML())
+	fmt.Fprintf(&b, "<tr><td>Humidity:</td><td>%s</td>", day.Humidity)
+	fmt.Fprintf(&b, "<td>Dew Point:</td><td>%s</td>", day.Dew)
+	fmt.Fprintf(&b, "<td>Pressure:</td><td>%ghPa</td></tr>", day.Pressure)
+	fmt.Fprintf(&b, "<tr><td>Precip:</td><td>%gmm</td>", day.Precip)
+	fmt.Fprintf(&b, "<td>PrecipProb:</td><td>%s</td>", day.PrecipProb)
+	fmt.Fprintf(&b, "<td>PrecipCover:</td><td>%s</td></tr>", day.PrecipCover)
+	fmt.Fprintf(&b, "<tr><td>WindGust:</td><td>%gkph</td>", day.WindGust)
+	fmt.Fprintf(&b, "<td>WindSpeed:</td><td>%gkph</td>", day.WindSpeed)
+	fmt.Fprintf(&b, `<td>WindDir:</td><td>%g°</td></tr>`, day.WindDir)
+	fmt.Fprintf(&b, "<tr><td>CloudCover:</td><td>%s</td>", day.CloudCover)
+	fmt.Fprintf(&b, "<td>Visibility:</td><td>%gkm</td>", day.Visibility)
+	fmt.Fprintf(&b, "<td>UVIndex:</td><td>%g</td></tr>", day.UVIndex)
+	fmt.Fprint(&b, "</tbody></table>")
 	return b.String()
 }
 

@@ -19,7 +19,7 @@ func (current *Current) Convert() weather.Current {
 		UVIndex:       current.UVIndex,
 		WindGust:      current.WindGust,
 		Condition:     current.Conditions,
-		Icon:          current.Icon,
+		Icon:          ConvertIcon(current.Icon),
 	}
 }
 
@@ -51,7 +51,7 @@ func ConvertDays(src []Day) (days []weather.Day) {
 			UVIndex:      i.UVIndex,
 			SevereRisk:   i.SevereRisk,
 			Condition:    i.Conditions,
-			Icon:         i.Icon,
+			Icon:         ConvertIcon(i.Icon),
 			Hours:        ConvertHours(i.Hours),
 		})
 	}
@@ -83,8 +83,14 @@ func ConvertHours(src []Hour) (hours []weather.Hour) {
 			UVIndex:        i.UVIndex,
 			SevereRisk:     i.SevereRisk,
 			Condition:      i.Conditions,
-			Icon:           i.Icon,
+			Icon:           ConvertIcon(i.Icon),
 		})
 	}
 	return
+}
+
+func ConvertIcon(icon string) string {
+	//return "https://www.visualcrossing.com/img/" + icon + ".svg"
+	//return "https://raw.githubusercontent.com/visualcrossing/WeatherIcons/main/PNG/2nd%20Set%20-%20Color/" + icon + ".png"
+	return "https://cdn.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd%20Set%20-%20Color/" + icon + ".png"
 }
