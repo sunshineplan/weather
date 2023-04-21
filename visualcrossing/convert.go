@@ -91,6 +91,6 @@ func ConvertHours(src []Hour) (hours []weather.Hour) {
 
 func ConvertIcon(icon string) string {
 	//return "https://www.visualcrossing.com/img/" + icon + ".svg"
-	//return "https://raw.githubusercontent.com/visualcrossing/WeatherIcons/main/PNG/2nd%20Set%20-%20Color/" + icon + ".png"
-	return "https://cdn.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd%20Set%20-%20Color/" + icon + ".png"
+	//return "https://cdn.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd%20Set%20-%20Color/" + icon + ".png"
+	return "https://raw.githubusercontent.com/visualcrossing/WeatherIcons/main/PNG/2nd%20Set%20-%20Color/" + icon + ".png"
 }
