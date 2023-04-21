@@ -78,7 +78,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 		fmt.Fprint(&b, rainSnow.HTML())
 	} else {
 		fmt.Fprintln(&b)
-		fmt.Fprint(&b, "No Rain Snow Alert.")
+		fmt.Fprintln(&b, "No Rain Snow Alert.")
 	}
 	if tempRiseFall != nil {
 		fmt.Fprintln(&b)
@@ -207,11 +207,12 @@ func table(days []weather.Day) string {
 		days = days[:7]
 	}
 	var b strings.Builder
-	fmt.Fprint(&b, "<table border=1 cellspacing=0>")
-	fmt.Fprint(&b, "<thead><tr><th>Date</th><th>Max</th><th>Min</th><th>FLMax</th><th>FLMin</th><th>Rain%</th></tr></thead>")
+	fmt.Fprint(&b, "<table border=1 cellspacing=0 cellpadding=2>")
+	fmt.Fprint(&b, "<thead><tr><th colspan=2>Date</th><th>Max</th><th>Min</th><th>FLMax</th><th>FLMin</th><th>Rain%</th></tr></thead>")
 	fmt.Fprint(&b, "<tbody>")
 	for _, day := range days {
-		fmt.Fprintf(&b, "<tr><td>%s %s</td>", day.DateInfo(false)[11:], day.Condition.Image(day.Icon))
+		fmt.Fprintf(&b, "<tr><td>%s</td>", day.DateInfo(false)[11:])
+		fmt.Fprintf(&b, "<td>%s</td>", day.Condition.Image(day.Icon))
 		fmt.Fprintf(&b, "<td>%s</td>", day.TempMax)
 		fmt.Fprintf(&b, "<td>%s</td>", day.TempMin)
 		fmt.Fprintf(&b, "<td>%s</td>", day.FeelsLikeMax)
