@@ -207,7 +207,7 @@ func table(days []weather.Day) string {
 		days = days[:7]
 	}
 	var b strings.Builder
-	fmt.Fprint(&b, "<table border=1 cellspacing=0 cellpadding=2>")
+	fmt.Fprint(&b, "<table border=1 cellspacing=0>")
 	fmt.Fprint(&b, "<thead><tr><th colspan=2>Date</th><th>Max</th><th>Min</th><th>FLMax</th><th>FLMin</th><th>Rain%</th></tr></thead>")
 	fmt.Fprint(&b, "<tbody>")
 	for _, day := range days {
