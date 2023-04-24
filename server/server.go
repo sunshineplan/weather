@@ -25,6 +25,7 @@ func runServer() error {
 	router.TrustedPlatform = "X-Real-IP"
 	server.Handler = router
 
+	router.GET("/img/:image", image)
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")
 		if q == "" {
