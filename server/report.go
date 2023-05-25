@@ -212,7 +212,7 @@ func table(days []weather.Day) string {
 	fmt.Fprint(&b, "<tbody>")
 	for _, day := range days {
 		fmt.Fprintf(&b, "<tr><td>%s</td>", day.DateInfo(false)[11:])
-		fmt.Fprintf(&b, "<td>%s</td>", day.Condition.Image(day.Icon))
+		fmt.Fprintf(&b, "<td>%s</td>", day.Condition.Img(day.Icon))
 		fmt.Fprintf(&b, "<td>%s</td>", day.TempMax)
 		fmt.Fprintf(&b, "<td>%s</td>", day.TempMin)
 		fmt.Fprintf(&b, "<td>%s</td>", day.FeelsLikeMax)

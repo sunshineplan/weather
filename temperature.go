@@ -2,8 +2,11 @@ package weather
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
+
+	"github.com/sunshineplan/weather/unit"
 )
 
 type TempRiseFall struct {
@@ -22,18 +25,26 @@ func (t TempRiseFall) Previous() Day {
 	return t.previous
 }
 
-func (t TempRiseFall) Difference() [2][3]Temperature {
-	return [2][3]Temperature{
-		{t.day.TempMax - t.previous.TempMax, t.day.TempMin - t.previous.TempMin, t.day.Temp - t.previous.Temp},
-		{t.day.FeelsLikeMax - t.previous.FeelsLikeMax, t.day.FeelsLikeMin - t.previous.FeelsLikeMin, t.day.FeelsLike - t.previous.FeelsLike},
+func (t TempRiseFall) Difference() [2][3]unit.Temperature {
+	return [2][3]unit.Temperature{
+		{
+			t.day.TempMax.Difference(t.previous.TempMax),
+			t.day.TempMin.Difference(t.previous.TempMin),
+			t.day.Temp.Difference(t.previous.Temp),
+		},
+		{
+			t.day.FeelsLikeMax.Difference(t.previous.FeelsLikeMax),
+			t.day.FeelsLikeMin.Difference(t.previous.FeelsLikeMin),
+			t.day.FeelsLike.Difference(t.previous.FeelsLike),
+		},
 	}
 }
 
 func (t TempRiseFall) IsRise() bool {
 	if t.day.Temp == t.previous.Temp {
-		return t.day.TempMax > t.previous.TempMax
+		return t.day.TempMax.Float64() > t.previous.TempMax.Float64()
 	}
-	return t.day.Temp > t.previous.Temp
+	return t.day.Temp.Float64() > t.previous.Temp.Float64()
 }
 
 func (t TempRiseFall) IsExpired() bool {
@@ -88,7 +99,7 @@ func (t TempRiseFall) String() string {
 func (t TempRiseFall) HTML() string {
 	var b strings.Builder
 	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`)
-	fmt.Fprintf(&b, "%s %s", t.DateInfo(), t.day.Condition.Image(t.day.Icon))
+	fmt.Fprintf(&b, "%s %s", t.DateInfo(), t.day.Condition.Img(t.day.Icon))
 	fmt.Fprint(&b, "</div>")
 	fmt.Fprint(&b, "<table><tbody>")
 	fmt.Fprint(&b, t.day.TemperatureHTML())
@@ -108,10 +119,10 @@ func WillTempRiseFall(days []Day, difference float64) (res []TempRiseFall, err e
 	for _, i := range days {
 		day = i
 		if previous.Date != "" {
-			if day.TempMax.AbsDiff(previous.TempMax) >= difference ||
-				day.TempMin.AbsDiff(previous.TempMin) >= difference ||
-				day.FeelsLikeMax.AbsDiff(previous.FeelsLikeMax) >= difference ||
-				day.FeelsLikeMin.AbsDiff(previous.FeelsLikeMin) >= difference {
+			if math.Abs(day.TempMax.Difference(previous.TempMax).Float64()) >= difference ||
+				math.Abs(day.TempMin.Difference(previous.TempMin).Float64()) >= difference ||
+				math.Abs(day.FeelsLikeMax.Difference(previous.FeelsLikeMax).Float64()) >= difference ||
+				math.Abs(day.FeelsLikeMin.Difference(previous.FeelsLikeMin).Float64()) >= difference {
 				res = append(res, NewTempRiseFall(day, previous))
 			}
 		}
