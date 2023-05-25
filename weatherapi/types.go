@@ -28,7 +28,7 @@ type Current struct {
 	Temp             unit.Celsius    `json:"temp_c"`
 	IsDay            int             `json:"is_day"`
 	Condition        *Condition      `json:"condition,omitempty"`
-	WindKph          float64         `json:"wind_kph,omitempty"`
+	WindKph          unit.WindKPH    `json:"wind_kph,omitempty"`
 	WindDegree       float64         `json:"wind_degree,omitempty"`
 	WindDir          string          `json:"wind_dir,omitempty"`
 	PressureMb       float64         `json:"pressure_mb,omitempty"`
@@ -38,7 +38,7 @@ type Current struct {
 	FeelsLike        unit.Celsius    `json:"feelslike_c"`
 	VisKm            float64         `json:"vis_km,omitempty"`
 	UV               float64         `json:"uv,omitempty"`
-	GustKph          float64         `json:"gust_kph,omitempty"`
+	GustKph          unit.WindKPH    `json:"gust_kph,omitempty"`
 }
 
 type Condition struct {
@@ -63,7 +63,7 @@ type ForecastDay struct {
 	MaxTemp           unit.Celsius    `json:"maxtemp_c"`
 	MinTemp           unit.Celsius    `json:"mintemp_c"`
 	AvgTemp           unit.Celsius    `json:"avgtemp_c"`
-	MaxWindKph        float64         `json:"maxwind_kph,omitempty"`
+	MaxWindKph        unit.WindKPH    `json:"maxwind_kph,omitempty"`
 	TotalPrecipMm     float64         `json:"totalprecip_mm"`
 	AvgVisKm          float64         `json:"avgvis_km,omitempty"`
 	AvgHumidity       weather.Percent `json:"avghumidity,omitempty"`
@@ -90,7 +90,7 @@ type ForecastHour struct {
 	Temp         unit.Celsius    `json:"temp_c"`
 	IsDay        int             `json:"is_day"`
 	Condition    *Condition      `json:"condition,omitempty"`
-	WindKph      float64         `json:"wind_kph,omitempty"`
+	WindKph      unit.WindKPH    `json:"wind_kph,omitempty"`
 	WindDegree   float64         `json:"wind_degree,omitempty"`
 	WindDir      string          `json:"wind_dir,omitempty"`
 	PressureMb   float64         `json:"pressure_mb,omitempty"`
@@ -106,6 +106,6 @@ type ForecastHour struct {
 	WillItSnow   int             `json:"will_it_snow"`
 	ChanceOfSnow weather.Percent `json:"chance_of_snow"`
 	VisKm        float64         `json:"vis_km,omitempty"`
-	GustKph      float64         `json:"gust_kph,omitempty"`
+	GustKph      unit.WindKPH    `json:"gust_kph,omitempty"`
 	UV           float64         `json:"uv,omitempty"`
 }

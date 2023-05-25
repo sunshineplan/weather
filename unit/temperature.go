@@ -1,16 +1,22 @@
 package unit
 
 import (
+	"encoding"
 	"fmt"
 	"strings"
 )
 
-var _ Temperature = Celsius(0)
+var (
+	_ encoding.TextMarshaler = Temperature(nil)
+
+	_ Temperature = Celsius(0)
+)
 
 type Temperature interface {
 	Float64() float64
 	Difference(Temperature) Temperature
 	String() string
+	MarshalText() ([]byte, error)
 	DiffHTML() string
 }
 
@@ -21,7 +27,11 @@ func (f Celsius) Float64() float64 {
 }
 
 func (f Celsius) String() string {
-	return fmt.Sprintf("%.1f°C", f)
+	return fmt.Sprintf("%s°C", formatFloat64(f, 1))
+}
+
+func (f Celsius) MarshalText() ([]byte, error) {
+	return []byte(f.String()), nil
 }
 
 func (f Celsius) Difference(i Temperature) Temperature {

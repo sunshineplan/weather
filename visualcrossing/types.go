@@ -28,8 +28,8 @@ type Current struct {
 	Snow           float64           `json:"snow,omitempty"`
 	SnowDepth      float64           `json:"snowdepth,omitempty"`
 	PrecipType     []string          `json:"preciptype,omitempty"`
-	WindGust       float64           `json:"windgust,omitempty"`
-	WindSpeed      float64           `json:"windspeed,omitempty"`
+	WindGust       unit.WindKPH      `json:"windgust,omitempty"`
+	WindSpeed      unit.WindKPH      `json:"windspeed,omitempty"`
 	WindDir        float64           `json:"winddir,omitempty"`
 	Pressure       float64           `json:"pressure,omitempty"`
 	Visibility     float64           `json:"visibility,omitempty"`
@@ -63,8 +63,8 @@ type Day struct {
 	Snow           float64           `json:"snow,omitempty"`
 	SnowDepth      float64           `json:"snowdepth,omitempty"`
 	PrecipType     []string          `json:"preciptype,omitempty"`
-	WindGust       float64           `json:"windgust,omitempty"`
-	WindSpeed      float64           `json:"windspeed,omitempty"`
+	WindGust       unit.WindKPH      `json:"windgust,omitempty"`
+	WindSpeed      unit.WindKPH      `json:"windspeed,omitempty"`
 	WindDir        float64           `json:"winddir,omitempty"`
 	Pressure       float64           `json:"pressure,omitempty"`
 	CloudCover     weather.Percent   `json:"cloudcover"`
@@ -96,8 +96,8 @@ type Hour struct {
 	Snow           float64           `json:"snow,omitempty"`
 	SnowDepth      float64           `json:"snowdepth,omitempty"`
 	PrecipType     []string          `json:"preciptype,omitempty"`
-	WindGust       float64           `json:"windgust,omitempty"`
-	WindSpeed      float64           `json:"windspeed,omitempty"`
+	WindGust       unit.WindKPH      `json:"windgust,omitempty"`
+	WindSpeed      unit.WindKPH      `json:"windspeed,omitempty"`
 	WindDir        float64           `json:"winddir,omitempty"`
 	Pressure       float64           `json:"pressure,omitempty"`
 	Visibility     float64           `json:"visibility,omitempty"`

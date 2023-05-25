@@ -7,6 +7,7 @@ import (
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/visualcrossing"
 )
 
 func record(date time.Time) (err error) {
@@ -31,7 +32,7 @@ func record(date time.Time) (err error) {
 }
 
 func average(date string, round int) (weather.Day, error) {
-	var res []weather.Day
+	var res []visualcrossing.Day
 	if err := client.Aggregate(
 		[]mongodb.M{
 			{"$match": mongodb.M{"date": mongodb.M{"$regex": date + "$"}}},
@@ -60,7 +61,7 @@ func average(date string, round int) (weather.Day, error) {
 	if n := len(res); n != 1 {
 		return weather.Day{}, fmt.Errorf("incorrect quantity of average results: %d", n)
 	}
-	return res[0], nil
+	return visualcrossing.ConvertDays(res)[0], nil
 }
 
 func export(month string, delete bool) (buf bytes.Buffer, err error) {
