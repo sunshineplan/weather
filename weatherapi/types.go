@@ -37,7 +37,7 @@ type Current struct {
 	Cloud            weather.Percent `json:"cloud"`
 	FeelsLike        unit.Celsius    `json:"feelslike_c"`
 	VisKm            float64         `json:"vis_km,omitempty"`
-	UV               float64         `json:"uv,omitempty"`
+	UV               unit.UVIndex    `json:"uv,omitempty"`
 	GustKph          unit.WindKPH    `json:"gust_kph,omitempty"`
 }
 
@@ -72,7 +72,7 @@ type ForecastDay struct {
 	DailyWillItSnow   int             `json:"daily_will_it_snow,omitempty"`
 	DailyChanceOfSnow weather.Percent `json:"daily_chance_of_snow,omitempty"`
 	Condition         *Condition      `json:"condition,omitempty"`
-	UV                float64         `json:"uv,omitempty"`
+	UV                unit.UVIndex    `json:"uv,omitempty"`
 }
 
 type ForecastAstro struct {
@@ -107,5 +107,5 @@ type ForecastHour struct {
 	ChanceOfSnow weather.Percent `json:"chance_of_snow"`
 	VisKm        float64         `json:"vis_km,omitempty"`
 	GustKph      unit.WindKPH    `json:"gust_kph,omitempty"`
-	UV           float64         `json:"uv,omitempty"`
+	UV           unit.UVIndex    `json:"uv,omitempty"`
 }

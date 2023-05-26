@@ -36,7 +36,7 @@ type Current struct {
 	CloudCover     weather.Percent   `json:"cloudcover"`
 	SolarRadiation float64           `json:"solarradiation,omitempty"`
 	SolarEnergy    float64           `json:"solarenergy,omitempty"`
-	UVIndex        float64           `json:"uvindex,omitempty"`
+	UVIndex        unit.UVIndex      `json:"uvindex,omitempty"`
 	Conditions     weather.Condition `json:"conditions,omitempty"`
 	Icon           string            `json:"icon,omitempty"`
 	Sunrise        string            `json:"sunrise,omitempty"`
@@ -71,7 +71,7 @@ type Day struct {
 	Visibility     float64           `json:"visibility,omitempty"`
 	SolarRadiation float64           `json:"solarradiation,omitempty"`
 	SolarEnergy    float64           `json:"solarenergy,omitempty"`
-	UVIndex        float64           `json:"uvindex,omitempty"`
+	UVIndex        unit.UVIndex      `json:"uvindex,omitempty"`
 	SevereRisk     float64           `json:"severerisk,omitempty"`
 	Sunrise        string            `json:"sunrise,omitempty"`
 	SunriseEpoch   int64             `json:"sunriseEpoch,omitempty"`
@@ -104,7 +104,7 @@ type Hour struct {
 	CloudCover     weather.Percent   `json:"cloudcover"`
 	SolarRadiation float64           `json:"solarradiation,omitempty"`
 	SolarEnergy    float64           `json:"solarenergy,omitempty"`
-	UVIndex        float64           `json:"uvindex,omitempty"`
+	UVIndex        unit.UVIndex      `json:"uvindex,omitempty"`
 	SevereRisk     float64           `json:"severerisk,omitempty"`
 	Conditions     weather.Condition `json:"conditions,omitempty"`
 	Icon           string            `json:"icon,omitempty"`

@@ -26,7 +26,7 @@ type Current struct {
 	Pressure      float64          `json:"pressure,omitempty"`
 	Visibility    float64          `json:"visibility,omitempty"`
 	CloudCover    Percent          `json:"cloudcover"`
-	UVIndex       float64          `json:"uvindex,omitempty"`
+	UVIndex       unit.UVIndex     `json:"uvindex,omitempty"`
 	Condition     Condition        `json:"condition,omitempty"`
 	Icon          string           `json:"icon,omitempty"`
 }
@@ -54,7 +54,7 @@ type Day struct {
 	Pressure     float64          `json:"pressure,omitempty"`
 	CloudCover   Percent          `json:"cloudcover"`
 	Visibility   float64          `json:"visibility,omitempty"`
-	UVIndex      float64          `json:"uvindex,omitempty"`
+	UVIndex      unit.UVIndex     `json:"uvindex,omitempty"`
 	SevereRisk   float64          `json:"severerisk,omitempty"`
 	Condition    Condition        `json:"condition,omitempty"`
 	Icon         string           `json:"icon,omitempty"`
@@ -149,7 +149,7 @@ func (day Day) String() string {
 	fmt.Fprintf(&b, "Humidity: %s, Dew Point: %s, Pressure: %ghPa\n", day.Humidity, day.Dew, day.Pressure)
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
 	fmt.Fprintf(&b, "WindGust: %s, WindSpeed: %s, WindDir: %g°\n", day.WindGust, day.WindSpeed, day.WindDir)
-	fmt.Fprintf(&b, "CloudCover: %s, Visibility: %gkm, UVIndex: %g", day.CloudCover, day.Visibility, day.UVIndex)
+	fmt.Fprintf(&b, "CloudCover: %s, Visibility: %gkm, UVIndex: %s", day.CloudCover, day.Visibility, day.UVIndex)
 	return b.String()
 }
 
@@ -169,29 +169,29 @@ func (day Day) HTML() string {
 	fmt.Fprintf(&b, `<td>WindDir:</td><td>%g°</td></tr>`, day.WindDir)
 	fmt.Fprintf(&b, "<tr><td>CloudCover:</td><td>%s</td>", day.CloudCover)
 	fmt.Fprintf(&b, "<td>Visibility:</td><td>%gkm</td>", day.Visibility)
-	fmt.Fprintf(&b, "<td>UVIndex:</td><td>%g</td></tr>", day.UVIndex)
+	fmt.Fprintf(&b, "<td>UVIndex:</td><td>%s</td></tr>", day.UVIndex.HTML())
 	fmt.Fprint(&b, "</tbody></table>")
 	return b.String()
 }
 
 func (day Day) JSON() string {
 	var format struct {
-		Date         string    `json:"date"`
-		TempMax      string    `json:"tempmax"`
-		TempMin      string    `json:"tempmin"`
-		Temp         string    `json:"temp"`
-		FeelsLikeMax string    `json:"feelslikemax"`
-		FeelsLikeMin string    `json:"feelslikemin"`
-		FeelsLike    string    `json:"feelslike"`
-		Humidity     Percent   `json:"humidity"`
-		Dew          string    `json:"dew"`
-		Precip       float64   `json:"precip"`
-		PrecipCover  Percent   `json:"precipcover"`
-		WindSpeed    string    `json:"windspeed"`
-		Pressure     float64   `json:"pressure"`
-		Visibility   float64   `json:"visibility"`
-		UVIndex      float64   `json:"uvindex"`
-		Condition    Condition `json:"condition"`
+		Date         string       `json:"date"`
+		TempMax      string       `json:"tempmax"`
+		TempMin      string       `json:"tempmin"`
+		Temp         string       `json:"temp"`
+		FeelsLikeMax string       `json:"feelslikemax"`
+		FeelsLikeMin string       `json:"feelslikemin"`
+		FeelsLike    string       `json:"feelslike"`
+		Humidity     Percent      `json:"humidity"`
+		Dew          string       `json:"dew"`
+		Precip       float64      `json:"precip"`
+		PrecipCover  Percent      `json:"precipcover"`
+		WindSpeed    string       `json:"windspeed"`
+		Pressure     float64      `json:"pressure"`
+		Visibility   float64      `json:"visibility"`
+		UVIndex      unit.UVIndex `json:"uvindex"`
+		Condition    Condition    `json:"condition"`
 	}
 	b, _ := json.Marshal(day)
 	json.Unmarshal(b, &format)
@@ -219,7 +219,7 @@ type Hour struct {
 	CloudCover     Percent          `json:"cloudcover"`
 	SolarRadiation float64          `json:"solarradiation,omitempty"`
 	SolarEnergy    float64          `json:"solarenergy,omitempty"`
-	UVIndex        float64          `json:"uvindex,omitempty"`
+	UVIndex        unit.UVIndex     `json:"uvindex,omitempty"`
 	SevereRisk     float64          `json:"severerisk,omitempty"`
 	Condition      Condition        `json:"condition,omitempty"`
 	Icon           string           `json:"icon,omitempty"`
@@ -227,22 +227,22 @@ type Hour struct {
 
 func (hour Hour) String() string {
 	var format struct {
-		Time       string    `json:"time"`
-		Temp       string    `json:"temp"`
-		FeelsLike  string    `json:"feelslike"`
-		Humidity   Percent   `json:"humidity"`
-		Dew        string    `json:"dew"`
-		Precip     float64   `json:"precip"`
-		PrecipProb Percent   `json:"precipprob"`
-		WindGust   string    `json:"windgust"`
-		WindSpeed  string    `json:"windspeed"`
-		WindDir    float64   `json:"winddir"`
-		Pressure   float64   `json:"pressure"`
-		Visibility float64   `json:"visibility"`
-		CloudCover Percent   `json:"cloudcover"`
-		UVIndex    float64   `json:"uvindex"`
-		SevereRisk float64   `json:"severerisk"`
-		Condition  Condition `json:"condition"`
+		Time       string       `json:"time"`
+		Temp       string       `json:"temp"`
+		FeelsLike  string       `json:"feelslike"`
+		Humidity   Percent      `json:"humidity"`
+		Dew        string       `json:"dew"`
+		Precip     float64      `json:"precip"`
+		PrecipProb Percent      `json:"precipprob"`
+		WindGust   string       `json:"windgust"`
+		WindSpeed  string       `json:"windspeed"`
+		WindDir    float64      `json:"winddir"`
+		Pressure   float64      `json:"pressure"`
+		Visibility float64      `json:"visibility"`
+		CloudCover Percent      `json:"cloudcover"`
+		UVIndex    unit.UVIndex `json:"uvindex"`
+		SevereRisk float64      `json:"severerisk"`
+		Condition  Condition    `json:"condition"`
 	}
 	b, _ := json.Marshal(hour)
 	json.Unmarshal(b, &format)
