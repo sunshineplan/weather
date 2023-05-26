@@ -12,6 +12,7 @@ var (
 )
 
 type WindSpeed interface {
+	MPS() float64
 	Force() int
 	ForceColor() string
 	String() string
@@ -38,6 +39,10 @@ func WindForceColor(force int) string {
 }
 
 type WindKPH float64
+
+func (f WindKPH) MPS() float64 {
+	return float64(f * 1000 / 60 / 60)
+}
 
 func (f WindKPH) Force() int {
 	if f < 2 {
@@ -73,7 +78,7 @@ func (f WindKPH) ForceColor() string {
 }
 
 func (f WindKPH) String() string {
-	return fmt.Sprintf("%skm/h[%d]", formatFloat64(f, 1), f.Force())
+	return fmt.Sprintf("%sm/s(%d)", formatFloat64(f.MPS(), 1), f.Force())
 }
 
 func (f WindKPH) MarshalText() ([]byte, error) {
@@ -81,5 +86,5 @@ func (f WindKPH) MarshalText() ([]byte, error) {
 }
 
 func (f WindKPH) HTML() string {
-	return fmt.Sprintf(`<span style="background-color:%s">%s</span>`, f.ForceColor(), f)
+	return fmt.Sprintf(`<span style="color:%s">%sm/s(%d)</span>`, f.ForceColor(), formatFloat64(f.MPS(), 1), f.Force())
 }
