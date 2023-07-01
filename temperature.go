@@ -11,10 +11,11 @@ import (
 
 type TempRiseFall struct {
 	day, previous Day
+	standard      float64
 }
 
-func NewTempRiseFall(day, previous Day) TempRiseFall {
-	return TempRiseFall{day, previous}
+func NewTempRiseFall(day, previous Day, standard float64) TempRiseFall {
+	return TempRiseFall{day, previous, standard}
 }
 
 func (t TempRiseFall) Day() Day {
@@ -41,8 +42,14 @@ func (t TempRiseFall) Difference() [2][3]unit.Temperature {
 }
 
 func (t TempRiseFall) IsRise() bool {
-	if t.day.Temp == t.previous.Temp {
-		return t.day.TempMax.Float64() > t.previous.TempMax.Float64()
+	if tempRiseFall, isRise := isRiseFall(t.day.TempMax, t.previous.TempMax, t.standard); tempRiseFall {
+		return isRise
+	} else if tempRiseFall, isRise = isRiseFall(t.day.TempMin, t.previous.TempMin, t.standard); tempRiseFall {
+		return isRise
+	} else if tempRiseFall, isRise = isRiseFall(t.day.FeelsLikeMax, t.previous.FeelsLikeMax, t.standard); tempRiseFall {
+		return isRise
+	} else if tempRiseFall, isRise = isRiseFall(t.day.FeelsLikeMin, t.previous.FeelsLikeMin, t.standard); tempRiseFall {
+		return isRise
 	}
 	return t.day.Temp.Float64() > t.previous.Temp.Float64()
 }
@@ -114,19 +121,31 @@ func (t TempRiseFall) HTML() string {
 	return b.String()
 }
 
-func WillTempRiseFall(days []Day, difference float64) (res []TempRiseFall, err error) {
+func WillTempRiseFall(days []Day, standard float64) (res []TempRiseFall, err error) {
 	var day, previous Day
 	for _, i := range days {
 		day = i
 		if previous.Date != "" {
-			if math.Abs(day.TempMax.Difference(previous.TempMax).Float64()) >= difference ||
-				math.Abs(day.TempMin.Difference(previous.TempMin).Float64()) >= difference ||
-				math.Abs(day.FeelsLikeMax.Difference(previous.FeelsLikeMax).Float64()) >= difference ||
-				math.Abs(day.FeelsLikeMin.Difference(previous.FeelsLikeMin).Float64()) >= difference {
-				res = append(res, NewTempRiseFall(day, previous))
+			var found bool
+			if tempRiseFall, _ := isRiseFall(day.TempMax, previous.TempMax, standard); tempRiseFall {
+				found = true
+			} else if tempRiseFall, _ = isRiseFall(day.TempMin, previous.TempMin, standard); tempRiseFall {
+				found = true
+			} else if tempRiseFall, _ = isRiseFall(day.FeelsLikeMax, previous.FeelsLikeMax, standard); tempRiseFall {
+				found = true
+			} else if tempRiseFall, _ = isRiseFall(day.FeelsLikeMin, previous.FeelsLikeMin, standard); tempRiseFall {
+				found = true
+			}
+			if found {
+				res = append(res, NewTempRiseFall(day, previous, standard))
 			}
 		}
 		previous = i
 	}
 	return
+}
+
+func isRiseFall(t, previous unit.Temperature, standard float64) (tempRiseFall bool, isRise bool) {
+	diff := t.Difference(previous).Float64()
+	return math.Abs(diff) >= standard, diff > 0
 }
