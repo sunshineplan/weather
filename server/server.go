@@ -52,13 +52,13 @@ func runServer() error {
 
 		delete, _ := strconv.ParseBool("delete")
 
-		buf, err := export(month, delete)
+		res, err := export(month, delete)
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")
 			return
 		}
-		c.String(200, buf.String())
+		c.String(200, res)
 	})
 
 	return server.Run()

@@ -1,12 +1,12 @@
 package unit
 
 import (
-	"encoding"
+	"encoding/json"
 	"fmt"
 )
 
 var (
-	_ encoding.TextMarshaler = WindSpeed(nil)
+	_ json.Marshaler = WindSpeed(nil)
 
 	_ WindSpeed = WindKPH(0)
 )
@@ -16,7 +16,7 @@ type WindSpeed interface {
 	Force() int
 	ForceColor() string
 	String() string
-	MarshalText() ([]byte, error)
+	MarshalJSON() ([]byte, error)
 	HTML() string
 }
 
@@ -81,8 +81,8 @@ func (f WindKPH) String() string {
 	return fmt.Sprintf("%sm/s(%d)", formatFloat64(f.MPS(), 1), f.Force())
 }
 
-func (f WindKPH) MarshalText() ([]byte, error) {
-	return []byte(f.String()), nil
+func (f WindKPH) MarshalJSON() ([]byte, error) {
+	return json.Marshal(float64(f))
 }
 
 func (f WindKPH) HTML() string {

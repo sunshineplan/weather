@@ -1,13 +1,13 @@
 package unit
 
 import (
-	"encoding"
+	"encoding/json"
 	"fmt"
 	"strings"
 )
 
 var (
-	_ encoding.TextMarshaler = Temperature(nil)
+	_ json.Marshaler = Temperature(nil)
 
 	_ Temperature = Celsius(0)
 )
@@ -16,7 +16,7 @@ type Temperature interface {
 	Float64() float64
 	Difference(Temperature) Temperature
 	String() string
-	MarshalText() ([]byte, error)
+	MarshalJSON() ([]byte, error)
 	DiffHTML() string
 }
 
@@ -30,8 +30,8 @@ func (f Celsius) String() string {
 	return fmt.Sprintf("%s°C", formatFloat64(f, 1))
 }
 
-func (f Celsius) MarshalText() ([]byte, error) {
-	return []byte(f.String()), nil
+func (f Celsius) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f.Float64())
 }
 
 func (f Celsius) Difference(i Temperature) Temperature {

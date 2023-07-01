@@ -1,12 +1,14 @@
 package main
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/visualcrossing"
 )
 
@@ -64,25 +66,37 @@ func average(date string, round int) (weather.Day, error) {
 	return visualcrossing.ConvertDays(res)[0], nil
 }
 
-func export(month string, delete bool) (buf bytes.Buffer, err error) {
-	var res []weather.Day
-	if err = client.Find(
+func export(month string, delete bool) (string, error) {
+	var res []struct {
+		Date         string            `json:"date"`
+		TempMax      any               `json:"tempmax"`
+		TempMin      any               `json:"tempmin"`
+		Temp         any               `json:"temp"`
+		FeelsLikeMax any               `json:"feelslikemax"`
+		FeelsLikeMin any               `json:"feelslikemin"`
+		FeelsLike    any               `json:"feelslike"`
+		Humidity     weather.Percent   `json:"humidity"`
+		Dew          any               `json:"dew"`
+		Precip       float64           `json:"precip"`
+		PrecipCover  float64           `json:"precipcover"`
+		WindSpeed    any               `json:"windspeed"`
+		Pressure     float64           `json:"pressure"`
+		Visibility   float64           `json:"visibility"`
+		UVIndex      unit.UVIndex      `json:"uvindex"`
+		Condition    weather.Condition `json:"condition"`
+	}
+	if err := client.Find(
 		mongodb.M{"date": mongodb.M{"$regex": month}},
 		&mongodb.FindOpt{Sort: mongodb.M{"date": 1}},
 		&res,
 	); err != nil {
-		return
+		return "", err
 	}
 
-	buf.WriteRune('[')
-	for index, i := range res {
-		buf.WriteString(i.JSON())
-		if index < len(res)-1 {
-			buf.WriteString(",\n")
-		}
+	b, err := json.Marshal(res)
+	if err != nil {
+		return "", err
 	}
-	buf.WriteRune(']')
-
 	if delete {
 		go func() {
 			if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
@@ -90,5 +104,5 @@ func export(month string, delete bool) (buf bytes.Buffer, err error) {
 			}
 		}()
 	}
-	return
+	return strings.ReplaceAll(string(b), "},{", "},\n{"), nil
 }

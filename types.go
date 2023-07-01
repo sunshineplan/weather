@@ -174,31 +174,6 @@ func (day Day) HTML() string {
 	return b.String()
 }
 
-func (day Day) JSON() string {
-	var format struct {
-		Date         string       `json:"date"`
-		TempMax      string       `json:"tempmax"`
-		TempMin      string       `json:"tempmin"`
-		Temp         string       `json:"temp"`
-		FeelsLikeMax string       `json:"feelslikemax"`
-		FeelsLikeMin string       `json:"feelslikemin"`
-		FeelsLike    string       `json:"feelslike"`
-		Humidity     Percent      `json:"humidity"`
-		Dew          string       `json:"dew"`
-		Precip       float64      `json:"precip"`
-		PrecipCover  Percent      `json:"precipcover"`
-		WindSpeed    string       `json:"windspeed"`
-		Pressure     float64      `json:"pressure"`
-		Visibility   float64      `json:"visibility"`
-		UVIndex      unit.UVIndex `json:"uvindex"`
-		Condition    Condition    `json:"condition"`
-	}
-	b, _ := json.Marshal(day)
-	json.Unmarshal(b, &format)
-	b, _ = json.Marshal(format)
-	return string(b)
-}
-
 type Hour struct {
 	Time           string           `json:"time,omitempty"`
 	TimeEpoch      int64            `json:"timeEpoch,omitempty"`
