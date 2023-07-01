@@ -225,6 +225,10 @@ type Hour struct {
 	Icon           string           `json:"icon,omitempty"`
 }
 
+func (hour Hour) Hour() int {
+	return time.Unix(hour.TimeEpoch, 0).Hour()
+}
+
 func (hour Hour) String() string {
 	var format struct {
 		Time       string       `json:"time"`

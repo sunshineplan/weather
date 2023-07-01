@@ -129,6 +129,15 @@ func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builde
 	}
 }
 
+func isRainSnow(now int, hours []weather.Hour) bool {
+	for _, i := range hours {
+		if hour := i.Hour(); (hour == now || hour == now+1) && i.Precip > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 	if rainSnow != nil {
 		if rainSnow.IsExpired() {
@@ -143,7 +152,10 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 		for index, i := range res {
 			if index == 0 {
 				first = i
-				if rainSnow == nil || rainSnow.Start().Date != i.Start().Date || rainSnow.Duration() != i.Duration() {
+				if rainSnow == nil ||
+					rainSnow.Start().Date != i.Start().Date ||
+					rainSnow.Duration() != i.Duration() ||
+					(i.Start().Date == time.Now().Format("2006-01-02") && isRainSnow(time.Now().Hour(), i.Start().Hours)) {
 					subject = "[Weather]Rain Snow Alert - " + i.Start().Date + timestamp()
 				}
 			}
