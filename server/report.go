@@ -148,15 +148,18 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 	if res, err := weather.WillRainSnow(days); err != nil {
 		svc.Print(err)
 	} else if len(res) > 0 {
-		var first weather.RainSnow
 		for index, i := range res {
 			if index == 0 {
-				first = i
-				if rainSnow == nil ||
-					rainSnow.Start().Date != i.Start().Date ||
-					rainSnow.Duration() != i.Duration() ||
-					(i.Start().Date == time.Now().Format("2006-01-02") && isRainSnow(time.Now().Hour(), i.Start().Hours)) {
-					subject = "[Weather]Rain Snow Alert - " + i.Start().Date + timestamp()
+				defer func(rs weather.RainSnow) { rainSnow = &rs }(i)
+				if start := i.Start(); rainSnow == nil ||
+					rainSnow.Start().Date != start.Date ||
+					rainSnow.Duration() != i.Duration() {
+					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
+				} else if start.Date == time.Now().Format("2006-01-02") && isRainSnow(time.Now().Hour(), start.Hours) {
+					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
+					fmt.Fprintln(&b, start.DateInfoHTML())
+					fmt.Fprint(&b, start.Precipitation())
+					return
 				}
 			}
 			fmt.Fprint(&b, i.HTML())
@@ -164,7 +167,6 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 				fmt.Fprintln(&b)
 			}
 		}
-		rainSnow = &first
 	} else if rainSnow != nil {
 		subject = "[Weather]Rain Snow Alert - Canceled" + timestamp()
 		b.WriteString("No more rain snow")
