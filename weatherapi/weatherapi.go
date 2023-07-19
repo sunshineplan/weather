@@ -38,6 +38,19 @@ func (api *WeatherAPI) Request(endpoint, query string) (res Response, err error)
 	return
 }
 
+func (api *WeatherAPI) Coordinates(query string) (latitude, longitude float64, err error) {
+	resp, err := api.Request("current.json", fmt.Sprintf("q=%s", query))
+	if err != nil {
+		return
+	}
+	if location := resp.Location; location != nil {
+		latitude = location.Lat
+		longitude = location.Lon
+		return
+	}
+	return 0, 0, errors.New("location is nil")
+}
+
 func (api *WeatherAPI) Realtime(query string) (current weather.Current, err error) {
 	resp, err := api.Request("current.json", fmt.Sprintf("q=%s", query))
 	if err != nil {

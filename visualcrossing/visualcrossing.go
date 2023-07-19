@@ -42,6 +42,16 @@ func (api *VisualCrossing) Request(endpoint, include, query string) (res Respons
 	return
 }
 
+func (api *VisualCrossing) Coordinates(query string) (latitude, longitude float64, err error) {
+	resp, err := api.Request("today", "current", query)
+	if err != nil {
+		return
+	}
+	latitude = resp.Latitude
+	longitude = resp.Longitude
+	return
+}
+
 func (api *VisualCrossing) Realtime(query string) (current weather.Current, err error) {
 	resp, err := api.Request("today", "current", query)
 	if err != nil {
