@@ -8,16 +8,16 @@ import (
 
 var to mail.Receipts
 
-func sendMail(subject, body string) {
+func sendMail(subject, body string, attachments []*mail.Attachment) {
+	msg := &mail.Message{
+		Subject:     subject,
+		Body:        body,
+		Attachments: attachments,
+		ContentType: mail.TextHTML,
+	}
 	for _, to := range to {
-		if err := dialer.Send(
-			&mail.Message{
-				To:          mail.Receipts{to},
-				Subject:     subject,
-				Body:        body,
-				ContentType: mail.TextHTML,
-			},
-		); err != nil {
+		msg.To = mail.Receipts{to}
+		if err := dialer.Send(msg); err != nil {
 			svc.Print(err)
 		}
 	}

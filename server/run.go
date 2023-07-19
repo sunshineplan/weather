@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,6 +15,9 @@ import (
 )
 
 func initWeather() error {
+	if *query == "" {
+		return errors.New("query is empty")
+	}
 	var res struct {
 		WeatherAPI     string
 		VisualCrossing string
@@ -27,6 +31,11 @@ func initWeather() error {
 		return err
 	}
 	realtime = weatherapi.New(res.WeatherAPI)
+	lat, lon, err := realtime.Coordinates(*query)
+	if err != nil {
+		return err
+	}
+	coordinates = Coordinates{lon, lat}
 	var api weather.API
 	switch *provider {
 	case "weatherapi":
@@ -77,6 +86,7 @@ func run() error {
 	run := scheduler.NewScheduler
 	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
 	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
+	run().At(scheduler.HourSchedule(6, 9, 15, 21)).Do(alertStorm)
 	run().At(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).Do(alert)
 
 	return runServer()

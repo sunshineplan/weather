@@ -63,6 +63,10 @@ var (
 	interval    = flag.Duration("interval", time.Hour, "alert interval")
 	days        = flag.Int("days", 15, "forecast days")
 	difference  = flag.Float64("difference", 5, "temperature difference")
+	radius      = flag.Float64("radius", 8, "storm affect radius")
+	offset      = flag.Float64("offset", -4, "storm screenshot offset")
+	zoom        = flag.Float64("zoom", 6.5, "storm screenshot zoom")
+	quality     = flag.Int("quality", 90, "storm screenshot quality")
 	provider    = flag.String("provider", "visualcrossing", "weather provider")
 	logPath     = flag.String("log", "", "Log file path")
 )
@@ -83,11 +87,6 @@ func main() {
 	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/weather.pid", "PID file path")
 	flags.SetConfigFile(filepath.Join(filepath.Dir(self), "config.ini"))
 	flags.Parse()
-
-	if service.IsWindowsService() {
-		svc.Run()
-		return
-	}
 
 	if err := svc.ParseAndRun(flag.Args()); err != nil {
 		svc.Fatal(err)

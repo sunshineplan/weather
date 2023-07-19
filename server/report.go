@@ -6,10 +6,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 )
 
 var (
+	coordinates  Coordinates
 	rainSnow     *weather.RainSnow
 	tempRiseFall *weather.TempRiseFall
 )
@@ -41,6 +43,7 @@ func report(t time.Time) {
 	runAlert(days, alertRainSnow)
 	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
 	today(days, yesterday, avg, t)
+	alertStorm(t)
 }
 
 func daily(t time.Time) {
@@ -93,7 +96,14 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 		fmt.Fprint(&b, "No Temperature Alert.")
 	}
 	fmt.Fprint(&b, "</pre>")
-	sendMail("[Weather]Daily Report"+timestamp(), b.String())
+	var attachments []*mail.Attachment
+	if bytes, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality); err != nil {
+		svc.Print(err)
+	} else {
+		fmt.Fprintf(&b, "<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom))
+		attachments = append(attachments, &mail.Attachment{Filename: "image.jpg", Bytes: bytes, ContentID: "map"})
+	}
+	sendMail("[Weather]Daily Report"+timestamp(), b.String(), attachments)
 }
 
 func alert(t time.Time) {
@@ -125,7 +135,7 @@ func alert(t time.Time) {
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
 	if subject, body := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, `<pre style="font-family:system-ui;margin:0">`+body.String()+"</pre>")
+		sendMail(subject, `<pre style="font-family:system-ui;margin:0">`+body.String()+"</pre>", nil)
 	}
 }
 
@@ -235,4 +245,32 @@ func table(days []weather.Day) string {
 	}
 	fmt.Fprint(&b, "</tbody></table>")
 	return b.String()
+}
+
+func alertStorm(t time.Time) {
+	storms, err := getStorms(t)
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	var found bool
+	for _, i := range storms {
+		if i.willAffect(coordinates, *radius) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return
+	}
+	b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality)
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	sendMail(
+		"[Weather]Storm Alert"+timestamp(),
+		fmt.Sprintf("<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom)),
+		[]*mail.Attachment{{Filename: "image.jpg", Bytes: b, ContentID: "map"}},
+	)
 }
