@@ -43,12 +43,20 @@ func (coords Coordinates) screenshot(zoom float64, quality int) (b []byte, err e
 	}); err != nil {
 		return
 	}
+	done := c.ListenEvent(chrome.URLContains("manifest"), "GET", false)
+	if err = c.Run(chromedp.Navigate(coords.url(zoom))); err != nil {
+		return
+	}
+	select {
+	case <-done:
+	case <-time.After(time.Minute):
+		svc.Print("storm screenshot timeout")
+	}
 	err = c.Run(
-		chromedp.Navigate(coords.url(zoom)),
 		//chromedp.EvaluateAsDevTools("$('nav.panel.layers').style.display='none'", nil),
 		chromedp.EvaluateAsDevTools("$('div.panel.clock').style.display='none'", nil),
 		chromedp.EvaluateAsDevTools("$('aside.notifications').style.display='none'", nil),
-		chromedp.Sleep(2*time.Second),
+		chromedp.Sleep(time.Second),
 		chromedp.FullScreenshot(&b, quality),
 	)
 	return

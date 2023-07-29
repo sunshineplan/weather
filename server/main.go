@@ -67,6 +67,7 @@ var (
 	offset      = flag.Float64("offset", -4, "storm screenshot offset")
 	zoom        = flag.Float64("zoom", 6.5, "storm screenshot zoom")
 	quality     = flag.Int("quality", 90, "storm screenshot quality")
+	path        = flag.String("path", "storm", "storm screenshot save path")
 	provider    = flag.String("provider", "visualcrossing", "weather provider")
 	logPath     = flag.String("log", "", "Log file path")
 )

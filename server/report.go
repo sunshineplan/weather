@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -253,14 +255,13 @@ func alertStorm(t time.Time) {
 		svc.Print(err)
 		return
 	}
-	var found bool
+	var found []string
 	for _, i := range storms {
 		if i.willAffect(coordinates, *radius) {
-			found = true
-			break
+			found = append(found, string(i))
 		}
 	}
-	if !found {
+	if len(found) == 0 {
 		return
 	}
 	b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality)
@@ -268,8 +269,18 @@ func alertStorm(t time.Time) {
 		svc.Print(err)
 		return
 	}
+	for _, i := range found {
+		file := fmt.Sprintf("%s/%s/%s00.jpg", *path, i, time.Now().Format("20060102-15"))
+		if err := os.MkdirAll(filepath.Dir(file), 0644); err != nil {
+			svc.Print(err)
+			continue
+		}
+		if err := os.WriteFile(file, b, 0644); err != nil {
+			svc.Print(err)
+		}
+	}
 	sendMail(
-		"[Weather]Storm Alert"+timestamp(),
+		fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(found, "|"), timestamp()),
 		fmt.Sprintf("<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom)),
 		[]*mail.Attachment{{Filename: "image.jpg", Bytes: b, ContentID: "map"}},
 	)
