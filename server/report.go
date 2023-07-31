@@ -275,7 +275,7 @@ func alertStorm(t time.Time, force bool) {
 	for _, i := range found {
 		dir := fmt.Sprintf("%s/%s", *path, i)
 		file := fmt.Sprintf("%s/%s00.jpg", dir, time.Now().Format("20060102-15"))
-		if err := os.MkdirAll(dir, 0644); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			svc.Print(err)
 			continue
 		}

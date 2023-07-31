@@ -55,6 +55,7 @@ func (coords Coordinates) screenshot(zoom float64, quality int) (b []byte, err e
 	err = c.Run(
 		//chromedp.EvaluateAsDevTools("$('nav.panel.layers').style.display='none'", nil),
 		chromedp.EvaluateAsDevTools("$('div.panel.clock').style.display='none'", nil),
+		chromedp.EvaluateAsDevTools("$('div.layers').style.display='none'", nil),
 		chromedp.EvaluateAsDevTools("$('aside.notifications').style.display='none'", nil),
 		chromedp.Sleep(time.Second),
 		chromedp.FullScreenshot(&b, quality),
