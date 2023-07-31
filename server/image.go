@@ -13,7 +13,7 @@ import (
 
 var imgCache sync.Map
 
-func image(c *gin.Context) {
+func icon(c *gin.Context) {
 	file := strings.ToLower(c.Param("image"))
 	if !strings.HasSuffix(file, ".png") {
 		c.AbortWithStatus(404)

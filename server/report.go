@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -45,7 +44,7 @@ func report(t time.Time) {
 	runAlert(days, alertRainSnow)
 	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
 	today(days, yesterday, avg, t)
-	alertStorm(t)
+	alertStorm(t, true)
 }
 
 func daily(t time.Time) {
@@ -122,7 +121,7 @@ func alert(t time.Time) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 	go func() {
 		defer wg.Done()
 		runAlert(days, alertRainSnow)
@@ -130,6 +129,10 @@ func alert(t time.Time) {
 	go func() {
 		defer wg.Done()
 		runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+	}()
+	go func() {
+		defer wg.Done()
+		alertStorm(t, false)
 	}()
 	wg.Wait()
 }
@@ -249,7 +252,7 @@ func table(days []weather.Day) string {
 	return b.String()
 }
 
-func alertStorm(t time.Time) {
+func alertStorm(t time.Time, force bool) {
 	storms, err := getStorms(t)
 	if err != nil {
 		svc.Print(err)
@@ -270,18 +273,25 @@ func alertStorm(t time.Time) {
 		return
 	}
 	for _, i := range found {
-		file := fmt.Sprintf("%s/%s/%s00.jpg", *path, i, time.Now().Format("20060102-15"))
-		if err := os.MkdirAll(filepath.Dir(file), 0644); err != nil {
+		dir := fmt.Sprintf("%s/%s", *path, i)
+		file := fmt.Sprintf("%s/%s00.jpg", dir, time.Now().Format("20060102-15"))
+		if err := os.MkdirAll(dir, 0644); err != nil {
 			svc.Print(err)
 			continue
 		}
 		if err := os.WriteFile(file, b, 0644); err != nil {
 			svc.Print(err)
+			continue
+		}
+		if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i)); err != nil {
+			svc.Print(err)
 		}
 	}
-	sendMail(
-		fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(found, "|"), timestamp()),
-		fmt.Sprintf("<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom)),
-		[]*mail.Attachment{{Filename: "image.jpg", Bytes: b, ContentID: "map"}},
-	)
+	if force || (t.Hour()%3 == 0) {
+		sendMail(
+			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(found, "|"), timestamp()),
+			fmt.Sprintf("<a href=%q><img src='cid:map'></a>", coordinates.offset(0, *offset).url(*zoom)),
+			[]*mail.Attachment{{Filename: "image.jpg", Bytes: b, ContentID: "map"}},
+		)
+	}
 }
