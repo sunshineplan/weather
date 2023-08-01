@@ -52,12 +52,16 @@ func jpg2gif(jpgPath, output string) error {
 		}
 		imgs = append(imgs, img)
 	}
-	gifImg := new(gif.GIF)
-	for _, img := range imgs {
+	gifImg, n := new(gif.GIF), len(imgs)
+	for i, img := range imgs {
 		p := image.NewPaletted(img.Bounds(), palette.Plan9)
 		draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
 		gifImg.Image = append(gifImg.Image, p)
-		gifImg.Delay = append(gifImg.Delay, 100)
+		if i != n-1 {
+			gifImg.Delay = append(gifImg.Delay, 40)
+		} else {
+			gifImg.Delay = append(gifImg.Delay, 200)
+		}
 	}
 	f, err := os.Create(output)
 	if err != nil {

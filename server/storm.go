@@ -35,7 +35,7 @@ func (coords Coordinates) url(zoom float64) string {
 	return fmt.Sprintf("https://zoom.earth/maps/satellite/#view=%s,%.2fz/overlays=radar,wind", coords, zoom)
 }
 
-func (coords Coordinates) screenshot(zoom float64, quality int) (b []byte, err error) {
+func (coords Coordinates) screenshot(zoom float64, quality int, clock bool) (b []byte, err error) {
 	c := chrome.Headless().AddFlags(chromedp.WindowSize(600, 800))
 	defer c.Close()
 	if err = c.EnableFetch(func(ev *fetch.EventRequestPaused) bool {
@@ -52,9 +52,13 @@ func (coords Coordinates) screenshot(zoom float64, quality int) (b []byte, err e
 	case <-time.After(time.Minute):
 		svc.Print("storm screenshot timeout")
 	}
+	if !clock {
+		if err = c.Run(chromedp.EvaluateAsDevTools("$('div.panel.clock').style.display='none'", nil)); err != nil {
+			return
+		}
+	}
 	err = c.Run(
 		//chromedp.EvaluateAsDevTools("$('nav.panel.layers').style.display='none'", nil),
-		chromedp.EvaluateAsDevTools("$('div.panel.clock').style.display='none'", nil),
 		chromedp.EvaluateAsDevTools("$('div.layers').style.display='none'", nil),
 		chromedp.EvaluateAsDevTools("$('aside.notifications').style.display='none'", nil),
 		chromedp.Sleep(time.Second),

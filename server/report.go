@@ -98,7 +98,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	}
 	fmt.Fprint(&b, "</pre>")
 	var attachments []*mail.Attachment
-	if bytes, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality); err != nil {
+	if bytes, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, false); err != nil {
 		svc.Print(err)
 	} else {
 		fmt.Fprintf(&b, "<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom))
@@ -121,7 +121,7 @@ func alert(t time.Time) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		runAlert(days, alertRainSnow)
@@ -129,10 +129,6 @@ func alert(t time.Time) {
 	go func() {
 		defer wg.Done()
 		runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
-	}()
-	go func() {
-		defer wg.Done()
-		alertStorm(t, false)
 	}()
 	wg.Wait()
 }
@@ -252,7 +248,7 @@ func table(days []weather.Day) string {
 	return b.String()
 }
 
-func alertStorm(t time.Time, force bool) {
+func alertStorm(t time.Time, isReport bool) {
 	storms, err := getStorms(t)
 	if err != nil {
 		svc.Print(err)
@@ -267,31 +263,38 @@ func alertStorm(t time.Time, force bool) {
 	if len(found) == 0 {
 		return
 	}
-	b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality)
+	b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, true)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
-	for _, i := range found {
-		dir := fmt.Sprintf("%s/%s", *path, i)
-		file := fmt.Sprintf("%s/%s00.jpg", dir, time.Now().Format("20060102-15"))
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			svc.Print(err)
-			continue
-		}
-		if err := os.WriteFile(file, b, 0644); err != nil {
-			svc.Print(err)
-			continue
-		}
-		if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i)); err != nil {
-			svc.Print(err)
+	if !isReport {
+		for _, i := range found {
+			dir := fmt.Sprintf("%s/%s", *path, i)
+			file := fmt.Sprintf("%s/%s00.jpg", dir, time.Now().Format("20060102-15"))
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				svc.Print(err)
+				continue
+			}
+			if err := os.WriteFile(file, b, 0644); err != nil {
+				svc.Print(err)
+				continue
+			}
+			if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i)); err != nil {
+				svc.Print(err)
+			}
 		}
 	}
-	if force || (t.Hour()%3 == 0) {
+	b, err = os.ReadFile(fmt.Sprintf("%s/%s/%[2]s.gif", *path, found[0]))
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	if hour := t.Hour(); isReport || (hour == 6 || hour == 9 || hour == 15 || hour == 21) {
 		sendMail(
 			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(found, "|"), timestamp()),
 			fmt.Sprintf("<a href=%q><img src='cid:map'></a>", coordinates.offset(0, *offset).url(*zoom)),
-			[]*mail.Attachment{{Filename: "image.jpg", Bytes: b, ContentID: "map"}},
+			[]*mail.Attachment{{Filename: "image.gif", Bytes: b, ContentID: "map"}},
 		)
 	}
 }

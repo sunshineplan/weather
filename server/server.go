@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -26,6 +29,20 @@ func runServer() error {
 	server.Handler = router
 
 	router.GET("/img/:image", icon)
+	router.GET("/storm/:storm", func(c *gin.Context) {
+		storm := strings.ToLower(c.Param("storm"))
+		b, err := os.ReadFile(filepath.Join(*path, storm, storm+".gif"))
+		if err != nil {
+			svc.Print(err)
+			if os.IsNotExist(err) {
+				c.AbortWithStatus(404)
+			} else {
+				c.AbortWithStatus(500)
+			}
+			return
+		}
+		c.Data(200, "image/gif", b)
+	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")
 		if q == "" {
