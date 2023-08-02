@@ -14,10 +14,6 @@ import (
 
 type Coordinates [2]float64
 
-func stormCoordinates(coordinates [2]float64) Coordinates {
-	return Coordinates{coordinates[1], coordinates[0]}
-}
-
 func (coords Coordinates) String() string {
 	return fmt.Sprintf("%.1f,%.1f", coords[1], coords[0])
 }
@@ -79,7 +75,7 @@ func willAffect(storm storm.Data, coords Coordinates, radius float64) bool {
 		return false
 	}
 	for _, i := range storm.Track {
-		if stormCoordinates(i.Coordinates).inArea(coords, radius) {
+		if Coordinates(i.Coordinates).inArea(coords, radius) {
 			return true
 		}
 	}

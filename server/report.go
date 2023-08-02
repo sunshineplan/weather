@@ -251,25 +251,6 @@ func table(days []weather.Day) string {
 }
 
 func alertZoomEarth(t time.Time, isReport bool) {
-	storms, err := storm.GetStorms(t)
-	if err != nil {
-		svc.Print(err)
-		return
-	}
-	var found []storm.Data
-	for _, i := range storms {
-		storm, err := i.Data()
-		if err != nil {
-			svc.Print(err)
-			continue
-		}
-		if willAffect(storm, coordinates, *radius) {
-			found = append(found, storm)
-		}
-	}
-	if len(found) == 0 {
-		return
-	}
 	if !isReport {
 		go func() {
 			b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, false, 5)
@@ -277,7 +258,7 @@ func alertZoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				return
 			}
-			file := fmt.Sprintf("daily/%s.jpg", time.Now().Format("2006010215"))
+			file := fmt.Sprintf("daily/%s.jpg", t.Format("2006010215"))
 			if err := os.MkdirAll("daily", 0755); err != nil {
 				svc.Print(err)
 				return
@@ -301,8 +282,30 @@ func alertZoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 			}
 		}()
+	}
+	storms, err := storm.GetStorms(t)
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	var found []storm.Data
+	for _, i := range storms {
+		storm, err := i.Data()
+		if err != nil {
+			svc.Print(err)
+			continue
+		}
+		if willAffect(storm, coordinates, *radius) {
+			found = append(found, storm)
+		}
+	}
+	if len(found) == 0 {
+		svc.Print("no storm found")
+		return
+	}
+	if !isReport {
 		for _, i := range found {
-			b, err := stormCoordinates(i.Coordinates).screenshot(*zoom, *quality, true, 5)
+			b, err := Coordinates(i.Coordinates).screenshot(*zoom, *quality, true, 5)
 			if err != nil {
 				svc.Print(err)
 				return
