@@ -9,7 +9,6 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/sunshineplan/chrome v1.1.2
 	github.com/sunshineplan/database/mongodb v1.0.5
-	github.com/sunshineplan/gohttp v1.0.10
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.13
 	github.com/sunshineplan/utils v0.1.45

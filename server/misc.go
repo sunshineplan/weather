@@ -60,7 +60,7 @@ func jpg2gif(jpgPath, output string) error {
 		if i != n-1 {
 			gifImg.Delay = append(gifImg.Delay, 40)
 		} else {
-			gifImg.Delay = append(gifImg.Delay, 200)
+			gifImg.Delay = append(gifImg.Delay, 300)
 		}
 	}
 	f, err := os.Create(output)
