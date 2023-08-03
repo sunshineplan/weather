@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"strings"
@@ -36,14 +37,16 @@ func (coords Coordinates) url(zoom float64) string {
 
 func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []byte, err error) {
 	c := chrome.Headless().AddFlags(chromedp.WindowSize(600, 800))
-	defer c.Close()
 	if err = c.EnableFetch(func(ev *fetch.EventRequestPaused) bool {
 		return !strings.Contains(ev.Request.URL, "adsbygoogle")
 	}); err != nil {
 		return
 	}
-	notify := c.ListenEvent(chrome.URLContains("notifications"), "GET", false)
-	if err = c.Run(chromedp.Navigate(coords.url(zoom))); err != nil {
+	notify := c.ListenEvent("https://tiles.zoom.earth/times/geocolor.json", "GET", false)
+	ctx, cancel := context.WithTimeout(c, time.Minute)
+	defer cancel()
+	if err = chromedp.Run(ctx, chromedp.Navigate(coords.url(zoom))); err != nil {
+		c.Close()
 		return
 	}
 	done := make(chan struct{})
@@ -51,7 +54,7 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 		var n int
 		for range notify {
 			n++
-			if n == 2 {
+			if n == 3 {
 				close(done)
 				return
 			}
@@ -59,10 +62,12 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 	}()
 	select {
 	case <-done:
-	case <-time.After(time.Minute):
+	case <-ctx.Done():
+		c.Close()
 		if retry = retry - 1; retry == 0 {
 			return nil, fmt.Errorf("timeout")
 		}
+		svc.Print("screenshot timeout, wait for retry")
 		time.Sleep(3 * time.Minute)
 		return coords.screenshot(zoom, quality, retry)
 	}
@@ -74,6 +79,7 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 		chromedp.Sleep(time.Second),
 		chromedp.FullScreenshot(&b, quality),
 	)
+	c.Close()
 	return
 }
 

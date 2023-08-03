@@ -65,7 +65,7 @@ var (
 	difference  = flag.Float64("difference", 5, "temperature difference")
 	radius      = flag.Float64("radius", 10, "storm affect radius")
 	offset      = flag.Float64("offset", -4, "storm screenshot offset")
-	zoom        = flag.Float64("zoom", 5.4, "storm screenshot zoom")
+	zoom        = flag.Float64("zoom", 7, "storm screenshot zoom")
 	quality     = flag.Int("quality", 95, "storm screenshot quality")
 	path        = flag.String("path", "storm", "storm screenshot save path")
 	provider    = flag.String("provider", "visualcrossing", "weather provider")
