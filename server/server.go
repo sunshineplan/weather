@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -33,17 +32,10 @@ func runServer() error {
 	router.GET("/img/:image", icon)
 	router.GET("/storm/:storm", func(c *gin.Context) {
 		storm := strings.ToLower(c.Param("storm"))
-		b, err := os.ReadFile(filepath.Join(*path, storm, storm+".gif"))
-		if err != nil {
-			svc.Print(err)
-			if os.IsNotExist(err) {
-				c.AbortWithStatus(404)
-			} else {
-				c.AbortWithStatus(500)
-			}
-			return
-		}
-		c.Data(200, "image/gif", b)
+		c.File(filepath.Join(*path, storm, storm+".gif"))
+	})
+	router.GET("/24h", func(c *gin.Context) {
+		c.File("daily/image.gif")
 	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")

@@ -17,6 +17,8 @@ var (
 	coordinates  Coordinates
 	rainSnow     *weather.RainSnow
 	tempRiseFall *weather.TempRiseFall
+
+	mu sync.Mutex
 )
 
 func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, err error) {
@@ -45,8 +47,8 @@ func report(t time.Time) {
 	}
 	runAlert(days, alertRainSnow)
 	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
-	today(days, yesterday, avg, t)
 	alertZoomEarth(t, true)
+	today(days, yesterday, avg, t)
 }
 
 func daily(t time.Time) {
@@ -100,6 +102,8 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	}
 	fmt.Fprint(&b, "</pre>")
 	var attachments []*mail.Attachment
+	mu.Lock()
+	defer mu.Unlock()
 	if bytes, err := os.ReadFile("daily/image.gif"); err != nil {
 		svc.Print(err)
 	} else {
@@ -253,7 +257,9 @@ func table(days []weather.Day) string {
 func alertZoomEarth(t time.Time, isReport bool) {
 	if !isReport {
 		go func() {
-			b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, false, 5)
+			mu.Lock()
+			defer mu.Unlock()
+			b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, 5)
 			if err != nil {
 				svc.Print(err)
 				return
@@ -305,7 +311,7 @@ func alertZoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			b, err := Coordinates(i.Coordinates).screenshot(*zoom, *quality, true, 5)
+			b, err := Coordinates(i.Coordinates).screenshot(*zoom, *quality, 5)
 			if err != nil {
 				svc.Print(err)
 				return
@@ -341,7 +347,7 @@ func alertZoomEarth(t time.Time, isReport bool) {
 			ContentID: fmt.Sprintf("map%d", i),
 		})
 	}
-	if hour := t.Hour(); isReport || (hour == 6 || hour == 9 || hour == 15 || hour == 21) {
+	if hour := t.Hour(); isReport || (hour == 6 || hour == 12 || hour == 21) {
 		sendMail(
 			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(affectStorms, "|"), timestamp()),
 			strings.Join(bodys, "\n"),
