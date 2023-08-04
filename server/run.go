@@ -87,7 +87,7 @@ func run() error {
 	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
 	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -1)) })
 	run().At(scheduler.ClockSchedule(scheduler.ClockFromString(*start), scheduler.ClockFromString(*end), *interval)).Do(alert)
-	run().At(scheduler.AtHour(-1)).Do(func(t time.Time) { alertZoomEarth(t, false) })
+	run().At(scheduler.AtHour(-1)).Do(func(t time.Time) { zoomEarth(t, false) })
 
 	return runServer()
 }

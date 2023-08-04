@@ -54,7 +54,7 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 		var n int
 		for range notify {
 			n++
-			if n == 3 {
+			if n == 4 {
 				close(done)
 				return
 			}
@@ -68,14 +68,32 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 			return nil, fmt.Errorf("timeout")
 		}
 		svc.Print("screenshot timeout, wait for retry")
-		time.Sleep(3 * time.Minute)
+		time.Sleep(time.Minute)
 		return coords.screenshot(zoom, quality, retry)
 	}
 	err = c.Run(
-		//chromedp.EvaluateAsDevTools("$('nav.panel.layers').style.display='none'", nil),
-		//chromedp.EvaluateAsDevTools("$('div.panel.clock').style.display='none'", nil),
-		chromedp.EvaluateAsDevTools("$('div.layers').style.display='none'", nil),
-		chromedp.EvaluateAsDevTools("$('aside.notifications').style.display='none'", nil),
+		chromedp.EvaluateAsDevTools(`
+$('button.title').style.display='none'
+$('button.search').style.display='none'
+$('.geolocation').style.display='none'
+$('.group.overlays').style.display='none'
+$('.group.layers').style.display='none'
+$('.notifications').style.display='none'
+
+$$('.up,.down').forEach(e=>e.remove())
+$$('div .text').forEach(e=>{e.style.top='18px'})
+$('.play').style.display='none'
+$('.latest').style.display='none'
+$('.clock').style.top='22px'
+$('.clock').style.height='50px'
+$('.clock').style.width='180px'
+$('.clock').style.marginLeft='-90px'
+$('div.date').style.left='16px'
+$('.hour').style.left='70px'
+$('.colon').style.left='108px'
+$('.colon').style.animation='none'
+$('.minute').style.left='110px'
+$('.am-pm').style.left='146px'`, nil),
 		chromedp.Sleep(time.Second),
 		chromedp.FullScreenshot(&b, quality),
 	)

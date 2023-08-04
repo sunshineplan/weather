@@ -47,7 +47,7 @@ func report(t time.Time) {
 	}
 	runAlert(days, alertRainSnow)
 	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
-	alertZoomEarth(t, true)
+	zoomEarth(t, true)
 	today(days, yesterday, avg, t)
 }
 
@@ -254,7 +254,7 @@ func table(days []weather.Day) string {
 	return b.String()
 }
 
-func alertZoomEarth(t time.Time, isReport bool) {
+func zoomEarth(t time.Time, isReport bool) {
 	if !isReport {
 		go func() {
 			mu.Lock()
