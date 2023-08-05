@@ -6,6 +6,7 @@ import (
 	"image/draw"
 	"image/gif"
 	"image/jpeg"
+	"math"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,18 +40,25 @@ func jpg2gif(jpgPath, output string) error {
 	if err != nil {
 		return err
 	}
+	n := len(res)
+	step := int(math.Round(float64(n) / 24))
+	if step == 0 {
+		step = 1
+	}
 	var imgs []image.Image
-	for _, i := range res {
-		f, err := os.Open(i)
-		if err != nil {
-			return err
+	for i, name := range res {
+		if i%step == 0 || i == n-1 {
+			f, err := os.Open(name)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			img, err := jpeg.Decode(f)
+			if err != nil {
+				return err
+			}
+			imgs = append(imgs, img)
 		}
-		defer f.Close()
-		img, err := jpeg.Decode(f)
-		if err != nil {
-			return err
-		}
-		imgs = append(imgs, img)
 	}
 	gifImg, n := new(gif.GIF), len(imgs)
 	for i, img := range imgs {
