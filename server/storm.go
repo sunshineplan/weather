@@ -101,14 +101,18 @@ $('.am-pm').style.left='146px'`, nil),
 	return
 }
 
-func willAffect(storm storm.Data, coords Coordinates, radius float64) bool {
-	if !storm.Active || storm.Cone == nil {
-		return false
+func willAffect(storm storm.Data, coords Coordinates, radius float64) (affect, future bool) {
+	if !storm.Active {
+		return
 	}
 	for _, i := range storm.Track {
 		if Coordinates(i.Coordinates).inArea(coords, radius) {
-			return true
+			affect = true
+			if i.Forecast {
+				future = true
+				break
+			}
 		}
 	}
-	return false
+	return
 }

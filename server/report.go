@@ -294,15 +294,18 @@ func zoomEarth(t time.Time, isReport bool) {
 		svc.Print(err)
 		return
 	}
-	var found []storm.Data
+	var found, alert []storm.Data
 	for _, i := range storms {
 		storm, err := i.Data()
 		if err != nil {
 			svc.Print(err)
 			continue
 		}
-		if willAffect(storm, coordinates, *radius) {
+		if affect, future := willAffect(storm, coordinates, *radius); affect {
 			found = append(found, storm)
+			if future {
+				alert = append(alert, storm)
+			}
 		}
 	}
 	if len(found) == 0 {
@@ -331,9 +334,12 @@ func zoomEarth(t time.Time, isReport bool) {
 			}
 		}
 	}
+	if len(alert) == 0 {
+		return
+	}
 	var affectStorms, bodys []string
 	var attachments []*mail.Attachment
-	for i, storm := range found {
+	for i, storm := range alert {
 		affectStorms = append(affectStorms, storm.Name)
 		bodys = append(bodys, fmt.Sprintf("<a href=%q><img src='cid:map%d'></a>", storm.ID.URL(), i))
 		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%[2]s.gif", *path, storm.ID))
