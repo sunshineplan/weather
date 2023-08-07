@@ -3,8 +3,8 @@ module weather
 go 1.20
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20230716001748-3ed7c525ec8b
-	github.com/chromedp/chromedp v0.9.1
+	github.com/chromedp/cdproto v0.0.0-20230802225258-3cf4e6d46a89
+	github.com/chromedp/chromedp v0.9.2
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/sunshineplan/chrome v1.1.2
@@ -26,7 +26,7 @@ require (
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.1.0 // indirect
+	github.com/gobwas/ws v1.2.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
