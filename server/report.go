@@ -314,7 +314,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			b, err := Coordinates(i.Coordinates).screenshot(5.4, *quality, 5)
+			b, err := Coordinates(i.Coordinates).screenshot(5.4, *quality, 3)
 			if err != nil {
 				svc.Print(err)
 				return

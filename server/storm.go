@@ -36,18 +36,25 @@ func (coords Coordinates) url(zoom float64) string {
 }
 
 func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []byte, err error) {
-	c := chrome.Headless().AddFlags(chromedp.WindowSize(600, 800))
-	if err = c.EnableFetch(func(ev *fetch.EventRequestPaused) bool {
-		return !strings.Contains(ev.Request.URL, "adsbygoogle")
-	}); err != nil {
-		return
+	if retry <= 0 {
+		return nil, fmt.Errorf("screenshot failed")
 	}
-	notify := c.ListenEvent("https://tiles.zoom.earth/times/geocolor.json", "GET", false)
+	c := chrome.Headless().AddFlags(chromedp.WindowSize(600, 800))
+	defer c.Close()
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
+	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
+		return !strings.Contains(ev.Request.URL, "adsbygoogle")
+	}); err != nil {
+		svc.Print(err)
+		time.Sleep(time.Minute)
+		return coords.screenshot(zoom, quality, retry-1)
+	}
+	notify := chrome.ListenEvent(ctx, "https://tiles.zoom.earth/times/geocolor.json", "GET", false)
 	if err = chromedp.Run(ctx, chromedp.Navigate(coords.url(zoom))); err != nil {
-		c.Close()
-		return
+		svc.Print(err)
+		time.Sleep(time.Minute)
+		return coords.screenshot(zoom, quality, retry-1)
 	}
 	done := make(chan struct{})
 	go func() {
@@ -63,15 +70,11 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 	select {
 	case <-done:
 	case <-ctx.Done():
-		c.Close()
-		if retry = retry - 1; retry == 0 {
-			return nil, fmt.Errorf("timeout")
-		}
 		svc.Print("screenshot timeout, wait for retry")
 		time.Sleep(time.Minute)
-		return coords.screenshot(zoom, quality, retry)
+		return coords.screenshot(zoom, quality, retry-1)
 	}
-	err = c.Run(
+	if err = c.Run(
 		chromedp.EvaluateAsDevTools(`
 $('button.title').style.display='none'
 $('button.search').style.display='none'
@@ -96,8 +99,11 @@ $('.minute').style.left='110px'
 $('.am-pm').style.left='146px'`, nil),
 		chromedp.Sleep(time.Second),
 		chromedp.FullScreenshot(&b, quality),
-	)
-	c.Close()
+	); err != nil {
+		svc.Print(err)
+		time.Sleep(time.Minute)
+		return coords.screenshot(zoom, quality, retry-1)
+	}
 	return
 }
 
