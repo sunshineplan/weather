@@ -35,14 +35,16 @@ func timestamp() string {
 	return time.Now().Format("(2006/01/02 15:04)")
 }
 
-func jpg2gif(jpgPath, output string) error {
+func jpg2gif(jpgPath, output string, daily bool) error {
 	res, err := filepath.Glob(jpgPath)
 	if err != nil {
 		return err
 	}
 	n := len(res)
-	step := int(math.Round(float64(n) / 24))
-	if step == 0 {
+	var step int
+	if daily {
+		step = 1
+	} else if step = int(math.Round(math.Log(1+float64(n)))) - 2; step <= 0 {
 		step = 1
 	}
 	var imgs []image.Image
@@ -61,12 +63,18 @@ func jpg2gif(jpgPath, output string) error {
 		}
 	}
 	gifImg, n := new(gif.GIF), len(imgs)
+	var delay int
+	if daily {
+		delay = 40
+	} else if delay = 6000 / n; delay > 40 {
+		delay = 40
+	}
 	for i, img := range imgs {
 		p := image.NewPaletted(img.Bounds(), palette.Plan9)
 		draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
 		gifImg.Image = append(gifImg.Image, p)
 		if i != n-1 {
-			gifImg.Delay = append(gifImg.Delay, 40)
+			gifImg.Delay = append(gifImg.Delay, delay)
 		} else {
 			gifImg.Delay = append(gifImg.Delay, 300)
 		}

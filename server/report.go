@@ -278,13 +278,13 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				return
 			}
-			for ; len(res) > 24; res = res[1:] {
+			for ; len(res) > 48; res = res[1:] {
 				if err := os.Remove(res[0]); err != nil {
 					svc.Print(err)
 					return
 				}
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/image.gif"); err != nil {
+			if err := jpg2gif("daily/*.jpg", "daily/image.gif", true); err != nil {
 				svc.Print(err)
 			}
 		}()
@@ -329,7 +329,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				continue
 			}
-			if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i.ID)); err != nil {
+			if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i.ID), false); err != nil {
 				svc.Print(err)
 			}
 		}

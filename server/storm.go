@@ -104,6 +104,11 @@ $('.am-pm').style.left='146px'`, nil),
 		time.Sleep(time.Minute)
 		return coords.screenshot(zoom, quality, retry-1)
 	}
+	if len(b) <= 30*1024 {
+		svc.Print("bad screenshot")
+		time.Sleep(time.Minute)
+		return coords.screenshot(zoom, quality, retry-1)
+	}
 	return
 }
 
