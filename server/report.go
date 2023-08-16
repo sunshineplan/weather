@@ -264,7 +264,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				return
 			}
-			file := fmt.Sprintf("daily/%s.jpg", t.Format("2006010215"))
+			file := fmt.Sprintf("daily/%s.jpg", t.Format("200601021504"))
 			if err := os.MkdirAll("daily", 0755); err != nil {
 				svc.Print(err)
 				return
@@ -305,11 +305,13 @@ func zoomEarth(t time.Time, isReport bool) {
 			found = append(found, storm)
 			if future {
 				alert = append(alert, storm)
+				svc.Printf("Alerting storm %s(%s)", storm.ID, Coordinates(storm.Coordinates))
+			} else {
+				svc.Printf("Recording storm %s(%s)", storm.ID, Coordinates(storm.Coordinates))
 			}
 		}
 	}
 	if len(found) == 0 {
-		svc.Print("no storm found")
 		return
 	}
 	if !isReport {
@@ -320,7 +322,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				return
 			}
 			dir := fmt.Sprintf("%s/%s", *path, i.ID)
-			file := fmt.Sprintf("%s/%s00.jpg", dir, time.Now().Format("20060102-15"))
+			file := fmt.Sprintf("%s/%s.jpg", dir, time.Now().Format("20060102-1504"))
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				svc.Print(err)
 				continue
@@ -353,7 +355,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			ContentID: fmt.Sprintf("map%d", i),
 		})
 	}
-	if hour := t.Hour(); isReport || (hour == 6 || hour == 12 || hour == 21) {
+	if hour := t.Hour(); isReport || ((hour == 6 || hour == 12 || hour == 21) && t.Minute() < 30) {
 		sendMail(
 			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(affectStorms, "|"), timestamp()),
 			strings.Join(bodys, "\n"),
