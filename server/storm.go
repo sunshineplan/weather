@@ -36,9 +36,17 @@ func (coords Coordinates) url(zoom float64) string {
 }
 
 func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []byte, err error) {
-	if retry <= 0 {
-		return nil, fmt.Errorf("screenshot failed")
-	}
+	defer func() {
+		if e := recover(); e != nil {
+			svc.Print(e)
+			if retry--; retry == 0 {
+				err = fmt.Errorf("screenshot failed")
+			} else {
+				time.Sleep(time.Minute)
+				b, err = coords.screenshot(zoom, quality, retry)
+			}
+		}
+	}()
 	c := chrome.Headless().AddFlags(chromedp.WindowSize(600, 800))
 	defer c.Close()
 	ctx, cancel := context.WithTimeout(c, time.Minute)
@@ -46,15 +54,11 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
 		return !strings.Contains(ev.Request.URL, "adsbygoogle")
 	}); err != nil {
-		svc.Print(err)
-		time.Sleep(time.Minute)
-		return coords.screenshot(zoom, quality, retry-1)
+		panic(err)
 	}
 	notify := chrome.ListenEvent(ctx, "https://tiles.zoom.earth/times/geocolor.json", "GET", false)
 	if err = chromedp.Run(ctx, chromedp.Navigate(coords.url(zoom))); err != nil {
-		svc.Print(err)
-		time.Sleep(time.Minute)
-		return coords.screenshot(zoom, quality, retry-1)
+		panic(err)
 	}
 	done := make(chan struct{})
 	go func() {
@@ -70,11 +74,10 @@ func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []
 	select {
 	case <-done:
 	case <-ctx.Done():
-		svc.Print("screenshot timeout, wait for retry")
-		time.Sleep(time.Minute)
-		return coords.screenshot(zoom, quality, retry-1)
+		panic("screenshot timeout, wait for retry")
 	}
-	if err = c.Run(
+	if err = chromedp.Run(
+		ctx,
 		chromedp.EvaluateAsDevTools(`
 $('button.title').style.display='none'
 $('button.search').style.display='none'
@@ -100,14 +103,10 @@ $('.am-pm').style.left='146px'`, nil),
 		chromedp.Sleep(time.Second),
 		chromedp.FullScreenshot(&b, quality),
 	); err != nil {
-		svc.Print(err)
-		time.Sleep(time.Minute)
-		return coords.screenshot(zoom, quality, retry-1)
+		panic(err)
 	}
 	if len(b) <= 30*1024 {
-		svc.Print("bad screenshot")
-		time.Sleep(time.Minute)
-		return coords.screenshot(zoom, quality, retry-1)
+		panic("bad screenshot")
 	}
 	return
 }
