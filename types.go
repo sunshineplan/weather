@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -126,17 +127,48 @@ func (day Day) TemperatureHTML() string {
 func (day Day) Precipitation() string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
-	fmt.Fprint(&b, "PrecipHours: ", strings.Join(day.PrecipHours(), ", "))
+	_, precipHours := day.PrecipHours()
+	if len(precipHours) == 0 {
+		fmt.Fprint(&b, "PrecipHours: none")
+	} else {
+		fmt.Fprint(&b, "PrecipHours: ", strings.Join(precipHours, ", "))
+	}
 	if len(day.PrecipType) > 0 {
 		fmt.Fprintf(&b, "\nPrecipType: %s", strings.Join(day.PrecipType, ", "))
 	}
 	return b.String()
 }
 
-func (day Day) PrecipHours() (hours []string) {
+func (day Day) PrecipitationHTML(highlight ...int) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
+	hours, precipHours := day.PrecipHours()
+	if len(precipHours) == 0 {
+		fmt.Fprint(&b, "PrecipHours: none")
+	} else {
+		fmt.Fprint(&b, "PrecipHours: ")
+		for i, hour := range hours {
+			if slices.Contains(highlight, hour) {
+				fmt.Fprintf(&b, `<span style="color:red">%s</span>`, precipHours[i])
+			} else {
+				fmt.Fprint(&b, precipHours[i])
+			}
+			if i < len(hours)-1 {
+				fmt.Fprint(&b, ", ")
+			}
+		}
+	}
+	if len(day.PrecipType) > 0 {
+		fmt.Fprintf(&b, "\nPrecipType: %s", strings.Join(day.PrecipType, ", "))
+	}
+	return b.String()
+}
+
+func (day Day) PrecipHours() (hours []int, output []string) {
 	for _, i := range day.Hours {
 		if i.Precip > 0 {
-			hours = append(hours, fmt.Sprintf("%s(%gmm,%s)", i.Time[:2], i.Precip, i.PrecipProb))
+			hours = append(hours, i.Hour())
+			output = append(output, fmt.Sprintf("%02d(%gmm,%s)", i.Hour(), i.Precip, i.PrecipProb))
 		}
 	}
 	return
