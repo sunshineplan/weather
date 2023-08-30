@@ -35,14 +35,18 @@ func timestamp() string {
 	return time.Now().Format("(2006/01/02 15:04)")
 }
 
-func jpg2gif(jpgPath, output string, daily bool) error {
+func jpg2gif(jpgPath, output string, count int) error {
 	res, err := filepath.Glob(jpgPath)
 	if err != nil {
 		return err
 	}
 	n := len(res)
+	if count != 0 && n > count {
+		res = res[n-count:]
+		n = count
+	}
 	var step int
-	if daily {
+	if count != 0 {
 		step = 1
 	} else if step = int(math.Round(math.Log(1+float64(n)))) - 2; step <= 0 {
 		step = 1
@@ -64,7 +68,7 @@ func jpg2gif(jpgPath, output string, daily bool) error {
 	}
 	gifImg, n := new(gif.GIF), len(imgs)
 	var delay int
-	if daily {
+	if count != 0 {
 		delay = 40
 	} else if delay = 6000 / n; delay > 40 {
 		delay = 40

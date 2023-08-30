@@ -83,7 +83,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	if rainSnow != nil {
 		fmt.Fprintln(&b)
 		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Rain Snow Alert", "</div>")
-		fmt.Fprint(&b, rainSnow.HTML())
+		fmt.Fprint(&b, rainSnow.HTML(t))
 	} else {
 		fmt.Fprintln(&b)
 		fmt.Fprintln(&b, "No Rain Snow Alert.")
@@ -148,7 +148,7 @@ func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builde
 
 func isRainSnow(now int, hours []weather.Hour) bool {
 	for _, i := range hours {
-		if hour := i.Hour(); (hour == now || hour == now+1) && i.Precip > 0 {
+		if hour := i.Hour(); hour == now && i.Precip > 0 {
 			return true
 		}
 	}
@@ -164,22 +164,29 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 
 	if res, err := weather.WillRainSnow(days); err != nil {
 		svc.Print(err)
-	} else if len(res) > 0 {
+	} else if n := len(res); n > 0 {
 		for index, i := range res {
+			now := time.Now()
+			hour := now.Hour()
 			if index == 0 {
 				defer func(rs weather.RainSnow) { rainSnow = &rs }(i)
 				if start := i.Start(); rainSnow == nil ||
 					rainSnow.Start().Date != start.Date ||
 					rainSnow.Duration() != i.Duration() {
 					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
-				} else if start.Date == time.Now().Format("2006-01-02") && isRainSnow(time.Now().Hour(), start.Hours) {
+				} else if start.Date == now.Format("2006-01-02") && isRainSnow(hour, start.Hours) {
 					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
 					fmt.Fprintln(&b, start.DateInfoHTML())
-					fmt.Fprint(&b, start.Precipitation())
+					fmt.Fprintln(&b, start.PrecipitationHTML(hour))
+					for index := 1; index < n && index < 3; index++ {
+						fmt.Fprintln(&b)
+						fmt.Fprintln(&b, i.Days()[index].DateInfoHTML())
+						fmt.Fprintln(&b, i.Days()[index].PrecipitationHTML())
+					}
 					return
 				}
 			}
-			fmt.Fprint(&b, i.HTML())
+			fmt.Fprint(&b, i.HTML(now, hour))
 			if index < len(res)-1 {
 				fmt.Fprintln(&b)
 			}
@@ -284,7 +291,13 @@ func zoomEarth(t time.Time, isReport bool) {
 					return
 				}
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/image.gif", true); err != nil {
+			if err := jpg2gif("daily/*.jpg", "daily/24h.gif", 48); err != nil {
+				svc.Print(err)
+			}
+			if err := jpg2gif("daily/*.jpg", "daily/12h.gif", 24); err != nil {
+				svc.Print(err)
+			}
+			if err := jpg2gif("daily/*.jpg", "daily/6h.gif", 12); err != nil {
 				svc.Print(err)
 			}
 		}()
@@ -331,7 +344,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				continue
 			}
-			if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i.ID), false); err != nil {
+			if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i.ID), 0); err != nil {
 				svc.Print(err)
 			}
 		}
