@@ -178,7 +178,7 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
 					fmt.Fprintln(&b, start.DateInfoHTML())
 					fmt.Fprintln(&b, start.PrecipitationHTML(hour))
-					for index := 1; index < n && index < 3; index++ {
+					for index, n := 1, len(i.Days()); index < n && index < 3; index++ {
 						fmt.Fprintln(&b)
 						fmt.Fprintln(&b, i.Days()[index].DateInfoHTML())
 						fmt.Fprintln(&b, i.Days()[index].PrecipitationHTML())
