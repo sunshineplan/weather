@@ -35,13 +35,13 @@ func runServer() error {
 		c.File(filepath.Join(*path, storm, storm+".gif"))
 	})
 	router.GET("/24h", func(c *gin.Context) {
-		c.File("daily/24h.gif")
+		c.File("daily/daily-24h.gif")
 	})
 	router.GET("/12h", func(c *gin.Context) {
-		c.File("daily/12h.gif")
+		c.File("daily/daily-12h.gif")
 	})
 	router.GET("/6h", func(c *gin.Context) {
-		c.File("daily/6h.gif")
+		c.File("daily/daily-6h.gif")
 	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")

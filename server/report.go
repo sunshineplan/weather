@@ -104,7 +104,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	var attachments []*mail.Attachment
 	mu.Lock()
 	defer mu.Unlock()
-	if bytes, err := os.ReadFile("daily/image.gif"); err != nil {
+	if bytes, err := os.ReadFile("daily/daily-12h.gif"); err != nil {
 		svc.Print(err)
 	} else {
 		fmt.Fprintf(&b, "<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom))
@@ -291,13 +291,13 @@ func zoomEarth(t time.Time, isReport bool) {
 					return
 				}
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/24h.gif", 48); err != nil {
+			if err := jpg2gif("daily/*.jpg", "daily/daily-24h.gif", 48); err != nil {
 				svc.Print(err)
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/12h.gif", 24); err != nil {
+			if err := jpg2gif("daily/*.jpg", "daily/daily-12h.gif", 24); err != nil {
 				svc.Print(err)
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/6h.gif", 12); err != nil {
+			if err := jpg2gif("daily/*.jpg", "daily/daily-6h.gif", 12); err != nil {
 				svc.Print(err)
 			}
 		}()
@@ -356,7 +356,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	var attachments []*mail.Attachment
 	for i, storm := range alert {
 		affectStorms = append(affectStorms, storm.Name)
-		bodys = append(bodys, fmt.Sprintf("<a href=%q><img src='cid:map%d'></a>", storm.ID.URL(), i))
+		bodys = append(bodys, fmt.Sprintf("%s - %s<a href=%q><img src='cid:map%d'></a>", storm.Title, storm.Place, storm.ID.URL(), i))
 		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%[2]s.gif", *path, storm.ID))
 		if err != nil {
 			svc.Print(err)

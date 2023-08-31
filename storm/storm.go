@@ -40,6 +40,7 @@ type Data struct {
 	Title  string
 	Active bool
 	Type   string
+	Place  string
 	Cone   [][2]float64
 	Track  []Track
 	JA     int
