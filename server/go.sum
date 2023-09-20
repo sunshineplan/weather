@@ -113,8 +113,8 @@ github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gtY=
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/sunshineplan/chrome v1.1.2 h1:Bfv6mAtNX1qN5Ss/51iigzYGKtuG3bzZFmhVYrMHnbU=
-github.com/sunshineplan/chrome v1.1.2/go.mod h1:5NN+TPkYKramXcWdPu3IdYDEDHpVeNOzQnU5PCmbg1U=
+github.com/sunshineplan/chrome v1.1.3 h1:iBX31fRS09yEdXtarKbiJOg0okbebbg4nVTTdavjVXY=
+github.com/sunshineplan/chrome v1.1.3/go.mod h1:f6hPoPl75KTPaMpmKzscfJ0s8QWSSN30UtYP4ibW7pc=
 github.com/sunshineplan/cipher v1.0.5 h1:opCKCTVjkdcoIJSCi2yoI0ndmwiyDbcm+5MpyavmnJ0=
 github.com/sunshineplan/cipher v1.0.5/go.mod h1:JMP+4CCZT1D7qjZyuiyTe8ZPYaaBMxU9MWrCBKC/QhQ=
 github.com/sunshineplan/database/mongodb v1.0.5 h1:+Mtcs8LjHaP00OOx0r0rf6/UinwMMWf1rnxcKNo0cc0=
