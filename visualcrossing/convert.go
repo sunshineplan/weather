@@ -51,6 +51,7 @@ func ConvertDays(src []Day) (days []weather.Day) {
 			UVIndex:      i.UVIndex,
 			SevereRisk:   i.SevereRisk,
 			Condition:    i.Conditions,
+			Description:  i.Description,
 			Icon:         ConvertIcon(i.Icon),
 			Hours:        ConvertHours(i.Hours),
 		})

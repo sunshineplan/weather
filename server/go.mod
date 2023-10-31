@@ -1,6 +1,6 @@
 module weather
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/chromedp/cdproto v0.0.0-20231011050154-1d073bb38998
