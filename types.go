@@ -58,6 +58,7 @@ type Day struct {
 	UVIndex      unit.UVIndex     `json:"uvindex,omitempty"`
 	SevereRisk   float64          `json:"severerisk,omitempty"`
 	Condition    Condition        `json:"condition,omitempty"`
+	Description  string           `json:"description,omitempty"`
 	Icon         string           `json:"icon,omitempty"`
 	Hours        []Hour           `json:"hours,omitempty"`
 }
