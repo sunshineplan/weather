@@ -84,6 +84,7 @@ func export(month string, delete bool) (string, error) {
 		Visibility   float64           `json:"visibility"`
 		UVIndex      unit.UVIndex      `json:"uvindex"`
 		Condition    weather.Condition `json:"condition"`
+		Description  string            `json:"description"`
 	}
 	if err := client.Find(
 		mongodb.M{"date": mongodb.M{"$regex": month}},

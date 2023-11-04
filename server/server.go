@@ -67,7 +67,7 @@ func runServer() error {
 			return
 		}
 
-		delete, _ := strconv.ParseBool("delete")
+		delete, _ := strconv.ParseBool(c.Query("delete"))
 
 		res, err := export(month, delete)
 		if err != nil {
