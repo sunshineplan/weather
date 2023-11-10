@@ -16,6 +16,17 @@ import (
 
 var to mail.Receipts
 
+func attachment(file string) (attachments []*mail.Attachment) {
+	zoomMutex.Lock()
+	defer zoomMutex.Unlock()
+	if b, err := os.ReadFile(file); err != nil {
+		svc.Print(err)
+	} else {
+		attachments = append(attachments, &mail.Attachment{Filename: filepath.Base(file), Bytes: b, ContentID: "attachment"})
+	}
+	return
+}
+
 func sendMail(subject, body string, attachments []*mail.Attachment) {
 	msg := &mail.Message{
 		Subject:     subject,

@@ -43,6 +43,16 @@ func runServer() error {
 	router.GET("/6h", func(c *gin.Context) {
 		c.File("daily/daily-6h.gif")
 	})
+	router.GET("/status", func(c *gin.Context) {
+		t := time.Now()
+		days, yesterday, avg, err := prepare(t)
+		if err != nil {
+			svc.Print(err)
+			c.String(500, "")
+			return
+		}
+		c.Data(200, "text/html", []byte(today(days, yesterday, avg, t, "/6h")))
+	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")
 		if q == "" {

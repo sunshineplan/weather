@@ -42,7 +42,7 @@ func init() {
 		}
 		report(time.Now())
 		return nil
-	}, 0)
+	}, 0, true)
 	svc.RegisterCommand("record", "record", func(arg ...string) error {
 		if err := initWeather(); err != nil {
 			return err
@@ -52,7 +52,7 @@ func init() {
 			return err
 		}
 		return record(date)
-	}, 1)
+	}, 1, true)
 }
 
 var (

@@ -18,7 +18,8 @@ var (
 	rainSnow     *weather.RainSnow
 	tempRiseFall *weather.TempRiseFall
 
-	mu sync.Mutex
+	alertMutex sync.Mutex
+	zoomMutex  sync.Mutex
 )
 
 func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, err error) {
@@ -48,7 +49,11 @@ func report(t time.Time) {
 	runAlert(days, alertRainSnow)
 	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
 	zoomEarth(t, true)
-	today(days, yesterday, avg, t)
+	sendMail(
+		"[Weather]Daily Report"+timestamp(),
+		today(days, yesterday, avg, t, ""),
+		attachment("daily/daily-12h.gif"),
+	)
 }
 
 func daily(t time.Time) {
@@ -58,10 +63,14 @@ func daily(t time.Time) {
 		svc.Print(err)
 		return
 	}
-	today(days, yesterday, avg, t)
+	sendMail(
+		"[Weather]Daily Report"+timestamp(),
+		today(days, yesterday, avg, t, ""),
+		attachment("daily/daily-12h.gif"),
+	)
 }
 
-func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
+func today(days []weather.Day, yesterday, avg weather.Day, t time.Time, src string) string {
 	var b strings.Builder
 	fmt.Fprint(&b, `<pre style="font-family:system-ui;margin:0">`)
 	fmt.Fprint(&b, days[0].HTML())
@@ -80,6 +89,10 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 	fmt.Fprintln(&b)
 	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Forecast", "</div>")
 	fmt.Fprint(&b, table(days))
+
+	alertMutex.Lock()
+	defer alertMutex.Unlock()
+
 	if rainSnow != nil {
 		fmt.Fprintln(&b)
 		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Rain Snow Alert", "</div>")
@@ -98,19 +111,15 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time) {
 		fmt.Fprint(&b, tempRiseFall.HTML())
 	} else {
 		fmt.Fprintln(&b)
-		fmt.Fprint(&b, "No Temperature Alert.")
+		fmt.Fprintln(&b, "No Temperature Alert.")
 	}
 	fmt.Fprint(&b, "</pre>")
-	var attachments []*mail.Attachment
-	mu.Lock()
-	defer mu.Unlock()
-	if bytes, err := os.ReadFile("daily/daily-12h.gif"); err != nil {
-		svc.Print(err)
+	if src == "" {
+		fmt.Fprintf(&b, "<a href=%q><img src='cid:attachment'></a>", coordinates.url(*zoom))
 	} else {
-		fmt.Fprintf(&b, "<a href=%q><img src='cid:map'></a>", coordinates.url(*zoom))
-		attachments = append(attachments, &mail.Attachment{Filename: "image.gif", Bytes: bytes, ContentID: "map"})
+		fmt.Fprintf(&b, "<a href=%q><img src=%q></a>", coordinates.url(*zoom), src)
 	}
-	sendMail("[Weather]Daily Report"+timestamp(), b.String(), attachments)
+	return b.String()
 }
 
 func alert(t time.Time) {
@@ -126,6 +135,8 @@ func alert(t time.Time) {
 		return
 	}
 
+	alertMutex.Lock()
+	defer alertMutex.Unlock()
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
@@ -241,8 +252,8 @@ func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
 }
 
 func table(days []weather.Day) string {
-	if len(days) > 7 {
-		days = days[:7]
+	if len(days) > 10 {
+		days = days[:10]
 	}
 	var b strings.Builder
 	fmt.Fprint(&b, "<table border=1 cellspacing=0>")
@@ -264,8 +275,8 @@ func table(days []weather.Day) string {
 func zoomEarth(t time.Time, isReport bool) {
 	if !isReport {
 		go func() {
-			mu.Lock()
-			defer mu.Unlock()
+			zoomMutex.Lock()
+			defer zoomMutex.Unlock()
 			b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, 5)
 			if err != nil {
 				svc.Print(err)
