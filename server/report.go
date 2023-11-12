@@ -15,8 +15,8 @@ import (
 
 var (
 	coordinates  Coordinates
-	rainSnow     *weather.RainSnow
-	tempRiseFall *weather.TempRiseFall
+	rainSnow     []weather.RainSnow
+	tempRiseFall []weather.TempRiseFall
 
 	alertMutex sync.Mutex
 	zoomMutex  sync.Mutex
@@ -53,6 +53,7 @@ func report(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		today(days, yesterday, avg, t, ""),
 		attachment("daily/daily-12h.gif"),
+		true,
 	)
 }
 
@@ -67,6 +68,7 @@ func daily(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		today(days, yesterday, avg, t, ""),
 		attachment("daily/daily-12h.gif"),
+		true,
 	)
 }
 
@@ -93,27 +95,33 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time, src stri
 	alertMutex.Lock()
 	defer alertMutex.Unlock()
 
-	if rainSnow != nil {
+	if len(rainSnow) > 0 {
 		fmt.Fprintln(&b)
 		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Rain Snow Alert", "</div>")
-		fmt.Fprint(&b, rainSnow.HTML(t))
+		for index, i := range rainSnow {
+			fmt.Fprint(&b, i.HTML(t))
+			if index < len(rainSnow)-1 {
+				fmt.Fprintln(&b)
+			}
+		}
 	} else {
 		fmt.Fprintln(&b)
 		fmt.Fprintln(&b, "No Rain Snow Alert.")
 	}
-	if tempRiseFall != nil {
+	if len(tempRiseFall) > 0 {
 		fmt.Fprintln(&b)
-		if tempRiseFall.IsRise() {
-			fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Temperature Rise Alert", "</div>")
-		} else {
-			fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Temperature Fall Alert", "</div>")
+		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Temperature Alert", "</div>")
+		for index, i := range tempRiseFall {
+			fmt.Fprint(&b, i.HTML())
+			if index < len(tempRiseFall)-1 {
+				fmt.Fprintln(&b)
+			}
 		}
-		fmt.Fprint(&b, tempRiseFall.HTML())
 	} else {
 		fmt.Fprintln(&b)
 		fmt.Fprintln(&b, "No Temperature Alert.")
 	}
-	fmt.Fprint(&b, "</pre>")
+	fmt.Fprint(&b, "\n</pre>")
 	if src == "" {
 		fmt.Fprintf(&b, "<a href=%q><img src='cid:attachment'></a>", coordinates.url(*zoom))
 	} else {
@@ -153,7 +161,7 @@ func alert(t time.Time) {
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
 	if subject, body := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, `<pre style="font-family:system-ui;margin:0">`+body.String()+"</pre>", nil)
+		sendMail(subject, `<pre style="font-family:system-ui;margin:0">`+body.String()+"</pre>", nil, false)
 	}
 }
 
@@ -167,9 +175,9 @@ func isRainSnow(now int, hours []weather.Hour) bool {
 }
 
 func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
-	if rainSnow != nil {
-		if rainSnow.IsExpired() {
-			rainSnow = nil
+	if len(rainSnow) > 0 {
+		if rainSnow[0].IsExpired() {
+			rainSnow = rainSnow[1:]
 		}
 	}
 
@@ -180,10 +188,9 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 			now := time.Now()
 			hour := now.Hour()
 			if index == 0 {
-				defer func(rs weather.RainSnow) { rainSnow = &rs }(i)
-				if start := i.Start(); rainSnow == nil ||
-					rainSnow.Start().Date != start.Date ||
-					rainSnow.Duration() != i.Duration() {
+				if start := i.Start(); len(rainSnow) == 0 ||
+					rainSnow[0].Start().Date != start.Date ||
+					rainSnow[0].Duration() != i.Duration() {
 					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
 				} else if start.Date == now.Format("2006-01-02") && isRainSnow(hour, start.Hours) {
 					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
@@ -202,7 +209,8 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 				fmt.Fprintln(&b)
 			}
 		}
-	} else if rainSnow != nil {
+		rainSnow = res
+	} else if len(rainSnow) > 0 {
 		subject = "[Weather]Rain Snow Alert - Canceled" + timestamp()
 		b.WriteString("No more rain snow")
 		rainSnow = nil
@@ -211,20 +219,20 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 }
 
 func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
-	if tempRiseFall != nil {
-		if tempRiseFall.IsExpired() {
-			tempRiseFall = nil
+	if len(tempRiseFall) > 0 {
+		if tempRiseFall[0].IsExpired() {
+			tempRiseFall = tempRiseFall[1:]
 		}
 	}
 
 	if res, err := weather.WillTempRiseFall(days, *difference); err != nil {
 		svc.Print(err)
 	} else if len(res) > 0 {
-		var first weather.TempRiseFall
 		for index, i := range res {
 			if index == 0 {
-				first = i
-				if tempRiseFall == nil || tempRiseFall.Day().Date != i.Day().Date {
+				if len(tempRiseFall) == 0 ||
+					tempRiseFall[0].Day().Date != i.Day().Date ||
+					(tempRiseFall[0].Day().Date == i.Day().Date && tempRiseFall[0].IsRise() != i.IsRise()) {
 					if i.IsRise() {
 						subject = "[Weather]Temperature Rise Alert - " + i.Day().Date + timestamp()
 					} else {
@@ -237,9 +245,9 @@ func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
 				fmt.Fprintln(&b)
 			}
 		}
-		tempRiseFall = &first
-	} else if tempRiseFall != nil {
-		if tempRiseFall.IsRise() {
+		tempRiseFall = res
+	} else if len(tempRiseFall) > 0 {
+		if tempRiseFall[0].IsRise() {
 			subject = "[Weather]Temperature Rise Alert - Canceled" + timestamp()
 			b.WriteString("No more temperature rise")
 		} else {
@@ -384,6 +392,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(affectStorms, "|"), timestamp()),
 			strings.Join(bodys, "\n"),
 			attachments,
+			true,
 		)
 	}
 }

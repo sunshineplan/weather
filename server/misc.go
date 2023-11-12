@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/utils/mail"
+	"github.com/sunshineplan/utils/scheduler"
 )
 
 var to mail.Receipts
@@ -27,7 +28,14 @@ func attachment(file string) (attachments []*mail.Attachment) {
 	return
 }
 
-func sendMail(subject, body string, attachments []*mail.Attachment) {
+func sendMail(subject, body string, attachments []*mail.Attachment, force bool) {
+	if !force && !scheduler.ClockSchedule(
+		scheduler.ClockFromString(*start),
+		scheduler.ClockFromString(*end),
+		time.Second,
+	).IsMatched(time.Now()) {
+		return
+	}
 	msg := &mail.Message{
 		Subject:     subject,
 		Body:        body,

@@ -60,7 +60,6 @@ var (
 	dailyReport = flag.String("daily", "7:00", "daily report time")
 	start       = flag.String("start", "6:00", "alert start time")
 	end         = flag.String("end", "22:00", "alert end time")
-	interval    = flag.Duration("interval", time.Hour, "alert interval")
 	days        = flag.Int("days", 15, "forecast days")
 	difference  = flag.Float64("difference", 5, "temperature difference")
 	offset      = flag.Float64("offset", 0, "daily screenshot offset")
