@@ -7,7 +7,7 @@ require (
 	github.com/chromedp/chromedp v0.9.3
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/sunshineplan/chrome v1.1.6
+	github.com/sunshineplan/chrome v1.1.8
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.19
