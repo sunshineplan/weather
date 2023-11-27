@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"math"
 	"strings"
 	"time"
 
@@ -11,31 +10,26 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/weather/storm"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
-type Coordinates [2]float64
+type coords struct{ coordinates.Coordinates }
 
-func (coords Coordinates) String() string {
-	return fmt.Sprintf("%.1f,%.1f", coords[1], coords[0])
+func (coords coords) inArea(c coords, radius float64) bool {
+	return coordinates.Distance(coords, c) <= radius
 }
 
-func (coords Coordinates) distance(c Coordinates) float64 {
-	return math.Sqrt(math.Pow(coords[0]-c[0], 2) + math.Pow(coords[1]-c[1], 2))
+func (c coords) offset(x, y float64) coords {
+	return coords{coordinates.New(float64(c.Latitude())+x, float64(c.Longitude())+y)}
 }
 
-func (coords Coordinates) inArea(c Coordinates, radius float64) bool {
-	return coords.distance(c) <= radius
+func (coords coords) url(zoom float64) string {
+	return fmt.Sprintf(
+		"https://zoom.earth/maps/satellite/#view=%g,%g,%.2fz/overlays=radar,wind", coords.Latitude(), coords.Longitude(), zoom,
+	)
 }
 
-func (coords Coordinates) offset(x, y float64) Coordinates {
-	return Coordinates{coords[0] + x, coords[1] + y}
-}
-
-func (coords Coordinates) url(zoom float64) string {
-	return fmt.Sprintf("https://zoom.earth/maps/satellite/#view=%s,%.2fz/overlays=radar,wind", coords, zoom)
-}
-
-func (coords Coordinates) screenshot(zoom float64, quality int, retry int) (b []byte, err error) {
+func (coords coords) screenshot(zoom float64, quality int, retry int) (b []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			svc.Print(e)
@@ -111,12 +105,12 @@ $('.am-pm').style.left='146px'`, nil),
 	return
 }
 
-func willAffect(storm storm.Data, coords Coordinates, radius float64) (affect, future bool) {
+func willAffect(storm storm.Data, coordinates coords, radius float64) (affect, future bool) {
 	if !storm.Active {
 		return
 	}
 	for _, i := range storm.Track {
-		if Coordinates(i.Coordinates()).inArea(coords, radius) {
+		if (coords{i.Coordinates()}).inArea(coordinates, radius) {
 			affect = true
 			if i.Forecast() {
 				future = true

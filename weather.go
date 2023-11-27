@@ -1,9 +1,13 @@
 package weather
 
-import "time"
+import (
+	"time"
+
+	"github.com/sunshineplan/weather/unit/coordinates"
+)
 
 type API interface {
-	Coordinates(string) (latitude, longitude float64, err error)
+	Coordinates(string) (coordinates.Coordinates, error)
 	Realtime(string) (Current, error)
 	Forecast(string, int) ([]Day, error)
 	History(string, time.Time) (Day, error)

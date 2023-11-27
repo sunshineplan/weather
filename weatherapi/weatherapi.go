@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 const baseURL = "https://api.weatherapi.com/v1"
@@ -38,17 +39,15 @@ func (api *WeatherAPI) Request(endpoint, query string) (res Response, err error)
 	return
 }
 
-func (api *WeatherAPI) Coordinates(query string) (latitude, longitude float64, err error) {
+func (api *WeatherAPI) Coordinates(query string) (coordinates.Coordinates, error) {
 	resp, err := api.Request("current.json", fmt.Sprintf("q=%s", query))
 	if err != nil {
-		return
+		return nil, err
 	}
 	if location := resp.Location; location != nil {
-		latitude = location.Lat
-		longitude = location.Lon
-		return
+		return coordinates.New(location.Lat, location.Lon), nil
 	}
-	return 0, 0, errors.New("location is nil")
+	return nil, errors.New("location is nil")
 }
 
 func (api *WeatherAPI) Realtime(query string) (current weather.Current, err error) {

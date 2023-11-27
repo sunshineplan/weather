@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 const baseURL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline"
@@ -42,14 +43,12 @@ func (api *VisualCrossing) Request(endpoint, include, query string) (res Respons
 	return
 }
 
-func (api *VisualCrossing) Coordinates(query string) (latitude, longitude float64, err error) {
+func (api *VisualCrossing) Coordinates(query string) (coordinates.Coordinates, error) {
 	resp, err := api.Request("today", "current", query)
 	if err != nil {
-		return
+		return nil, err
 	}
-	latitude = resp.Latitude
-	longitude = resp.Longitude
-	return
+	return coordinates.New(resp.Latitude, resp.Longitude), nil
 }
 
 func (api *VisualCrossing) Realtime(query string) (current weather.Current, err error) {

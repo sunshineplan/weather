@@ -78,7 +78,7 @@ func (f WindKPH) ForceColor() string {
 }
 
 func (f WindKPH) String() string {
-	return fmt.Sprintf("%sm/s(%d)", formatFloat64(f.MPS(), 1), f.Force())
+	return fmt.Sprintf("%sm/s(%d)", FormatFloat64(f.MPS(), 1), f.Force())
 }
 
 func (f WindKPH) MarshalJSON() ([]byte, error) {
@@ -86,5 +86,5 @@ func (f WindKPH) MarshalJSON() ([]byte, error) {
 }
 
 func (f WindKPH) HTML() string {
-	return fmt.Sprintf(`<span style="color:%s">%sm/s(%d)</span>`, f.ForceColor(), formatFloat64(f.MPS(), 1), f.Force())
+	return fmt.Sprintf(`<span style="color:%s">%sm/s(%d)</span>`, f.ForceColor(), FormatFloat64(f.MPS(), 1), f.Force())
 }

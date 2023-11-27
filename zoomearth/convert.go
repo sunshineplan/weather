@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/weather/storm"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 func (data StormData) Convert() storm.Data {
@@ -23,7 +24,7 @@ var _ storm.Track = track{}
 
 type track struct {
 	d time.Time
-	c [2]float64
+	c coordinates.Coordinates
 	f bool
 }
 
@@ -31,7 +32,7 @@ func (track track) Date() time.Time {
 	return track.d
 }
 
-func (track track) Coordinates() [2]float64 {
+func (track track) Coordinates() coordinates.Coordinates {
 	return track.c
 }
 

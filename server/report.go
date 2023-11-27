@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	coordinates  Coordinates
+	location     coords
 	rainSnow     []weather.RainSnow
 	tempRiseFall []weather.TempRiseFall
 
@@ -123,9 +123,9 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time, src stri
 	}
 	fmt.Fprint(&b, "\n</pre>")
 	if src == "" {
-		fmt.Fprintf(&b, "<a href=%q><img src='cid:attachment'></a>", coordinates.url(*zoom))
+		fmt.Fprintf(&b, "<a href=%q><img src='cid:attachment'></a>", location.url(*zoom))
 	} else {
-		fmt.Fprintf(&b, "<a href=%q><img src=%q></a>", coordinates.url(*zoom), src)
+		fmt.Fprintf(&b, "<a href=%q><img src=%q></a>", location.url(*zoom), src)
 	}
 	return b.String()
 }
@@ -285,7 +285,7 @@ func zoomEarth(t time.Time, isReport bool) {
 		go func() {
 			zoomMutex.Lock()
 			defer zoomMutex.Unlock()
-			b, err := coordinates.offset(0, *offset).screenshot(*zoom, *quality, 5)
+			b, err := location.offset(0, *offset).screenshot(*zoom, *quality, 5)
 			if err != nil {
 				svc.Print(err)
 				return
@@ -333,13 +333,13 @@ func zoomEarth(t time.Time, isReport bool) {
 			svc.Print(err)
 			continue
 		}
-		if affect, future := willAffect(storm, coordinates, *radius); affect {
+		if affect, future := willAffect(storm, location, *radius); affect {
 			found = append(found, storm)
 			if future {
 				alert = append(alert, storm)
-				svc.Printf("Alerting storm %s(%s)", storm.ID, Coordinates(storm.Coordinates))
+				svc.Printf("Alerting storm %s(%s)", storm.ID, storm.Coordinates)
 			} else {
-				svc.Printf("Recording storm %s(%s)", storm.ID, Coordinates(storm.Coordinates))
+				svc.Printf("Recording storm %s(%s)", storm.ID, storm.Coordinates)
 			}
 		}
 	}
@@ -348,7 +348,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			b, err := Coordinates(i.Coordinates).screenshot(5.4, *quality, 3)
+			b, err := coords{i.Coordinates}.screenshot(5.4, *quality, 3)
 			if err != nil {
 				svc.Print(err)
 				return

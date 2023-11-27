@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/weather/storm"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 var _ storm.API = ZoomEarthAPI{}
@@ -55,7 +56,7 @@ func (id StormID) Data() (storm.Data, error) {
 	return data.Convert(), nil
 }
 
-func calcCoordinates(a, b Track, t time.Time) [2]float64 {
+func calcCoordinates(a, b Track, t time.Time) coordinates.Coordinates {
 	start, end, n := a.Date.Unix(), b.Date.Unix(), t.Unix()
 	if n < start {
 		return a.Coordinates
@@ -63,7 +64,7 @@ func calcCoordinates(a, b Track, t time.Time) [2]float64 {
 		return b.Coordinates
 	}
 	rate := float64(n-start) / float64(end-start)
-	return [2]float64{
+	return coordinates.LongLat{
 		a.Coordinates[0] + (b.Coordinates[0]-a.Coordinates[0])*rate,
 		a.Coordinates[1] + (b.Coordinates[1]-a.Coordinates[1])*rate,
 	}
@@ -79,7 +80,7 @@ func (data *StormData) calcCoordinates() {
 			break
 		}
 	}
-	if b.Coordinates == [2]float64{0, 0} {
+	if b.Coordinates == [2]float64{} {
 		data.Coordinates = a.Coordinates
 	} else {
 		data.Coordinates = calcCoordinates(a, b, time.Now())

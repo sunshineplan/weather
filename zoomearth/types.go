@@ -1,6 +1,10 @@
 package zoomearth
 
-import "time"
+import (
+	"time"
+
+	"github.com/sunshineplan/weather/unit/coordinates"
+)
 
 type ZoomEarthAPI struct{}
 
@@ -13,15 +17,15 @@ type StormData struct {
 	Active bool
 	Type   string
 	Place  string
-	Cone   [][2]float64
+	Cone   []coordinates.LongLat
 	Track  []Track
 	JA     int
 
-	Coordinates [2]float64
+	Coordinates coordinates.Coordinates
 }
 
 type Track struct {
 	Date        time.Time
-	Coordinates [2]float64
+	Coordinates coordinates.LongLat
 	Forecast    bool
 }
