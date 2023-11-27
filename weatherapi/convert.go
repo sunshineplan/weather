@@ -1,8 +1,6 @@
 package weatherapi
 
-import (
-	"github.com/sunshineplan/weather"
-)
+import "github.com/sunshineplan/weather"
 
 func (current *Current) Convert() weather.Current {
 	return weather.Current{
