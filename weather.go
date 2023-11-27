@@ -1,8 +1,6 @@
 package weather
 
-import (
-	"time"
-)
+import "time"
 
 type API interface {
 	Coordinates(string) (latitude, longitude float64, err error)

@@ -116,9 +116,9 @@ func willAffect(storm storm.Data, coords Coordinates, radius float64) (affect, f
 		return
 	}
 	for _, i := range storm.Track {
-		if Coordinates(i.Coordinates).inArea(coords, radius) {
+		if Coordinates(i.Coordinates()).inArea(coords, radius) {
 			affect = true
-			if i.Forecast {
+			if i.Forecast() {
 				future = true
 				break
 			}

@@ -321,7 +321,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			}
 		}()
 	}
-	storms, err := storm.GetStorms(t)
+	storms, err := stormAPI.GetStorms(t)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -375,7 +375,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	var attachments []*mail.Attachment
 	for i, storm := range alert {
 		affectStorms = append(affectStorms, storm.Name)
-		bodys = append(bodys, fmt.Sprintf("%s - %s<a href=%q><img src='cid:map%d'></a>", storm.Title, storm.Place, storm.ID.URL(), i))
+		bodys = append(bodys, fmt.Sprintf("%s - %s<a href=%q><img src='cid:map%d'></a>", storm.Title, storm.Place, storm.URL, i))
 		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%[2]s.gif", *path, storm.ID))
 		if err != nil {
 			svc.Print(err)

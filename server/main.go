@@ -13,6 +13,7 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/weatherapi"
+	"github.com/sunshineplan/weather/zoomearth"
 )
 
 var (
@@ -24,6 +25,7 @@ var (
 	realtime *weatherapi.WeatherAPI
 	forecast *weather.Weather
 	history  weather.API
+	stormAPI zoomearth.ZoomEarthAPI
 )
 
 func init() {
