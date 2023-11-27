@@ -22,7 +22,7 @@ func runServer() error {
 		gin.DefaultErrorWriter = svc.Logger
 	}
 	svc.Println("Location:", *query)
-	svc.Println("Coordinates:", coordinates)
+	svc.Println("Coordinates:", location)
 
 	router := gin.Default()
 	router.Use(cors.Default())

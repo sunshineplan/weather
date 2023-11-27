@@ -1,6 +1,10 @@
 package storm
 
-import "time"
+import (
+	"time"
+
+	"github.com/sunshineplan/weather/unit/coordinates"
+)
 
 type API interface {
 	GetStorms(t time.Time) ([]Storm, error)
@@ -17,12 +21,12 @@ type Data struct {
 	Active      bool
 	Place       string
 	Track       []Track
-	Coordinates [2]float64
+	Coordinates coordinates.Coordinates
 	URL         string
 }
 
 type Track interface {
 	Date() time.Time
-	Coordinates() [2]float64
+	Coordinates() coordinates.Coordinates
 	Forecast() bool
 }

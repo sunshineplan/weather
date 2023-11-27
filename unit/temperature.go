@@ -27,7 +27,7 @@ func (f Celsius) Float64() float64 {
 }
 
 func (f Celsius) String() string {
-	return fmt.Sprintf("%s°C", formatFloat64(f, 1))
+	return fmt.Sprintf("%s°C", FormatFloat64(f, 1))
 }
 
 func (f Celsius) MarshalJSON() ([]byte, error) {

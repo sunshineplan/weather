@@ -31,11 +31,11 @@ func initWeather() error {
 		return err
 	}
 	realtime = weatherapi.New(res.WeatherAPI)
-	lat, lon, err := realtime.Coordinates(*query)
+	coordinates, err := realtime.Coordinates(*query)
 	if err != nil {
 		return err
 	}
-	coordinates = Coordinates{lon, lat}
+	location = coords{coordinates}
 	var api weather.API
 	switch *provider {
 	case "weatherapi":

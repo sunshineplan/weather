@@ -67,7 +67,7 @@ var (
 	offset      = flag.Float64("offset", 0, "daily screenshot offset")
 	zoom        = flag.Float64("zoom", 7, "daily screenshot zoom")
 	quality     = flag.Int("quality", 95, "screenshot quality")
-	radius      = flag.Float64("radius", 7, "storm affect radius")
+	radius      = flag.Float64("radius", 700, "storm affect radius (unit: km)")
 	path        = flag.String("path", "storm", "storm screenshot save path")
 	provider    = flag.String("provider", "visualcrossing", "weather provider")
 	logPath     = flag.String("log", "", "Log file path")
