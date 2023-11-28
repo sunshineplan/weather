@@ -8,8 +8,8 @@ import (
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/api/visualcrossing"
 	"github.com/sunshineplan/weather/unit"
-	"github.com/sunshineplan/weather/visualcrossing"
 )
 
 func record(date time.Time) (err error) {
