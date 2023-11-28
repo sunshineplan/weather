@@ -12,8 +12,8 @@ import (
 	"github.com/sunshineplan/utils/flags"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
-	"github.com/sunshineplan/weather/weatherapi"
-	"github.com/sunshineplan/weather/zoomearth"
+	"github.com/sunshineplan/weather/api/weatherapi"
+	"github.com/sunshineplan/weather/api/zoomearth"
 )
 
 var (

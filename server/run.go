@@ -10,8 +10,8 @@ import (
 	"github.com/sunshineplan/utils/retry"
 	"github.com/sunshineplan/utils/scheduler"
 	"github.com/sunshineplan/weather"
-	"github.com/sunshineplan/weather/visualcrossing"
-	"github.com/sunshineplan/weather/weatherapi"
+	"github.com/sunshineplan/weather/api/visualcrossing"
+	"github.com/sunshineplan/weather/api/weatherapi"
 )
 
 func initWeather() error {
