@@ -13,7 +13,7 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/weatherapi"
-	"github.com/sunshineplan/weather/api/zoomearth"
+	"github.com/sunshineplan/weather/storm"
 )
 
 var (
@@ -23,9 +23,9 @@ var (
 	dialer mail.Dialer
 
 	realtime *weatherapi.WeatherAPI
-	forecast *weather.Weather
+	forecast weather.API
 	history  weather.API
-	stormAPI zoomearth.ZoomEarthAPI
+	stormAPI storm.API
 )
 
 func init() {
