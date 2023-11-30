@@ -5,6 +5,10 @@ import (
 	"math"
 )
 
+type GeoLocator interface {
+	Coordinates(string) (Coordinates, error)
+}
+
 type Coordinates interface {
 	Latitude() Latitude
 	Longitude() Longitude
