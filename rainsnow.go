@@ -46,7 +46,7 @@ func (rainsnow RainSnow) Duration() int {
 
 func (rainsnow *RainSnow) IsExpired() bool {
 	for day := rainsnow.Start(); day.Date != ""; day = rainsnow.Start() {
-		if day.IsExpired() {
+		if day.DateEpoch.IsExpired() {
 			rainsnow.days = rainsnow.days[1:]
 		} else {
 			return false
@@ -57,8 +57,8 @@ func (rainsnow *RainSnow) IsExpired() bool {
 
 func (rainsnow RainSnow) DateInfo() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "%s %s", rainsnow.Start().Date, rainsnow.Start().Weekday())
-	if until := rainsnow.Start().Until(); until == 0 {
+	fmt.Fprintf(&b, "%s %s", rainsnow.Start().Date, rainsnow.Start().DateEpoch.Weekday())
+	if until := rainsnow.Start().DateEpoch.Until(); until == 0 {
 		fmt.Fprint(&b, " (today)")
 	} else if until == 24*time.Hour {
 		fmt.Fprint(&b, " (tomorrow)")
@@ -67,7 +67,7 @@ func (rainsnow RainSnow) DateInfo() string {
 	}
 	if rainsnow.isEnd {
 		if rainsnow.Duration() != 0 {
-			fmt.Fprintf(&b, " ~ %s %s (last %dd)", rainsnow.End().Date, rainsnow.End().Weekday(), rainsnow.Duration())
+			fmt.Fprintf(&b, " ~ %s %s (last %dd)", rainsnow.End().Date, rainsnow.End().DateEpoch.Weekday(), rainsnow.Duration())
 		}
 	} else {
 		fmt.Fprint(&b, " ~ unknown")

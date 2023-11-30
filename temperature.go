@@ -55,13 +55,13 @@ func (t TempRiseFall) IsRise() bool {
 }
 
 func (t TempRiseFall) IsExpired() bool {
-	return t.day.IsExpired()
+	return t.day.DateEpoch.IsExpired()
 }
 
 func (t TempRiseFall) DateInfo() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "%s %s", t.day.Date, t.day.Weekday())
-	if until := t.day.Until(); until == 0 {
+	fmt.Fprintf(&b, "%s %s", t.day.Date, t.day.DateEpoch.Weekday())
+	if until := t.day.DateEpoch.Until(); until == 0 {
 		fmt.Fprint(&b, " (today)")
 	} else if until == 24*time.Hour {
 		fmt.Fprint(&b, " (tomorrow)")

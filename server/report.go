@@ -167,7 +167,7 @@ func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builde
 
 func isRainSnow(now int, hours []weather.Hour) bool {
 	for _, i := range hours {
-		if hour := i.Hour(); hour == now && i.Precip > 0 {
+		if hour := i.TimeEpoch.Time().Hour(); hour == now && i.Precip > 0 {
 			return true
 		}
 	}
