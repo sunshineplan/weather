@@ -6,14 +6,13 @@ import (
 	"math"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/sunshineplan/weather/unit"
 )
 
 type Current struct {
 	Datetime      string           `json:"datetime,omitempty"`
-	DatetimeEpoch int64            `json:"datetimeEpoch,omitempty"`
+	DatetimeEpoch unit.UnixTime    `json:"datetimeEpoch,omitempty"`
 	Temp          unit.Temperature `json:"temp"`
 	FeelsLike     unit.Temperature `json:"feelslike"`
 	Humidity      Percent          `json:"humidity,omitempty"`
@@ -34,7 +33,7 @@ type Current struct {
 
 type Day struct {
 	Date         string           `json:"date,omitempty"`
-	DateEpoch    int64            `json:"dateEpoch,omitempty"`
+	DateEpoch    unit.UnixTime    `json:"dateEpoch,omitempty"`
 	TempMax      unit.Temperature `json:"tempmax"`
 	TempMin      unit.Temperature `json:"tempmin"`
 	Temp         unit.Temperature `json:"temp"`
@@ -63,40 +62,9 @@ type Day struct {
 	Hours        []Hour           `json:"hours,omitempty"`
 }
 
-func (day Day) Time() time.Time {
-	return time.Unix(day.DateEpoch, 0)
-}
-
-func (day Day) Until() time.Duration {
-	return time.Until(day.Time().AddDate(0, 0, 1)).Truncate(24 * time.Hour)
-}
-
-func (w Day) Before(date time.Time) bool {
-	year, month, day := date.Date()
-	y, m, d := w.Time().Date()
-	if year == y {
-		if month == m {
-			return day > d
-		}
-		return month > m
-	}
-	return year > y
-}
-
-func (day Day) IsExpired() bool {
-	if day.Date != "" {
-		return day.Before(time.Now())
-	}
-	return true
-}
-
-func (day Day) Weekday() string {
-	return day.Time().Weekday().String()[:3]
-}
-
 func (day Day) DateInfo(condition bool) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Date: %s %s", day.Date, day.Weekday())
+	fmt.Fprintf(&b, "Date: %s %s", day.Date, day.DateEpoch.Weekday())
 	if condition {
 		fmt.Fprintf(&b, " (%s)", day.Condition)
 	}
@@ -104,7 +72,7 @@ func (day Day) DateInfo(condition bool) string {
 }
 
 func (day Day) DateInfoHTML() string {
-	return fmt.Sprintf("%s %s %s", day.Date, day.Weekday(), day.Condition.Img(day.Icon))
+	return fmt.Sprintf("%s %s %s", day.Date, day.DateEpoch.Weekday(), day.Condition.Img(day.Icon))
 }
 
 func (day Day) Temperature() string {
@@ -168,8 +136,9 @@ func (day Day) PrecipitationHTML(highlight ...int) string {
 func (day Day) PrecipHours() (hours []int, output []string) {
 	for _, i := range day.Hours {
 		if i.Precip > 0 {
-			hours = append(hours, i.Hour())
-			output = append(output, fmt.Sprintf("%02d(%gmm,%s)", i.Hour(), i.Precip, i.PrecipProb))
+			hour := i.TimeEpoch.Time().Hour()
+			hours = append(hours, hour)
+			output = append(output, fmt.Sprintf("%02d(%gmm,%s)", hour, i.Precip, i.PrecipProb))
 		}
 	}
 	return
@@ -209,7 +178,7 @@ func (day Day) HTML() string {
 
 type Hour struct {
 	Time           string           `json:"time,omitempty"`
-	TimeEpoch      int64            `json:"timeEpoch,omitempty"`
+	TimeEpoch      unit.UnixTime    `json:"timeEpoch,omitempty"`
 	Temp           unit.Temperature `json:"temp"`
 	FeelsLike      unit.Temperature `json:"feelslike"`
 	Humidity       Percent          `json:"humidity"`
@@ -231,10 +200,6 @@ type Hour struct {
 	SevereRisk     float64          `json:"severerisk,omitempty"`
 	Condition      Condition        `json:"condition,omitempty"`
 	Icon           string           `json:"icon,omitempty"`
-}
-
-func (hour Hour) Hour() int {
-	return time.Unix(hour.TimeEpoch, 0).Hour()
 }
 
 func (hour Hour) String() string {

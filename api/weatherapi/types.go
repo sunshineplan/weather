@@ -23,7 +23,7 @@ type Location struct {
 }
 
 type Current struct {
-	LastUpdatedEpoch int64           `json:"last_updated_epoch,omitempty"`
+	LastUpdatedEpoch unit.UnixTime   `json:"last_updated_epoch,omitempty"`
 	LastUpdated      string          `json:"last_updated,omitempty"`
 	Temp             unit.Celsius    `json:"temp_c"`
 	IsDay            int             `json:"is_day"`
@@ -53,7 +53,7 @@ type Forecast struct {
 
 type ForecastForecastday struct {
 	Date      string         `json:"date,omitempty"`
-	DateEpoch int64          `json:"date_epoch,omitempty"`
+	DateEpoch unit.UnixTime  `json:"date_epoch,omitempty"`
 	Day       *ForecastDay   `json:"day,omitempty"`
 	Astro     *ForecastAstro `json:"astro,omitempty"`
 	Hour      []ForecastHour `json:"hour,omitempty"`
@@ -86,7 +86,7 @@ type ForecastAstro struct {
 
 type ForecastHour struct {
 	Time         string          `json:"time,omitempty"`
-	TimeEpoch    int64           `json:"time_epoch,omitempty"`
+	TimeEpoch    unit.UnixTime   `json:"time_epoch,omitempty"`
 	Temp         unit.Celsius    `json:"temp_c"`
 	IsDay        int             `json:"is_day"`
 	Condition    *Condition      `json:"condition,omitempty"`

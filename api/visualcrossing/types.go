@@ -18,7 +18,7 @@ type Response struct {
 
 type Current struct {
 	Datetime       string            `json:"datetime,omitempty"`
-	DatetimeEpoch  int64             `json:"datetimeEpoch,omitempty"`
+	DatetimeEpoch  unit.UnixTime     `json:"datetimeEpoch,omitempty"`
 	Temp           unit.Celsius      `json:"temp"`
 	FeelsLike      unit.Celsius      `json:"feelslike"`
 	Humidity       weather.Percent   `json:"humidity"`
@@ -48,7 +48,7 @@ type Current struct {
 
 type Day struct {
 	Datetime       string            `json:"datetime,omitempty"`
-	DatetimeEpoch  int64             `json:"datetimeEpoch,omitempty"`
+	DatetimeEpoch  unit.UnixTime     `json:"datetimeEpoch,omitempty"`
 	TempMax        unit.Celsius      `json:"tempmax"`
 	TempMin        unit.Celsius      `json:"tempmin"`
 	Temp           unit.Celsius      `json:"temp"`
@@ -86,7 +86,7 @@ type Day struct {
 
 type Hour struct {
 	Datetime       string            `json:"datetime,omitempty"`
-	DatetimeEpoch  int64             `json:"datetimeEpoch,omitempty"`
+	DatetimeEpoch  unit.UnixTime     `json:"datetimeEpoch,omitempty"`
 	Temp           unit.Celsius      `json:"temp"`
 	FeelsLike      unit.Celsius      `json:"feelslike"`
 	Humidity       weather.Percent   `json:"humidity"`
