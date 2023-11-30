@@ -7,7 +7,7 @@ import (
 )
 
 type API interface {
-	Coordinates(string) (coordinates.Coordinates, error)
+	coordinates.GeoLocator
 	Realtime(string) (Current, error)
 	Forecast(string, int) ([]Day, error)
 	History(string, time.Time) (Day, error)
