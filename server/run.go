@@ -9,9 +9,9 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
 	"github.com/sunshineplan/utils/scheduler"
-	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/visualcrossing"
 	"github.com/sunshineplan/weather/api/weatherapi"
+	"github.com/sunshineplan/weather/api/zoomearth"
 )
 
 func initWeather() error {
@@ -36,15 +36,14 @@ func initWeather() error {
 		return err
 	}
 	location = coords{coordinates}
-	var api weather.API
 	switch *provider {
 	case "weatherapi":
-		api = realtime
+		forecast = realtime
 	default:
-		api = visualcrossing.New(res.VisualCrossing)
+		forecast = visualcrossing.New(res.VisualCrossing)
 	}
-	forecast = weather.New(api)
-	history = api
+	history = forecast
+	stormAPI = zoomearth.ZoomEarthAPI{}
 	client = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber
