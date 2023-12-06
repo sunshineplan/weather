@@ -81,7 +81,7 @@ type ForecastAstro struct {
 	Moonrise         string `json:"moonrise,omitempty"`
 	Moonset          string `json:"moonset,omitempty"`
 	MoonPhase        string `json:"moon_phase,omitempty"`
-	MoonIllumination string `json:"moon_illumination,omitempty"`
+	MoonIllumination int    `json:"moon_illumination,omitempty"`
 }
 
 type ForecastHour struct {

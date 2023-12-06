@@ -23,7 +23,11 @@ jobs:
           go-version: stable
 
       - name: Test Code
+        env: 
+          WEATHERAPI: ${{ secrets.WEATHERAPI }}
+          VISUALCROSSING: ${{ secrets.VISUALCROSSING }}
         run: |
           go build -v ./...
+          go test -v -race ./...
           cd server
           go build -v ./...
