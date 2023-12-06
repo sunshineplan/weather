@@ -8,6 +8,10 @@ func (t UnixTime) Time() time.Time {
 	return time.Unix(int64(t), 0)
 }
 
+func (t UnixTime) Date() string {
+	return t.Time().Format("2006-01-02")
+}
+
 func (t UnixTime) Until() time.Duration {
 	return time.Until(t.Time().AddDate(0, 0, 1)).Truncate(24 * time.Hour)
 }
