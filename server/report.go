@@ -10,7 +10,9 @@ import (
 
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/storm"
+	"github.com/sunshineplan/weather/unit"
 )
 
 var (
@@ -22,7 +24,7 @@ var (
 	zoomMutex  sync.Mutex
 )
 
-func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, err error) {
+func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, aqiCurrent aqi.Current, err error) {
 	date := t.Format("01-02")
 	forecasts, err = forecast.Forecast(*query, *days)
 	if err != nil {
@@ -37,11 +39,15 @@ func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, 
 		return
 	}
 	avg, err = average(date, 2)
+	if err != nil {
+		return
+	}
+	aqiCurrent, err = aqiAPI.Realtime(aqi.China, *query)
 	return
 }
 
 func report(t time.Time) {
-	days, yesterday, avg, err := prepare(t)
+	days, yesterday, avg, aqi, err := prepare(t)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -51,7 +57,7 @@ func report(t time.Time) {
 	zoomEarth(t, true)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		today(days, yesterday, avg, t, ""),
+		today(days, yesterday, avg, aqi, t, ""),
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
@@ -59,23 +65,25 @@ func report(t time.Time) {
 
 func daily(t time.Time) {
 	svc.Print("Start sending daily report...")
-	days, yesterday, avg, err := prepare(t)
+	days, yesterday, avg, aqi, err := prepare(t)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		today(days, yesterday, avg, t, ""),
+		today(days, yesterday, avg, aqi, t, ""),
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
 }
 
-func today(days []weather.Day, yesterday, avg weather.Day, t time.Time, src string) string {
+func today(days []weather.Day, yesterday, avg weather.Day, aqi aqi.Current, t time.Time, src string) string {
 	var b strings.Builder
 	fmt.Fprint(&b, `<pre style="font-family:system-ui;margin:0">`)
 	fmt.Fprint(&b, days[0].HTML())
+	fmt.Fprintln(&b)
+	fmt.Fprint(&b, aqiHTML(aqi))
 	fmt.Fprintln(&b)
 	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Compared with Yesterday", "</div>")
 	fmt.Fprint(&b, "<table><tbody>")
@@ -89,8 +97,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, t time.Time, src stri
 	fmt.Fprint(&b, weather.NewTempRiseFall(days[0], avg, 0).DiffInfoHTML())
 	fmt.Fprint(&b, "</tbody></table>")
 	fmt.Fprintln(&b)
-	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Forecast", "</div>")
-	fmt.Fprint(&b, table(days))
+	fmt.Fprint(&b, forecastHTML(days))
 
 	alertMutex.Lock()
 	defer alertMutex.Unlock()
@@ -146,7 +153,7 @@ func alert(t time.Time) {
 	alertMutex.Lock()
 	defer alertMutex.Unlock()
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 	go func() {
 		defer wg.Done()
 		runAlert(days, alertRainSnow)
@@ -154,6 +161,10 @@ func alert(t time.Time) {
 	go func() {
 		defer wg.Done()
 		runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+	}()
+	go func() {
+		defer wg.Done()
+		runAlert(nil, alertAQI)
 	}()
 	wg.Wait()
 }
@@ -259,11 +270,34 @@ func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
 	return
 }
 
-func table(days []weather.Day) string {
+func aqiHTML(current aqi.Current) string {
+	var b strings.Builder
+	fmt.Fprintf(&b,
+		`<div style="display:list-item;margin-left:15px">%s:<span style="padding:0 1em;color:white;background-color:%s">%d %s</span></div>`,
+		current.AQI().Type(), current.AQI().Level().Color(), current.AQI().Value(), current.AQI().Level(),
+	)
+	fmt.Fprint(&b, "<table><tbody>")
+	for i, p := range current.Pollutants() {
+		if i%3 == 0 {
+			if i != 0 {
+				fmt.Fprint(&b, "</tr>")
+			}
+			fmt.Fprint(&b, "<tr>")
+		}
+		fmt.Fprintf(&b, `<td>%s:</td><td style="color:%s">%s %s</td>`,
+			p.Kind().HTML(), p.Level().Color(), unit.FormatFloat64(p.Value(), 2), p.Unit())
+	}
+	fmt.Fprint(&b, "</tr>")
+	fmt.Fprint(&b, "</tbody></table>")
+	return b.String()
+}
+
+func forecastHTML(days []weather.Day) string {
 	if len(days) > 10 {
 		days = days[:10]
 	}
 	var b strings.Builder
+	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">Forecast</div>`)
 	fmt.Fprint(&b, "<table border=1 cellspacing=0>")
 	fmt.Fprint(&b, "<thead><tr><th colspan=2>Date</th><th>Max</th><th>Min</th><th>FLMax</th><th>FLMin</th><th>Rain%</th></tr></thead>")
 	fmt.Fprint(&b, "<tbody>")
@@ -395,4 +429,17 @@ func zoomEarth(t time.Time, isReport bool) {
 			true,
 		)
 	}
+}
+
+func alertAQI(_ []weather.Day) (subject string, b strings.Builder) {
+	current, err := aqiAPI.Realtime(aqi.China, *query)
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	if level := current.AQI().Level().String(); level != "Excellent" && level != "Good" {
+		subject = "[Weather]Air Quality Alert - " + level + timestamp()
+		b.WriteString(aqiHTML(current))
+	}
+	return
 }

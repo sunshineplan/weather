@@ -9,6 +9,7 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
 	"github.com/sunshineplan/utils/scheduler"
+	"github.com/sunshineplan/weather/api/airmatters"
 	"github.com/sunshineplan/weather/api/visualcrossing"
 	"github.com/sunshineplan/weather/api/weatherapi"
 	"github.com/sunshineplan/weather/api/zoomearth"
@@ -21,6 +22,7 @@ func initWeather() error {
 	var res struct {
 		WeatherAPI     string
 		VisualCrossing string
+		AirMatters     string
 		Mongo          api.Client
 		Dialer         mail.Dialer
 		Subscriber     mail.Receipts
@@ -44,6 +46,7 @@ func initWeather() error {
 	}
 	history = forecast
 	stormAPI = zoomearth.ZoomEarthAPI{}
+	aqiAPI = airmatters.New(res.AirMatters)
 	client = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber
