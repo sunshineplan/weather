@@ -13,6 +13,7 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/weatherapi"
+	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/storm"
 )
 
@@ -26,6 +27,7 @@ var (
 	forecast weather.API
 	history  weather.API
 	stormAPI storm.API
+	aqiAPI   aqi.API
 )
 
 func init() {
