@@ -121,7 +121,7 @@ func (t TempRiseFall) HTML() string {
 	return b.String()
 }
 
-func WillTempRiseFall(days []Day, standard float64) (res []TempRiseFall, err error) {
+func WillTempRiseFall(days []Day, standard float64) (res []TempRiseFall) {
 	var day, previous Day
 	for _, i := range days {
 		day = i
@@ -147,5 +147,5 @@ func WillTempRiseFall(days []Day, standard float64) (res []TempRiseFall, err err
 
 func isRiseFall(t, previous unit.Temperature, standard float64) (tempRiseFall bool, isRise bool) {
 	diff := t.Difference(previous).Float64()
-	return math.Abs(diff) >= standard, diff > 0
+	return math.Abs(diff) >= math.Abs(standard), diff > 0
 }

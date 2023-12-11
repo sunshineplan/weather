@@ -13,16 +13,6 @@ import (
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
-type coords struct{ coordinates.Coordinates }
-
-func (coords coords) inArea(c coords, radius float64) bool {
-	return coordinates.Distance(coords, c) <= radius
-}
-
-func (c coords) offset(x, y float64) coords {
-	return coords{coordinates.New(float64(c.Latitude())+x, float64(c.Longitude())+y)}
-}
-
 func (coords coords) url(zoom float64) string {
 	return fmt.Sprintf(
 		"https://zoom.earth/maps/satellite/#view=%g,%g,%.2fz/overlays=radar,wind", coords.Latitude(), coords.Longitude(), zoom,
@@ -94,7 +84,7 @@ $('.colon').style.left='108px'
 $('.colon').style.animation='none'
 $('.minute').style.left='110px'
 $('.am-pm').style.left='146px'`, nil),
-		chromedp.Sleep(time.Second),
+		chromedp.Sleep(time.Second*2),
 		chromedp.FullScreenshot(&b, quality),
 	); err != nil {
 		panic(err)
@@ -105,12 +95,12 @@ $('.am-pm').style.left='146px'`, nil),
 	return
 }
 
-func willAffect(storm storm.Data, coordinates coords, radius float64) (affect, future bool) {
+func willAffect(storm storm.Data, coords *coords, radius float64) (affect, future bool) {
 	if !storm.Active {
 		return
 	}
 	for _, i := range storm.Track {
-		if (coords{i.Coordinates()}).inArea(coordinates, radius) {
+		if coordinates.Distance(i.Coordinates(), coords) <= radius {
 			affect = true
 			if i.Forecast() {
 				future = true

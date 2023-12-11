@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/sunshineplan/weather"
@@ -23,8 +25,9 @@ func New(key string) *WeatherAPI {
 	return &WeatherAPI{key}
 }
 
-func (api *WeatherAPI) Request(endpoint, query string) (res Response, err error) {
-	resp, err := http.Get(fmt.Sprintf("%s/%s?key=%s&%s", baseURL, endpoint, api.key, query))
+func (api *WeatherAPI) Request(endpoint string, query url.Values) (res Response, err error) {
+	query.Set("key", api.key)
+	resp, err := http.Get(fmt.Sprintf("%s/%s?%s", baseURL, endpoint, query.Encode()))
 	if err != nil {
 		return
 	}
@@ -40,7 +43,7 @@ func (api *WeatherAPI) Request(endpoint, query string) (res Response, err error)
 }
 
 func (api *WeatherAPI) Coordinates(query string) (coordinates.Coordinates, error) {
-	resp, err := api.Request("current.json", fmt.Sprintf("q=%s", query))
+	resp, err := api.Request("current.json", url.Values{"q": {query}})
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +54,7 @@ func (api *WeatherAPI) Coordinates(query string) (coordinates.Coordinates, error
 }
 
 func (api *WeatherAPI) Realtime(query string) (current weather.Current, err error) {
-	resp, err := api.Request("current.json", fmt.Sprintf("q=%s", query))
+	resp, err := api.Request("current.json", url.Values{"q": {query}})
 	if err != nil {
 		return
 	}
@@ -60,7 +63,7 @@ func (api *WeatherAPI) Realtime(query string) (current weather.Current, err erro
 }
 
 func (api *WeatherAPI) Forecast(query string, n int) (days []weather.Day, err error) {
-	resp, err := api.Request("forecast.json", fmt.Sprintf("q=%s&days=%d", query, n))
+	resp, err := api.Request("forecast.json", url.Values{"q": {query}, "days": {strconv.Itoa(n)}})
 	if err != nil {
 		return
 	}
@@ -71,7 +74,7 @@ func (api *WeatherAPI) Forecast(query string, n int) (days []weather.Day, err er
 }
 
 func (api *WeatherAPI) History(query string, date time.Time) (day weather.Day, err error) {
-	resp, err := api.Request("history.json", fmt.Sprintf("q=%s&dt=%s", query, date.Format("2006-01-02")))
+	resp, err := api.Request("history.json", url.Values{"q": {query}, "dt": {date.Format("2006-01-02")}})
 	if err != nil {
 		return
 	}

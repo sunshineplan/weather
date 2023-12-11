@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/log"
+	"github.com/sunshineplan/weather/aqi"
 )
 
 var server = httpsvr.New()
@@ -43,22 +45,80 @@ func runServer() error {
 	router.GET("/6h", func(c *gin.Context) {
 		c.File("daily/daily-6h.gif")
 	})
+	router.GET("/map", func(c *gin.Context) {
+		var q string
+		if q = c.Query("q"); q == "" {
+			q = *query
+		}
+		var z float64
+		var err error
+		if z, err = strconv.ParseFloat(c.Query("z"), 64); err != nil {
+			z = *zoom
+		}
+		if q == *query {
+			c.File("daily/daily-24h.gif")
+		} else {
+			coords, err := getCoords(q)
+			if err != nil {
+				svc.Print(err)
+				c.String(400, "")
+				return
+			}
+			b, err := coords.screenshot(z, 95, 3)
+			if err != nil {
+				svc.Print(err)
+				c.String(500, "")
+				return
+			}
+			c.Data(200, "image/jpeg", b)
+		}
+	})
 	router.GET("/status", func(c *gin.Context) {
 		t := time.Now()
-		days, yesterday, avg, aqi, err := prepare(t)
+		var q string
+		if q = c.Query("q"); q == "" {
+			q = *query
+		}
+		var n int
+		if n, _ = strconv.Atoi(c.Query("n")); n < 1 {
+			n = *days
+		}
+		var diff, z float64
+		var err error
+		if diff, err = strconv.ParseFloat(c.Query("diff"), 64); err != nil {
+			diff = *difference
+		}
+		if z, err = strconv.ParseFloat(c.Query("z"), 64); err != nil {
+			z = *zoom
+		}
+		days, avg, aqi, err := getAll(q, n, aqi.China, t)
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")
 			return
 		}
-		c.Data(200, "text/html", []byte(today(days, yesterday, avg, aqi, t, "/6h")))
+		if q == *query {
+			c.Data(200, "text/html", []byte(
+				html(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, diff)+imageHTML(location.url(z), "/6h"),
+			))
+		} else {
+			coords, err := getCoords(q)
+			if err != nil {
+				svc.Print(err)
+				c.String(400, "")
+				return
+			}
+			c.Data(200, "text/html", []byte(
+				html(fmt.Sprintf("%s(%s)", q, coords), days, avg, aqi, t, diff)+imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q)),
+			))
+		}
 	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")
 		if q == "" {
 			q = c.ClientIP()
 		}
-		resp, err := realtime.Request("current.json", fmt.Sprintf("q=%s", q))
+		resp, err := realtime.Request("current.json", url.Values{"q": {q}})
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")

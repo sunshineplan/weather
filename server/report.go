@@ -13,10 +13,12 @@ import (
 	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var (
-	location     coords
+	location     *coords
 	rainSnow     []weather.RainSnow
 	tempRiseFall []weather.TempRiseFall
 
@@ -24,40 +26,18 @@ var (
 	zoomMutex  sync.Mutex
 )
 
-func prepare(t time.Time) (forecasts []weather.Day, yesterday, avg weather.Day, aqiCurrent aqi.Current, err error) {
-	date := t.Format("01-02")
-	forecasts, err = forecast.Forecast(*query, *days)
-	if err != nil {
-		return
-	}
-	if !strings.HasSuffix(forecasts[0].Date, date) {
-		err = fmt.Errorf("first forecast is not today: %s", forecasts[0].Date)
-		return
-	}
-	yesterday, err = history.History(*query, t.AddDate(0, 0, -1))
-	if err != nil {
-		return
-	}
-	avg, err = average(date, 2)
-	if err != nil {
-		return
-	}
-	aqiCurrent, err = aqiAPI.Realtime(aqi.China, *query)
-	return
-}
-
 func report(t time.Time) {
-	days, yesterday, avg, aqi, err := prepare(t)
+	days, avg, aqi, err := getAll(*query, *days, aqi.China, t)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
-	runAlert(days, alertRainSnow)
-	runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+	runAlert(days[1:], alertRainSnow)
+	runAlert(days, alertTempRiseFall)
 	zoomEarth(t, true)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		today(days, yesterday, avg, aqi, t, ""),
+		html(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference)+imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
@@ -65,44 +45,47 @@ func report(t time.Time) {
 
 func daily(t time.Time) {
 	svc.Print("Start sending daily report...")
-	days, yesterday, avg, aqi, err := prepare(t)
+	days, avg, aqi, err := getAll(*query, *days, aqi.China, t)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		today(days, yesterday, avg, aqi, t, ""),
+		html(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference)+imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
 }
 
-func today(days []weather.Day, yesterday, avg weather.Day, aqi aqi.Current, t time.Time, src string) string {
+func html(q string, days []weather.Day, avg weather.Day, aqi aqi.Current, t time.Time, diff float64) string {
 	var b strings.Builder
 	fmt.Fprint(&b, `<pre style="font-family:system-ui;margin:0">`)
-	fmt.Fprint(&b, days[0].HTML())
+	fmt.Fprintf(&b,
+		`<div style="display:list-item;list-style:circle;margin-left:1em;font-size:1.5em">Weather of %s</div>`,
+		cases.Title(language.English).String(q),
+	)
+	fmt.Fprint(&b, days[1].HTML())
 	fmt.Fprintln(&b)
 	fmt.Fprint(&b, aqiHTML(aqi))
 	fmt.Fprintln(&b)
 	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Compared with Yesterday", "</div>")
 	fmt.Fprint(&b, "<table><tbody>")
-	fmt.Fprint(&b, yesterday.TemperatureHTML())
-	fmt.Fprint(&b, weather.NewTempRiseFall(days[0], yesterday, 0).DiffInfoHTML())
+	fmt.Fprint(&b, days[0].TemperatureHTML())
+	fmt.Fprint(&b, weather.NewTempRiseFall(days[1], days[0], 0).DiffInfoHTML())
 	fmt.Fprint(&b, "</tbody></table>")
 	fmt.Fprintln(&b)
-	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Historical Average Temperature of ", t.Format("01-02"), "</div>")
-	fmt.Fprint(&b, "<table><tbody>")
-	fmt.Fprint(&b, avg.TemperatureHTML())
-	fmt.Fprint(&b, weather.NewTempRiseFall(days[0], avg, 0).DiffInfoHTML())
-	fmt.Fprint(&b, "</tbody></table>")
-	fmt.Fprintln(&b)
-	fmt.Fprint(&b, forecastHTML(days))
+	if avg.Date != "" {
+		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Historical Average Temperature of ", t.Format("01-02"), "</div>")
+		fmt.Fprint(&b, "<table><tbody>")
+		fmt.Fprint(&b, avg.TemperatureHTML())
+		fmt.Fprint(&b, weather.NewTempRiseFall(days[1], avg, 0).DiffInfoHTML())
+		fmt.Fprint(&b, "</tbody></table>")
+		fmt.Fprintln(&b)
+	}
+	fmt.Fprint(&b, forecastHTML(days[1:]))
 
-	alertMutex.Lock()
-	defer alertMutex.Unlock()
-
-	if len(rainSnow) > 0 {
+	if rainSnow := weather.WillRainSnow(days[1:]); len(rainSnow) > 0 {
 		fmt.Fprintln(&b)
 		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Rain Snow Alert", "</div>")
 		for index, i := range rainSnow {
@@ -115,7 +98,7 @@ func today(days []weather.Day, yesterday, avg weather.Day, aqi aqi.Current, t ti
 		fmt.Fprintln(&b)
 		fmt.Fprintln(&b, "No Rain Snow Alert.")
 	}
-	if len(tempRiseFall) > 0 {
+	if tempRiseFall := weather.WillTempRiseFall(days, diff); len(tempRiseFall) > 0 {
 		fmt.Fprintln(&b)
 		fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px">`, "Recent Temperature Alert", "</div>")
 		for index, i := range tempRiseFall {
@@ -129,22 +112,12 @@ func today(days []weather.Day, yesterday, avg weather.Day, aqi aqi.Current, t ti
 		fmt.Fprintln(&b, "No Temperature Alert.")
 	}
 	fmt.Fprint(&b, "\n</pre>")
-	if src == "" {
-		fmt.Fprintf(&b, "<a href=%q><img src='cid:attachment'></a>", location.url(*zoom))
-	} else {
-		fmt.Fprintf(&b, "<a href=%q><img src=%q></a>", location.url(*zoom), src)
-	}
 	return b.String()
 }
 
 func alert(t time.Time) {
 	svc.Print("Start alerting...")
-	days, err := forecast.Forecast(*query, *days)
-	if err != nil {
-		svc.Print(err)
-		return
-	}
-	yesterday, err := history.History(*query, t.AddDate(0, 0, -1))
+	days, err := getWeather(*query, *days, t)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -156,11 +129,11 @@ func alert(t time.Time) {
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		runAlert(days, alertRainSnow)
+		runAlert(days[1:], alertRainSnow)
 	}()
 	go func() {
 		defer wg.Done()
-		runAlert(append([]weather.Day{yesterday}, days...), alertTempRiseFall)
+		runAlert(days, alertTempRiseFall)
 	}()
 	go func() {
 		defer wg.Done()
@@ -192,9 +165,7 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 		}
 	}
 
-	if res, err := weather.WillRainSnow(days); err != nil {
-		svc.Print(err)
-	} else if n := len(res); n > 0 {
+	if res := weather.WillRainSnow(days); len(res) > 0 {
 		for index, i := range res {
 			now := time.Now()
 			hour := now.Hour()
@@ -236,9 +207,7 @@ func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
 		}
 	}
 
-	if res, err := weather.WillTempRiseFall(days, *difference); err != nil {
-		svc.Print(err)
-	} else if len(res) > 0 {
+	if res := weather.WillTempRiseFall(days, *difference); len(res) > 0 {
 		for index, i := range res {
 			if index == 0 {
 				if len(tempRiseFall) == 0 ||

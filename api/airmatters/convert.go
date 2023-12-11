@@ -1,7 +1,9 @@
 package airmatters
 
 import (
+	"cmp"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -76,6 +78,7 @@ func (i Current) Pollutants() (pollutants []aqi.Pollutant) {
 			}
 		}
 	}
+	slices.SortFunc(pollutants, func(a, b aqi.Pollutant) int { return cmp.Compare(a.Kind(), b.Kind()) })
 	return
 }
 

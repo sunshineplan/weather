@@ -99,7 +99,7 @@ func (rainsnow RainSnow) HTML(t time.Time, highlight ...int) string {
 	return b.String()
 }
 
-func WillRainSnow(days []Day) (res []RainSnow, err error) {
+func WillRainSnow(days []Day) (res []RainSnow) {
 	var rainDays []Day
 	for _, i := range days {
 		switch i.Precip {

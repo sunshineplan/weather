@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/weather/aqi"
+	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
@@ -93,15 +94,41 @@ func (api *AirMatters) Realtime(aqiType aqi.Type, query string) (aqi.Current, er
 		v, _ := PlaceMap.Load(query)
 		id = v.(Place).ID
 	}
-	var latest struct{ Latest Current }
+	var res struct{ Latest Current }
 	if err := api.Request("current_air_condition", url.Values{
 		"place_id": {id},
 		"standard": {standard},
-	}, &latest); err != nil {
+	}, &res); err != nil {
 		return nil, err
 	}
-	latest.Latest.AQIType = aqiType
-	return latest.Latest, nil
+	res.Latest.AQIType = aqiType
+	for i := range res.Latest.Items {
+		res.Latest.Items[i].AQIType = aqiType
+	}
+	return res.Latest, nil
+}
+
+func (api *AirMatters) RealtimeNearby(aqiType aqi.Type, query coordinates.Coordinates) (Place, aqi.Current, error) {
+	standard, ok := typeMap[aqiType]
+	if !ok {
+		return Place{}, nil, errors.New("aqi type not supported")
+	}
+	var res struct {
+		Place  Place
+		Latest Current
+	}
+	if err := api.Request("nearby_air_condition", url.Values{
+		"lat":      {unit.FormatFloat64(query.Latitude(), 2)},
+		"lon":      {unit.FormatFloat64(query.Longitude(), 2)},
+		"standard": {standard},
+	}, &res); err != nil {
+		return Place{}, nil, err
+	}
+	res.Latest.AQIType = aqiType
+	for i := range res.Latest.Items {
+		res.Latest.Items[i].AQIType = aqiType
+	}
+	return res.Place, res.Latest, nil
 }
 
 func (api *AirMatters) Forecast(aqiType aqi.Type, query string, _ int) (days []aqi.Day, err error) {
