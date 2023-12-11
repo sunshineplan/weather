@@ -118,7 +118,7 @@ func runServer() error {
 		if q == "" {
 			q = c.ClientIP()
 		}
-		resp, err := realtime.Request("current.json", fmt.Sprintf("q=%s", q))
+		resp, err := realtime.Request("current.json", url.Values{"q": {q}})
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")
