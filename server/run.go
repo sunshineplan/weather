@@ -15,7 +15,7 @@ import (
 	"github.com/sunshineplan/weather/api/zoomearth"
 )
 
-func initWeather() error {
+func initWeather() (err error) {
 	if *query == "" {
 		return errors.New("query is empty")
 	}
@@ -27,17 +27,16 @@ func initWeather() error {
 		Dialer         mail.Dialer
 		Subscriber     mail.Receipts
 	}
-	if err := retry.Do(func() error {
+	if err = retry.Do(func() error {
 		return meta.Get("weather", &res)
 	}, 3, 20); err != nil {
-		return err
+		return
 	}
 	realtime = weatherapi.New(res.WeatherAPI)
-	coordinates, err := realtime.Coordinates(*query)
+	location, err = getCoords(*query)
 	if err != nil {
-		return err
+		return
 	}
-	location = coords{coordinates}
 	switch *provider {
 	case "weatherapi":
 		forecast = realtime

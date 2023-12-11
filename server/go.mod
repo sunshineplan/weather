@@ -13,6 +13,7 @@ require (
 	github.com/sunshineplan/service v1.0.19
 	github.com/sunshineplan/utils v0.1.55
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
+	golang.org/x/text v0.13.0
 )
 
 require (
@@ -49,7 +50,6 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

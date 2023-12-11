@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/sunshineplan/weather"
@@ -24,7 +25,7 @@ func New(key string) *VisualCrossing {
 }
 
 func (api *VisualCrossing) Request(endpoint, include, query string) (res Response, err error) {
-	url := fmt.Sprintf("%s/%s/%s?unitGroup=metric&key=%s", baseURL, query, endpoint, api.key)
+	url := fmt.Sprintf("%s/%s/%s?unitGroup=metric&key=%s", baseURL, url.PathEscape(query), endpoint, api.key)
 	if include != "" {
 		url += "&include=" + include
 	}

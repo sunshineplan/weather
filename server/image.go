@@ -62,3 +62,7 @@ func icon(c *gin.Context) {
 		c.Data(200, "image/png", b)
 	}
 }
+
+func imageHTML(href, src string) string {
+	return fmt.Sprintf("<a href=%q><img src=%q></a>", href, src)
+}
