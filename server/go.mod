@@ -13,7 +13,7 @@ require (
 	github.com/sunshineplan/service v1.0.19
 	github.com/sunshineplan/utils v0.1.55
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
-	golang.org/x/text v0.13.0
+	golang.org/x/text v0.14.0
 )
 
 require (
