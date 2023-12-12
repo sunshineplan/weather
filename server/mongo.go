@@ -48,6 +48,7 @@ func average(date string, round int) (weather.Day, error) {
 				"feelslike":    mongodb.M{"$avg": "$feelslike"},
 			}},
 			{"$project": mongodb.M{
+				"datetime":     "$_id",
 				"tempmax":      mongodb.M{"$round": []any{"$tempmax", round}},
 				"tempmin":      mongodb.M{"$round": []any{"$tempmin", round}},
 				"temp":         mongodb.M{"$round": []any{"$temp", round}},
