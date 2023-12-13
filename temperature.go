@@ -105,19 +105,20 @@ func (t TempRiseFall) String() string {
 
 func (t TempRiseFall) HTML() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`)
+	fmt.Fprint(&b, "<div>")
+	fmt.Fprintf(&b, `<span style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`)
 	fmt.Fprintf(&b, "%s %s", t.DateInfo(), t.day.Condition.Img(t.day.Icon))
-	fmt.Fprint(&b, "</div>")
+	fmt.Fprint(&b, "</span>")
 	fmt.Fprint(&b, "<table><tbody>")
 	fmt.Fprint(&b, t.day.TemperatureHTML())
 	fmt.Fprint(&b, t.DiffInfoHTML())
 	fmt.Fprint(&b, "</tbody></table>")
-	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:circle">`)
+	fmt.Fprintf(&b, `<span style="display:list-item;margin-left:15px;list-style-type:circle">`)
 	fmt.Fprint(&b, "Previous Day: ", t.previous.DateInfoHTML())
-	fmt.Fprint(&b, "</div>")
+	fmt.Fprint(&b, "</span>")
 	fmt.Fprint(&b, "<table><tbody>")
 	fmt.Fprint(&b, t.previous.TemperatureHTML())
-	fmt.Fprint(&b, "</tbody></table>")
+	fmt.Fprint(&b, "</tbody></table></div>")
 	return b.String()
 }
 

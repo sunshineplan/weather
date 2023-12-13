@@ -87,15 +87,19 @@ func (rainsnow RainSnow) String() string {
 
 func (rainsnow RainSnow) HTML(t time.Time, highlight ...int) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">%s</div>`, rainsnow.DateInfo())
+	fmt.Fprint(&b, "<div>")
+	fmt.Fprintf(&b, `<span style="display:list-item;margin-left:15px;list-style-type:disclosure-open">%s</span>`, rainsnow.DateInfo())
 	for index, i := range rainsnow.days {
-		fmt.Fprintf(&b, "%d.  %s\n", index+1, i.DateInfoHTML())
+		fmt.Fprint(&b, `<div style="display:grid">`)
+		fmt.Fprintf(&b, "<span>%d.  %s</span>", index+1, i.DateInfoHTML())
 		if i.Date == t.Format("2006-01-02") {
-			fmt.Fprintln(&b, i.PrecipitationHTML(highlight...))
+			fmt.Fprint(&b, i.PrecipitationHTML(highlight...))
 		} else {
-			fmt.Fprintln(&b, i.PrecipitationHTML())
+			fmt.Fprint(&b, i.PrecipitationHTML())
 		}
+		fmt.Fprint(&b, "</div>")
 	}
+	fmt.Fprint(&b, "</div>")
 	return b.String()
 }
 
