@@ -99,7 +99,7 @@ func runServer() error {
 		}
 		if q == *query {
 			c.Data(200, "text/html", []byte(
-				html(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, diff)+imageHTML(location.url(z), "/6h"),
+				fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, diff)+imageHTML(location.url(z), "/6h"),
 			))
 		} else {
 			coords, err := getCoords(q)
@@ -109,7 +109,7 @@ func runServer() error {
 				return
 			}
 			c.Data(200, "text/html", []byte(
-				html(fmt.Sprintf("%s(%s)", q, coords), days, avg, aqi, t, diff)+imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q)),
+				fullHTML(fmt.Sprintf("%s(%s)", q, coords), days, avg, aqi, t, diff)+imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q)),
 			))
 		}
 	})

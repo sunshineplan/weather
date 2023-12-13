@@ -110,12 +110,12 @@ func (day Day) Precipitation() string {
 
 func (day Day) PrecipitationHTML(highlight ...int) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
+	fmt.Fprintf(&b, "<span>Precip: %gmm, PrecipProb: %s, PrecipCover: %s</span>", day.Precip, day.PrecipProb, day.PrecipCover)
 	hours, precipHours := day.PrecipHours()
 	if len(precipHours) == 0 {
-		fmt.Fprint(&b, "PrecipHours: none")
+		fmt.Fprint(&b, "<span>PrecipHours: none</span>")
 	} else {
-		fmt.Fprint(&b, "PrecipHours: ")
+		fmt.Fprint(&b, `<span>PrecipHours: `)
 		for i, hour := range hours {
 			if slices.Contains(highlight, hour) {
 				fmt.Fprintf(&b, `<span style="color:red">%s</span>`, precipHours[i])
@@ -126,9 +126,10 @@ func (day Day) PrecipitationHTML(highlight ...int) string {
 				fmt.Fprint(&b, ", ")
 			}
 		}
+		fmt.Fprint(&b, "</span>")
 	}
 	if len(day.PrecipType) > 0 {
-		fmt.Fprintf(&b, "\nPrecipType: %s", strings.Join(day.PrecipType, ", "))
+		fmt.Fprintf(&b, "<span>PrecipType: %s</span>", strings.Join(day.PrecipType, ", "))
 	}
 	return b.String()
 }
@@ -157,7 +158,8 @@ func (day Day) String() string {
 
 func (day Day) HTML() string {
 	var b strings.Builder
-	fmt.Fprint(&b, `<div style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`, day.DateInfoHTML(), "</div>")
+	fmt.Fprint(&b, "<div>")
+	fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`, day.DateInfoHTML(), "</span>")
 	fmt.Fprint(&b, "<table><tbody>")
 	fmt.Fprint(&b, day.TemperatureHTML())
 	fmt.Fprintf(&b, "<tr><td>Humidity:</td><td>%s</td>", day.Humidity)
@@ -172,7 +174,7 @@ func (day Day) HTML() string {
 	fmt.Fprintf(&b, "<tr><td>CloudCover:</td><td>%s</td>", day.CloudCover)
 	fmt.Fprintf(&b, "<td>Visibility:</td><td>%gkm</td>", day.Visibility)
 	fmt.Fprintf(&b, "<td>UVIndex:</td><td>%s</td></tr>", day.UVIndex.HTML())
-	fmt.Fprint(&b, "</tbody></table>")
+	fmt.Fprint(&b, "</tbody></table></div>")
 	return b.String()
 }
 
