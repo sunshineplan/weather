@@ -3,6 +3,8 @@ package unit
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/sunshineplan/utils/html"
 )
 
 var (
@@ -17,7 +19,7 @@ type WindSpeed interface {
 	ForceColor() string
 	String() string
 	MarshalJSON() ([]byte, error)
-	HTML() string
+	HTML() html.HTML
 }
 
 func WindForceColor(force int) string {
@@ -85,6 +87,6 @@ func (f WindKPH) MarshalJSON() ([]byte, error) {
 	return json.Marshal(float64(f))
 }
 
-func (f WindKPH) HTML() string {
-	return fmt.Sprintf(`<span style="color:%s">%sm/s(%d)</span>`, f.ForceColor(), FormatFloat64(f.MPS(), 1), f.Force())
+func (f WindKPH) HTML() html.HTML {
+	return html.Span().Style("color:"+f.ForceColor()).Contentf("%sm/s(%d)", FormatFloat64(f.MPS(), 1), f.Force()).HTML()
 }

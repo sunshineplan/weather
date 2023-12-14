@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
@@ -36,7 +38,9 @@ func report(t time.Time) {
 	zoomEarth(t, true)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference)+imageHTML(location.url(*zoom), "cid:attachment"),
+		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference)+
+			html.Br().HTML()+
+			imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
@@ -57,73 +61,86 @@ func daily(t time.Time) {
 	)
 }
 
-func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Current, t time.Time, diff float64) string {
-	var b strings.Builder
-	fmt.Fprint(&b, `<div style="font-family:system-ui;margin:0">`)
-	fmt.Fprintf(&b,
-		`<span style="display:list-item;list-style:circle;margin-left:1em;font-size:1.5em">Weather of %s</span>`,
-		cases.Title(language.English).String(q),
+func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Current, t time.Time, diff float64) html.HTML {
+	div := html.Div().Style("font-family:system-ui;margin:0")
+	div.AppendContent(
+		html.Span().Style("display:list-item;list-style:circle;margin-left:1em;font-size:1.5em").
+			Contentf("Weather of %s", cases.Title(language.English).String(q)),
+		days[1],
+		html.Br(),
+		aqi.CurrentHTML(currentAQI),
+		html.Br(),
+		html.Div().AppendChild(
+			html.Span().Style("display:list-item;margin-left:15px").Content("Compared with Yesterday"),
+			html.Table().AppendChild(
+				html.Tbody().Content(
+					days[0].TemperatureHTML(),
+					weather.NewTempRiseFall(days[1], days[0], 0).DiffInfoHTML(),
+				),
+			),
+		),
+		html.Br(),
 	)
-	fmt.Fprint(&b, days[1].HTML())
-	fmt.Fprint(&b, "<br>")
-	fmt.Fprint(&b, aqi.CurrentHTML(currentAQI))
-	fmt.Fprint(&b, "<br>")
-	fmt.Fprint(&b, "<div>")
-	fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px">`, "Compared with Yesterday", "</span>")
-	fmt.Fprint(&b, "<table><tbody>")
-	fmt.Fprint(&b, days[0].TemperatureHTML())
-	fmt.Fprint(&b, weather.NewTempRiseFall(days[1], days[0], 0).DiffInfoHTML())
-	fmt.Fprint(&b, "</tbody></table>")
-	fmt.Fprint(&b, "</div>")
-	fmt.Fprint(&b, "<br>")
 	if avg.Date != "" {
-		fmt.Fprint(&b, "<div>")
-		fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px">`, "Historical Average Temperature of ", t.Format("01-02"), "</span>")
-		fmt.Fprint(&b, "<table><tbody>")
-		fmt.Fprint(&b, avg.TemperatureHTML())
-		fmt.Fprint(&b, weather.NewTempRiseFall(days[1], avg, 0).DiffInfoHTML())
-		fmt.Fprint(&b, "</tbody></table>")
-		fmt.Fprint(&b, "</div>")
-		fmt.Fprint(&b, "<br>")
+		div.AppendChild(
+			html.Div().AppendChild(
+				html.Span().Style("display:list-item;margin-left:15px").
+					Contentf("Historical Average Temperature of %s", t.Format("01-02")),
+				html.Table().AppendChild(
+					html.Tbody().Content(
+						avg.TemperatureHTML(),
+						weather.NewTempRiseFall(days[1], avg, 0).DiffInfoHTML(),
+					),
+				),
+			),
+			html.Br(),
+		)
 	}
-	fmt.Fprint(&b, forecastHTML(days[1:]))
+	div.AppendContent(forecastHTML(days[1:]))
 
 	if rainSnow := weather.WillRainSnow(days[1:]); len(rainSnow) > 0 {
-		fmt.Fprint(&b, "<br>")
-		fmt.Fprint(&b, "<div>")
-		fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px">`, "Recent Rain Snow Alert", "</span>")
-		fmt.Fprint(&b, "<div>")
+		res := html.Div()
 		for index, i := range rainSnow {
-			fmt.Fprint(&b, i.HTML(t))
+			res.AppendContent(i.HTML(t))
 			if index < len(rainSnow)-1 {
-				fmt.Fprint(&b, "<br>")
+				res.AppendChild(html.Br())
 			}
 		}
-		fmt.Fprint(&b, "</div>")
-		fmt.Fprint(&b, "</div>")
+		div.AppendChild(
+			html.Br(),
+			html.Div().AppendChild(
+				html.Span().Style("display:list-item;margin-left:15px").Content("Recent Rain Snow Alert"),
+				html.Div().AppendChild(res),
+			),
+		)
 	} else {
-		fmt.Fprint(&b, "<br>")
-		fmt.Fprint(&b, "No Rain Snow Alert.")
+		div.AppendContent(
+			html.Br(),
+			"No Rain Snow Alert.",
+		)
 	}
 	if tempRiseFall := weather.WillTempRiseFall(days, diff); len(tempRiseFall) > 0 {
-		fmt.Fprint(&b, "<br>")
-		fmt.Fprint(&b, "<div>")
-		fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px">`, "Recent Temperature Alert", "</span>")
-		fmt.Fprint(&b, "<div>")
+		res := html.Div()
 		for index, i := range tempRiseFall {
-			fmt.Fprint(&b, i.HTML())
+			res.AppendContent(i)
 			if index < len(tempRiseFall)-1 {
-				fmt.Fprint(&b, "<br>")
+				res.AppendChild(html.Br())
 			}
 		}
-		fmt.Fprint(&b, "</div>")
-		fmt.Fprint(&b, "</div>")
+		div.AppendChild(
+			html.Br(),
+			html.Div().AppendChild(
+				html.Span().Style("display:list-item;margin-left:15px").Content("Recent Temperature Alert"),
+				html.Div().AppendChild(res),
+			),
+		)
 	} else {
-		fmt.Fprint(&b, "<br>")
-		fmt.Fprint(&b, "No Temperature Alert.")
+		div.AppendContent(
+			html.Br(),
+			"No Temperature Alert.",
+		)
 	}
-	fmt.Fprint(&b, "</div>")
-	return b.String()
+	return div.HTML()
 }
 
 func alert(t time.Time) {
@@ -153,10 +170,10 @@ func alert(t time.Time) {
 	wg.Wait()
 }
 
-func runAlert(days []weather.Day, fn func([]weather.Day) (string, strings.Builder)) {
+func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element)) {
 	if subject, body := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, `<div style="font-family:system-ui;margin:0">`+body.String()+"</div>", nil, false)
+		sendMail(subject, html.Div().Style("font-family:system-ui;margin:0").AppendChild(body).HTML(), nil, false)
 	}
 }
 
@@ -169,13 +186,14 @@ func isRainSnow(now int, hours []weather.Hour) bool {
 	return false
 }
 
-func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
+func alertRainSnow(days []weather.Day) (subject string, body *html.Element) {
 	if len(rainSnow) > 0 {
 		if rainSnow[0].IsExpired() {
 			rainSnow = rainSnow[1:]
 		}
 	}
 
+	body = html.Background()
 	if res := weather.WillRainSnow(days); len(res) > 0 {
 		for index, i := range res {
 			now := time.Now()
@@ -187,37 +205,39 @@ func alertRainSnow(days []weather.Day) (subject string, b strings.Builder) {
 					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
 				} else if start.Date == now.Format("2006-01-02") && isRainSnow(hour, start.Hours) {
 					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
-					fmt.Fprint(&b, start.DateInfoHTML())
-					fmt.Fprint(&b, start.PrecipitationHTML(hour))
+					body.AppendContent(start.DateInfoHTML(), start.PrecipitationHTML(hour))
 					for index, n := 1, len(i.Days()); index < n && index < 3; index++ {
-						fmt.Fprint(&b, "<br>")
-						fmt.Fprint(&b, i.Days()[index].DateInfoHTML())
-						fmt.Fprint(&b, i.Days()[index].PrecipitationHTML())
+						body.AppendContent(
+							html.Br(),
+							i.Days()[index].DateInfoHTML(),
+							i.Days()[index].PrecipitationHTML(),
+						)
 					}
 					return
 				}
 			}
-			fmt.Fprint(&b, i.HTML(now, hour))
+			body.AppendContent(i.HTML(now, hour))
 			if index < len(res)-1 {
-				fmt.Fprint(&b, "<br>")
+				body.AppendChild(html.Br())
 			}
 		}
 		rainSnow = res
 	} else if len(rainSnow) > 0 {
 		subject = "[Weather]Rain Snow Alert - Canceled" + timestamp()
-		b.WriteString("No more rain snow")
+		body.Content("No more rain snow")
 		rainSnow = nil
 	}
 	return
 }
 
-func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
+func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element) {
 	if len(tempRiseFall) > 0 {
 		if tempRiseFall[0].IsExpired() {
 			tempRiseFall = tempRiseFall[1:]
 		}
 	}
 
+	body = html.Background()
 	if res := weather.WillTempRiseFall(days, *difference); len(res) > 0 {
 		for index, i := range res {
 			if index == 0 {
@@ -231,47 +251,60 @@ func alertTempRiseFall(days []weather.Day) (subject string, b strings.Builder) {
 					}
 				}
 			}
-			fmt.Fprint(&b, i.HTML())
+			body.AppendContent(i)
 			if index < len(res)-1 {
-				fmt.Fprint(&b, "<br>")
+				body.AppendChild(html.Br())
 			}
 		}
 		tempRiseFall = res
 	} else if len(tempRiseFall) > 0 {
 		if tempRiseFall[0].IsRise() {
 			subject = "[Weather]Temperature Rise Alert - Canceled" + timestamp()
-			b.WriteString("No more temperature rise")
+			body.Content("No more temperature rise")
 		} else {
 			subject = "[Weather]Temperature Fall Alert - Canceled" + timestamp()
-			b.WriteString("No more temperature fall")
+			body.Content("No more temperature fall")
 		}
 		tempRiseFall = nil
 	}
 	return
 }
 
-func forecastHTML(days []weather.Day) string {
+func forecastHTML(days []weather.Day) html.HTML {
 	if len(days) > 10 {
 		days = days[:10]
 	}
-	var b strings.Builder
-	fmt.Fprint(&b, "<div>")
-	fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px">Forecast</span>`)
-	fmt.Fprint(&b, "<table border=1 cellspacing=0>")
-	fmt.Fprint(&b, "<thead><tr><th colspan=2>Date</th><th>Max</th><th>Min</th><th>FLMax</th><th>FLMin</th><th>Rain%</th></tr></thead>")
-	fmt.Fprint(&b, "<tbody>")
+	div := html.Div()
+	div.AppendChild(html.Span().Style("display:list-item;margin-left:15px").Content("Forecast"))
+	table := html.Table().Attribute("border", "1").Attribute("cellspacing", "0")
+	table.AppendChild(
+		html.Thead().AppendChild(
+			html.Tr(
+				html.Th("Date").Colspan(2),
+				html.Th("Max"),
+				html.Th("Min"),
+				html.Th("FLMax"),
+				html.Th("FLMin"),
+				html.Th("Rain%"),
+			),
+		),
+	)
+	tbody := html.Tbody()
 	for _, day := range days {
-		fmt.Fprintf(&b, "<tr><td>%s</td>", day.DateInfo(false)[11:])
-		fmt.Fprintf(&b, "<td>%s</td>", day.Condition.Img(day.Icon))
-		fmt.Fprintf(&b, "<td>%s</td>", day.TempMax)
-		fmt.Fprintf(&b, "<td>%s</td>", day.TempMin)
-		fmt.Fprintf(&b, "<td>%s</td>", day.FeelsLikeMax)
-		fmt.Fprintf(&b, "<td>%s</td>", day.FeelsLikeMin)
-		fmt.Fprintf(&b, "<td>%s</td></tr>", day.PrecipProb)
+		tbody.AppendChild(
+			html.Tr(
+				html.Td(day.DateInfo(false)[11:]),
+				html.Td(day.Condition.Img(day.Icon)),
+				html.Td(day.TempMax),
+				html.Td(day.TempMin),
+				html.Td(day.FeelsLikeMax),
+				html.Td(day.FeelsLikeMin),
+				html.Td(day.PrecipProb),
+			))
 	}
-	fmt.Fprint(&b, "</tbody></table>")
-	fmt.Fprint(&b, "</div>")
-	return b.String()
+	table.AppendChild(tbody)
+	div.AppendChild(table)
+	return div.HTML()
 }
 
 func zoomEarth(t time.Time, isReport bool) {
@@ -369,7 +402,10 @@ func zoomEarth(t time.Time, isReport bool) {
 	var attachments []*mail.Attachment
 	for i, storm := range alert {
 		affectStorms = append(affectStorms, storm.Name)
-		bodys = append(bodys, fmt.Sprintf("%s - %s<a href=%q><img src='cid:map%d'></a>", storm.Title, storm.Place, storm.URL, i))
+		bodys = append(bodys, html.Background().
+			Contentf("%s - %s", storm.Title, storm.Place).
+			AppendChild(html.A().Href(storm.URL).AppendChild(html.Img().Src("cid:map"+strconv.Itoa(i)))).String(),
+		)
 		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%[2]s.gif", *path, storm.ID))
 		if err != nil {
 			svc.Print(err)
@@ -384,14 +420,14 @@ func zoomEarth(t time.Time, isReport bool) {
 	if hour := t.Hour(); isReport || ((hour == 6 || hour == 12 || hour == 21) && t.Minute() < 30) {
 		sendMail(
 			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(affectStorms, "|"), timestamp()),
-			strings.Join(bodys, "\n"),
+			html.HTML(strings.Join(bodys, "\n")),
 			attachments,
 			true,
 		)
 	}
 }
 
-func alertAQI(_ []weather.Day) (subject string, b strings.Builder) {
+func alertAQI(_ []weather.Day) (subject string, body *html.Element) {
 	current, err := aqiAPI.Realtime(aqi.China, *query)
 	if err != nil {
 		svc.Print(err)
@@ -399,7 +435,7 @@ func alertAQI(_ []weather.Day) (subject string, b strings.Builder) {
 	}
 	if level := current.AQI().Level().String(); level != "Excellent" && level != "Good" {
 		subject = "[Weather]Air Quality Alert - " + level + timestamp()
-		b.WriteString(aqi.CurrentHTML(current))
+		body = html.Background().Content(aqi.CurrentHTML(current))
 	}
 	return
 }
