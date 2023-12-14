@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/weather/unit"
 )
 
@@ -79,16 +80,20 @@ func (t TempRiseFall) DiffInfo() string {
 	return b.String()
 }
 
-func (t TempRiseFall) DiffInfoHTML() string {
+func (t TempRiseFall) DiffInfoHTML() html.HTML {
 	diff := t.Difference()
-	var b strings.Builder
-	fmt.Fprintf(&b, "<tr><td>TempMax:</td><td>%s</td>", diff[0][0].DiffHTML())
-	fmt.Fprintf(&b, "<td>TempMin:</td><td>%s</td>", diff[0][1].DiffHTML())
-	fmt.Fprintf(&b, "<td>Temp:</td><td>%s</td></tr>", diff[0][2].DiffHTML())
-	fmt.Fprintf(&b, "<tr><td>FeelsLikeMax:</td><td>%s</td>", diff[1][0].DiffHTML())
-	fmt.Fprintf(&b, "<td>FeelsLikeMin:</td><td>%s</td>", diff[1][1].DiffHTML())
-	fmt.Fprintf(&b, "<td>FeelsLike:</td><td>%s</td></tr>", diff[1][2].DiffHTML())
-	return b.String()
+	return html.Background().AppendChild(
+		html.Tr(
+			html.Td("TempMax:"), html.Td(diff[0][0].DiffHTML()),
+			html.Td("TempMin:"), html.Td(diff[0][1].DiffHTML()),
+			html.Td("Temp:"), html.Td(diff[0][2].DiffHTML()),
+		),
+		html.Tr(
+			html.Td("FeelsLikeMax:"), html.Td(diff[1][0].DiffHTML()),
+			html.Td("FeelsLikeMin:"), html.Td(diff[1][1].DiffHTML()),
+			html.Td("FeelsLike:"), html.Td(diff[1][2].DiffHTML()),
+		),
+	).HTML()
 }
 
 func (t TempRiseFall) String() string {
@@ -103,23 +108,17 @@ func (t TempRiseFall) String() string {
 	return b.String()
 }
 
-func (t TempRiseFall) HTML() string {
-	var b strings.Builder
-	fmt.Fprint(&b, "<div>")
-	fmt.Fprintf(&b, `<span style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`)
-	fmt.Fprintf(&b, "%s %s", t.DateInfo(), t.day.Condition.Img(t.day.Icon))
-	fmt.Fprint(&b, "</span>")
-	fmt.Fprint(&b, "<table><tbody>")
-	fmt.Fprint(&b, t.day.TemperatureHTML())
-	fmt.Fprint(&b, t.DiffInfoHTML())
-	fmt.Fprint(&b, "</tbody></table>")
-	fmt.Fprintf(&b, `<span style="display:list-item;margin-left:15px;list-style-type:circle">`)
-	fmt.Fprint(&b, "Previous Day: ", t.previous.DateInfoHTML())
-	fmt.Fprint(&b, "</span>")
-	fmt.Fprint(&b, "<table><tbody>")
-	fmt.Fprint(&b, t.previous.TemperatureHTML())
-	fmt.Fprint(&b, "</tbody></table></div>")
-	return b.String()
+func (t TempRiseFall) HTML() html.HTML {
+	return html.Div().AppendChild(
+		html.Span().Style("display:list-item;margin-left:15px;list-style-type:disclosure-open").
+			Content(t.DateInfo(), " ", t.day.Condition.Img(t.day.Icon)),
+		html.Table().AppendChild(
+			html.Tbody().Content(t.day.TemperatureHTML(), t.DiffInfoHTML())),
+		html.Span().Style("display:list-item;margin-left:15px;list-style-type:circle").
+			Content("Previous Day: ", t.previous.DateInfoHTML()),
+		html.Table().AppendChild(
+			html.Tbody().Content(t.previous.TemperatureHTML())),
+	).HTML()
 }
 
 func WillTempRiseFall(days []Day, standard float64) (res []TempRiseFall) {

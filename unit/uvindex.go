@@ -3,6 +3,8 @@ package unit
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/sunshineplan/utils/html"
 )
 
 var _ json.Unmarshaler = new(UVIndex)
@@ -48,6 +50,6 @@ func (i UVIndex) String() string {
 	return fmt.Sprintf("%d(%s)", i, i.Risk())
 }
 
-func (i UVIndex) HTML() string {
-	return fmt.Sprintf(`<span style="color:%s">%s</span>`, i.Color(), i)
+func (i UVIndex) HTML() html.HTML {
+	return html.Span().Style("color:" + i.Color()).Content(i.String()).HTML()
 }

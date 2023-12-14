@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/sunshineplan/utils/html"
 )
 
 type RainSnow struct {
@@ -85,22 +87,22 @@ func (rainsnow RainSnow) String() string {
 	return b.String()
 }
 
-func (rainsnow RainSnow) HTML(t time.Time, highlight ...int) string {
-	var b strings.Builder
-	fmt.Fprint(&b, "<div>")
-	fmt.Fprintf(&b, `<span style="display:list-item;margin-left:15px;list-style-type:disclosure-open">%s</span>`, rainsnow.DateInfo())
+func (rainsnow RainSnow) HTML(t time.Time, highlight ...int) html.HTML {
+	div := html.Div()
+	div.AppendChild(
+		html.Span().Style("display:list-item;margin-left:15px;list-style-type:disclosure-open").
+			Content(rainsnow.DateInfo()))
 	for index, i := range rainsnow.days {
-		fmt.Fprint(&b, `<div style="display:grid">`)
-		fmt.Fprintf(&b, "<span>%d.  %s</span>", index+1, i.DateInfoHTML())
+		day := html.Div()
+		day.AppendChild(html.Span().Contentf("%d.  ", index+1).AppendContent(i.DateInfoHTML()))
 		if i.Date == t.Format("2006-01-02") {
-			fmt.Fprint(&b, i.PrecipitationHTML(highlight...))
+			day.AppendContent(i.PrecipitationHTML(highlight...))
 		} else {
-			fmt.Fprint(&b, i.PrecipitationHTML())
+			day.AppendContent(i.PrecipitationHTML())
 		}
-		fmt.Fprint(&b, "</div>")
+		div.AppendChild(day)
 	}
-	fmt.Fprint(&b, "</div>")
-	return b.String()
+	return div.HTML()
 }
 
 func WillRainSnow(days []Day) (res []RainSnow) {

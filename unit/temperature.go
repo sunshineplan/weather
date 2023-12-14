@@ -3,7 +3,8 @@ package unit
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
+
+	"github.com/sunshineplan/utils/html"
 )
 
 var (
@@ -17,7 +18,7 @@ type Temperature interface {
 	Difference(Temperature) Temperature
 	String() string
 	MarshalJSON() ([]byte, error)
-	DiffHTML() string
+	DiffHTML() html.HTML
 }
 
 type Celsius float64
@@ -38,15 +39,12 @@ func (f Celsius) Difference(i Temperature) Temperature {
 	return Celsius(f.Float64() - i.Float64())
 }
 
-func (f Celsius) DiffHTML() string {
-	var b strings.Builder
+func (f Celsius) DiffHTML() html.HTML {
 	if f > 0 {
-		fmt.Fprint(&b, `<span style="color:red">`, f, "↑")
+		return html.Span().Style("color:red").Contentf("%s↑", f).HTML()
 	} else if f < 0 {
-		fmt.Fprint(&b, `<span style="color:green">`, -f, "↓")
+		return html.Span().Style("color:green").Contentf("%s↓", -f).HTML()
 	} else {
-		fmt.Fprint(&b, "<span>", f)
+		return html.Span().Content("0°C").HTML()
 	}
-	b.WriteString("</span>")
-	return b.String()
 }

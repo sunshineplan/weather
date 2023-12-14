@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/scheduler"
 )
@@ -28,7 +29,7 @@ func attachment(file string) (attachments []*mail.Attachment) {
 	return
 }
 
-func sendMail(subject, body string, attachments []*mail.Attachment, force bool) {
+func sendMail(subject string, body html.HTML, attachments []*mail.Attachment, force bool) {
 	if !force && !scheduler.ClockSchedule(
 		scheduler.ClockFromString(*start),
 		scheduler.ClockFromString(*end),
@@ -38,7 +39,7 @@ func sendMail(subject, body string, attachments []*mail.Attachment, force bool) 
 	}
 	msg := &mail.Message{
 		Subject:     subject,
-		Body:        body,
+		Body:        string(body),
 		Attachments: attachments,
 		ContentType: mail.TextHTML,
 	}

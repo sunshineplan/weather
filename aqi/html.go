@@ -1,31 +1,41 @@
 package aqi
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/weather/unit"
 )
 
-func CurrentHTML(current Current) string {
-	var b strings.Builder
-	fmt.Fprint(&b, "<div>")
-	fmt.Fprintf(&b,
-		`<div style="display:list-item;margin-left:15px">%s:<span style="padding:0 1em;color:white;background-color:%s">%d %s</span></div>`,
-		current.AQI().Type(), current.AQI().Level().Color(), current.AQI().Value(), current.AQI().Level(),
+func CurrentHTML(current Current) html.HTML {
+	div := html.Div()
+	div.AppendChild(
+		html.Div().Style("display:list-item;margin-left:15px").
+			Content(
+				current.AQI().Type(),
+				":",
+				html.Span().Style("padding:0 1em;color:white;background-color:"+current.AQI().Level().Color()).
+					Contentf("%d %s", current.AQI().Value(), current.AQI().Level()),
+			),
 	)
-	fmt.Fprint(&b, "<table><tbody>")
+	table := html.Table()
+	table.AppendChild(html.Tbody())
+	var tr *html.Element
 	for i, p := range current.Pollutants() {
-		if i%3 == 0 {
-			if i != 0 {
-				fmt.Fprint(&b, "</tr>")
-			}
-			fmt.Fprint(&b, "<tr>")
+		if tr == nil {
+			tr = html.NewElement("tr")
 		}
-		fmt.Fprintf(&b, `<td>%s:</td><td style="color:%s">%s %s</td>`,
-			p.Kind().HTML(), p.Level().Color(), unit.FormatFloat64(p.Value(), 2), p.Unit())
+		tr.AppendChild(
+			html.NewElement("td").Content(p.Kind(), ":"),
+			html.NewElement("td").Style("color:"+p.Level().Color()).
+				Contentf("%s %s", unit.FormatFloat64(p.Value(), 2), p.Unit()),
+		)
+		if (i+1)%3 == 0 {
+			table.AppendChild(tr)
+			tr = nil
+		}
 	}
-	fmt.Fprint(&b, "</tr>")
-	fmt.Fprint(&b, "</tbody></table></div>")
-	return b.String()
+	if tr != nil {
+		table.AppendChild(tr)
+	}
+	div.AppendChild(table)
+	return div.HTML()
 }

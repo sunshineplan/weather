@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/weather/unit"
 )
 
@@ -71,8 +72,8 @@ func (day Day) DateInfo(condition bool) string {
 	return b.String()
 }
 
-func (day Day) DateInfoHTML() string {
-	return fmt.Sprintf("%s %s %s", day.Date, day.DateEpoch.Weekday(), day.Condition.Img(day.Icon))
+func (day Day) DateInfoHTML() html.HTML {
+	return html.HTML(fmt.Sprintf("%s %s %s", day.Date, day.DateEpoch.Weekday(), day.Condition.Img(day.Icon)))
 }
 
 func (day Day) Temperature() string {
@@ -82,15 +83,19 @@ func (day Day) Temperature() string {
 	return b.String()
 }
 
-func (day Day) TemperatureHTML() string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "<tr><td>TempMax:</td><td>%s</td>", day.TempMax)
-	fmt.Fprintf(&b, "<td>TempMin:</td><td>%s</td>", day.TempMin)
-	fmt.Fprintf(&b, "<td>Temp:</td><td>%s</td></tr>", day.Temp)
-	fmt.Fprintf(&b, "<tr><td>FeelsLikeMax:</td><td>%s</td>", day.FeelsLikeMax)
-	fmt.Fprintf(&b, "<td>FeelsLikeMin:</td><td>%s</td>", day.FeelsLikeMin)
-	fmt.Fprintf(&b, "<td>FeelsLike:</td><td>%s</td></tr>", day.FeelsLike)
-	return b.String()
+func (day Day) TemperatureHTML() html.HTML {
+	return html.Background().AppendChild(
+		html.Tr(
+			html.Td("TempMax:"), html.Td(day.TempMax),
+			html.Td("TempMin:"), html.Td(day.TempMin),
+			html.Td("Temp:"), html.Td(day.Temp),
+		),
+		html.Tr(
+			html.Td("FeelsLikeMax:"), html.Td(day.FeelsLikeMax),
+			html.Td("FeelsLikeMin:"), html.Td(day.FeelsLikeMin),
+			html.Td("FeelsLike:"), html.Td(day.FeelsLike),
+		),
+	).HTML()
 }
 
 func (day Day) Precipitation() string {
@@ -108,30 +113,31 @@ func (day Day) Precipitation() string {
 	return b.String()
 }
 
-func (day Day) PrecipitationHTML(highlight ...int) string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "<span>Precip: %gmm, PrecipProb: %s, PrecipCover: %s</span>", day.Precip, day.PrecipProb, day.PrecipCover)
-	hours, precipHours := day.PrecipHours()
-	if len(precipHours) == 0 {
-		fmt.Fprint(&b, "<span>PrecipHours: none</span>")
+func (day Day) PrecipitationHTML(highlight ...int) html.HTML {
+	div := html.Div().Style("display:grid")
+	div.AppendChild(
+		html.Span().
+			Contentf("Precip: %gmm, PrecipProb: %s, PrecipCover: %s", day.Precip, day.PrecipProb, day.PrecipCover))
+	if hours, precipHours := day.PrecipHours(); len(precipHours) == 0 {
+		div.AppendChild(html.Span().Content("PrecipHours: none"))
 	} else {
-		fmt.Fprint(&b, `<span>PrecipHours: `)
+		span := html.Span().Content("PrecipHours: ")
 		for i, hour := range hours {
 			if slices.Contains(highlight, hour) {
-				fmt.Fprintf(&b, `<span style="color:red">%s</span>`, precipHours[i])
+				span.AppendChild(html.Span().Style("color:red").Content(precipHours[i]))
 			} else {
-				fmt.Fprint(&b, precipHours[i])
+				span.AppendContent(precipHours[i])
 			}
 			if i < len(hours)-1 {
-				fmt.Fprint(&b, ", ")
+				span.AppendContent(", ")
 			}
 		}
-		fmt.Fprint(&b, "</span>")
+		div.AppendChild(span)
 	}
 	if len(day.PrecipType) > 0 {
-		fmt.Fprintf(&b, "<span>PrecipType: %s</span>", strings.Join(day.PrecipType, ", "))
+		div.AppendChild(html.Span().Contentf("PrecipType: %s", strings.Join(day.PrecipType, ", ")))
 	}
-	return b.String()
+	return div.HTML()
 }
 
 func (day Day) PrecipHours() (hours []int, output []string) {
@@ -156,26 +162,33 @@ func (day Day) String() string {
 	return b.String()
 }
 
-func (day Day) HTML() string {
-	var b strings.Builder
-	fmt.Fprint(&b, "<div>")
-	fmt.Fprint(&b, `<span style="display:list-item;margin-left:15px;list-style-type:disclosure-open">`, day.DateInfoHTML(), "</span>")
-	fmt.Fprint(&b, "<table><tbody>")
-	fmt.Fprint(&b, day.TemperatureHTML())
-	fmt.Fprintf(&b, "<tr><td>Humidity:</td><td>%s</td>", day.Humidity)
-	fmt.Fprintf(&b, "<td>Dew Point:</td><td>%s</td>", day.Dew)
-	fmt.Fprintf(&b, "<td>Pressure:</td><td>%ghPa</td></tr>", day.Pressure)
-	fmt.Fprintf(&b, "<tr><td>Precip:</td><td>%gmm</td>", day.Precip)
-	fmt.Fprintf(&b, "<td>PrecipProb:</td><td>%s</td>", day.PrecipProb)
-	fmt.Fprintf(&b, "<td>PrecipCover:</td><td>%s</td></tr>", day.PrecipCover)
-	fmt.Fprintf(&b, "<tr><td>WindGust:</td><td>%s</td>", day.WindGust.HTML())
-	fmt.Fprintf(&b, "<td>WindSpeed:</td><td>%s</td>", day.WindSpeed.HTML())
-	fmt.Fprintf(&b, `<td>WindDir:</td><td>%g°</td></tr>`, day.WindDir)
-	fmt.Fprintf(&b, "<tr><td>CloudCover:</td><td>%s</td>", day.CloudCover)
-	fmt.Fprintf(&b, "<td>Visibility:</td><td>%gkm</td>", day.Visibility)
-	fmt.Fprintf(&b, "<td>UVIndex:</td><td>%s</td></tr>", day.UVIndex.HTML())
-	fmt.Fprint(&b, "</tbody></table></div>")
-	return b.String()
+func (day Day) HTML() html.HTML {
+	return html.Div().AppendChild(
+		html.Span().Style("display:list-item;margin-left:15px;list-style-type:disclosure-open").Content(day.DateInfoHTML()),
+		html.Table().AppendChild(
+			html.Tbody().AppendContent(
+				day.TemperatureHTML(),
+				html.Tr(
+					html.Td("Humidity:"), html.Td(day.Humidity),
+					html.Td("Dew Point:"), html.Td(day.Dew),
+					html.Td("Pressure:"), html.Td(fmt.Sprintf("%ghPa", day.Pressure)),
+				),
+				html.Tr(
+					html.Td("Precip:"), html.Td(fmt.Sprintf("%gmm", day.Precip)),
+					html.Td("PrecipProb:"), html.Td(day.PrecipProb),
+					html.Td("PrecipCover:"), html.Td(day.PrecipCover),
+				),
+				html.Tr(
+					html.Td("WindGust:"), html.Td(day.WindGust),
+					html.Td("WindSpeed:"), html.Td(day.WindSpeed),
+					html.Td("WindDir:"), html.Td(fmt.Sprintf("%g°", day.WindDir)),
+				),
+				html.Tr(
+					html.Td("CloudCover:"), html.Td(day.CloudCover),
+					html.Td("Visibility:"), html.Td(fmt.Sprintf("%gkm", day.Visibility)),
+					html.Td("UVIndex:"), html.Td(day.UVIndex),
+				))),
+	).HTML()
 }
 
 type Hour struct {
@@ -251,6 +264,6 @@ func (s Condition) Short() string {
 	}
 }
 
-func (s Condition) Img(icon string) string {
-	return fmt.Sprintf(`<img style="height:20px" src=%q title=%q></img>`, icon, s)
+func (s Condition) Img(icon string) html.HTML {
+	return html.Img().Style("height:20px").Src(icon).Title(string(s)).HTML()
 }

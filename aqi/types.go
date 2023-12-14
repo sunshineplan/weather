@@ -1,6 +1,9 @@
 package aqi
 
-import "github.com/sunshineplan/weather/unit"
+import (
+	"github.com/sunshineplan/utils/html"
+	"github.com/sunshineplan/weather/unit"
+)
 
 type Current interface {
 	Day
@@ -95,7 +98,7 @@ func (k Kind) String() string {
 	return "Unknown Kind"
 }
 
-func (k Kind) HTML() string {
+func (k Kind) HTML() html.HTML {
 	switch k {
 	case CO:
 		return "CO"

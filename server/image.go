@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/executor"
+	"github.com/sunshineplan/utils/html"
 )
 
 var imgCache sync.Map
@@ -63,6 +64,6 @@ func icon(c *gin.Context) {
 	}
 }
 
-func imageHTML(href, src string) string {
-	return fmt.Sprintf("<a href=%q><img src=%q></a>", href, src)
+func imageHTML(href, src string) html.HTML {
+	return html.A().Href(href).AppendChild(html.Img().Src(src)).HTML()
 }
