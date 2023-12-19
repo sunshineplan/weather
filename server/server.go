@@ -98,12 +98,10 @@ func runServer() error {
 			c.String(500, "")
 			return
 		}
+		var image html.HTML
 		if q == *query {
-			c.Data(200, "text/html", []byte(
-				fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, diff)+
-					html.Br().HTML()+
-					imageHTML(location.url(z), "/6h"),
-			))
+			image = imageHTML(location.url(z), "/6h")
+			q = fmt.Sprintf("%s(%s)", *query, location)
 		} else {
 			coords, err := getCoords(q)
 			if err != nil {
@@ -111,12 +109,18 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			c.Data(200, "text/html", []byte(
-				fullHTML(fmt.Sprintf("%s(%s)", q, coords), days, avg, aqi, t, diff)+
-					html.Br().HTML()+
-					imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q)),
-			))
+			image = imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q))
+			q = fmt.Sprintf("%s(%s)", q, coords)
 		}
+		c.Data(200, "text/html", []byte(
+			html.NewHTML().AppendChild(
+				html.Head().AppendChild(
+					html.Meta().Name("viewport").Attribute("content", "width=device-width"),
+				),
+				html.Body().Style("margin:0").
+					Content(fullHTML(q, days, avg, aqi, t, diff)+image),
+			).HTML()),
+		)
 	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")

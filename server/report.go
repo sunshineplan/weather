@@ -62,7 +62,7 @@ func daily(t time.Time) {
 }
 
 func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Current, t time.Time, diff float64) html.HTML {
-	div := html.Div().Style("font-family:system-ui;margin:0")
+	div := html.Div().Style("font-family:system-ui;margin:8px")
 	div.AppendContent(
 		html.Span().Style("display:list-item;list-style:circle;margin-left:1em;font-size:1.5em").
 			Contentf("Weather of %s", cases.Title(language.English).String(q)),
@@ -293,7 +293,7 @@ func forecastHTML(days []weather.Day) html.HTML {
 	for _, day := range days {
 		tbody.AppendChild(
 			html.Tr(
-				html.Td(day.DateInfo(false)[11:]),
+				html.Td(day.DateInfo(false)[11:]).Style("text-wrap:nowrap"),
 				html.Td(day.Condition.Img(day.Icon)),
 				html.Td(day.TempMax),
 				html.Td(day.TempMin),
