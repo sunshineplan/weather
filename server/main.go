@@ -66,6 +66,7 @@ var (
 	end         = flag.String("end", "22:00", "alert end time")
 	days        = flag.Int("days", 15, "forecast days")
 	difference  = flag.Float64("difference", 5, "temperature difference")
+	aqiType     aqi.Type
 	offset      = flag.Float64("offset", 0, "daily screenshot offset")
 	zoom        = flag.Float64("zoom", 7, "daily screenshot zoom")
 	quality     = flag.Int("quality", 95, "screenshot quality")
@@ -80,6 +81,8 @@ func main() {
 	if err != nil {
 		svc.Fatalln("Failed to get self path:", err)
 	}
+
+	flag.TextVar(&aqiType, "aqi", aqi.US, "AQI Type")
 
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
