@@ -10,22 +10,31 @@ import (
 	"github.com/sunshineplan/weather/aqi"
 )
 
-func getWeather(query string, n int, t time.Time) ([]weather.Day, error) {
+func getWeather(query string, n int, t time.Time, realtime bool) (current weather.Current, days []weather.Day, err error) {
+	if realtime {
+		current, err = forecast.Realtime(query)
+		if err != nil {
+			return
+		}
+	}
 	forecasts, err := forecast.Forecast(query, n)
 	if err != nil {
-		return nil, err
+		return
 	}
 	if len(forecasts) < n {
-		return nil, fmt.Errorf("bad forecast number: %d", len(forecasts))
+		err = fmt.Errorf("bad forecast number: %d", len(forecasts))
+		return
 	}
 	if date := t.Format("01-02"); !strings.HasSuffix(forecasts[0].Date, date) {
-		return nil, fmt.Errorf("the first forecast date(%s) does not match the input(%s)", forecasts[0].Date, date)
+		err = fmt.Errorf("the first forecast date(%s) does not match the input(%s)", forecasts[0].Date, date)
+		return
 	}
 	yesterday, err := history.History(query, t.AddDate(0, 0, -1))
 	if err != nil {
-		return nil, err
+		return
 	}
-	return append([]weather.Day{yesterday}, forecasts...), nil
+	days = append([]weather.Day{yesterday}, forecasts...)
+	return
 }
 
 func getAQI(aqiType aqi.Type, q string) (aqi.Current, error) {
@@ -40,8 +49,9 @@ func getAQI(aqiType aqi.Type, q string) (aqi.Current, error) {
 	return res, err
 }
 
-func getAll(q string, n int, aqiType aqi.Type, t time.Time) (days []weather.Day, avg weather.Day, current aqi.Current, err error) {
-	if days, err = getWeather(q, n, t); err != nil {
+func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool) (
+	current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current, err error) {
+	if current, days, err = getWeather(q, n, t, realtime); err != nil {
 		return
 	}
 	if q == *query {
@@ -49,6 +59,6 @@ func getAll(q string, n int, aqiType aqi.Type, t time.Time) (days []weather.Day,
 			return
 		}
 	}
-	current, err = getAQI(aqiType, q)
+	currentAQI, err = getAQI(aqiType, q)
 	return
 }

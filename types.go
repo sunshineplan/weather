@@ -32,6 +32,33 @@ type Current struct {
 	Icon          string           `json:"icon,omitempty"`
 }
 
+func (current Current) TimeInfoHTML() html.HTML {
+	return html.HTML(fmt.Sprintf("%s %s", current.Datetime, current.Condition.Img(current.Icon)))
+}
+
+func (current Current) HTML() html.HTML {
+	return html.Div().AppendChild(
+		html.Span().Style("display:list-item;margin-left:15px;list-style-type:disclosure-open").Content(current.TimeInfoHTML()),
+		html.Table().AppendChild(
+			html.Tbody().AppendContent(
+				html.Tr(
+					html.Td("Temp:"), html.Td(current.Temp),
+					html.Td("FeelsLike:"), html.Td(current.FeelsLike),
+					html.Td("Humidity:"), html.Td(current.Humidity),
+				),
+				html.Tr(
+					html.Td("Pressure:"), html.Td(fmt.Sprintf("%ghPa", current.Pressure)),
+					html.Td("Precip:"), html.Td(fmt.Sprintf("%gmm", current.Precip)),
+					html.Td("WindSpeed:"), html.Td(current.WindSpeed),
+				),
+				html.Tr(
+					html.Td("CloudCover:"), html.Td(current.CloudCover),
+					html.Td("Visibility:"), html.Td(fmt.Sprintf("%gkm", current.Visibility)),
+					html.Td("UVIndex:"), html.Td(current.UVIndex),
+				))),
+	).HTML()
+}
+
 type Day struct {
 	Date         string           `json:"date,omitempty"`
 	DateEpoch    unit.UnixTime    `json:"dateEpoch,omitempty"`

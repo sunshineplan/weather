@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 	"path/filepath"
 	"strconv"
@@ -96,25 +95,25 @@ func runServer() error {
 		if z, err = strconv.ParseFloat(c.Query("z"), 64); err != nil {
 			z = *zoom
 		}
-		days, avg, aqi, err := getAll(q, n, t, now)
+		current, days, avg, aqi, err := getAll(q, n, t, now, true)
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")
 			return
 		}
+		var coords *coords
 		var image html.HTML
 		if q == *query {
+			coords = location
 			image = imageHTML(location.url(z), "/6h")
-			q = fmt.Sprintf("%s(%s)", *query, location)
 		} else {
-			coords, err := getCoords(q)
+			coords, err = getCoords(q)
 			if err != nil {
 				svc.Print(err)
 				c.String(400, "")
 				return
 			}
 			image = imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q))
-			q = fmt.Sprintf("%s(%s)", q, coords)
 		}
 		c.Data(200, "text/html", []byte(
 			html.NewHTML().AppendChild(
@@ -122,7 +121,7 @@ func runServer() error {
 					html.Meta().Name("viewport").Attribute("content", "width=device-width"),
 				),
 				html.Body().Style("margin:0").
-					Content(fullHTML(q, days, avg, aqi, now, diff, "8px")+image),
+					Content(fullHTML(q, coords, current, days, avg, aqi, now, diff, "8px")+image),
 			).HTML()),
 		)
 	})

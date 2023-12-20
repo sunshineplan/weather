@@ -18,6 +18,7 @@ type Temperature interface {
 	Difference(Temperature) Temperature
 	String() string
 	MarshalJSON() ([]byte, error)
+	HTML() html.HTML
 	DiffHTML() html.HTML
 }
 
@@ -37,6 +38,14 @@ func (f Celsius) MarshalJSON() ([]byte, error) {
 
 func (f Celsius) Difference(i Temperature) Temperature {
 	return Celsius(f.Float64() - i.Float64())
+}
+
+func (f Celsius) HTML() html.HTML {
+	span := html.Span().Content(f.String())
+	if f <= 0 {
+		span.Style("color:blue")
+	}
+	return span.HTML()
 }
 
 func (f Celsius) DiffHTML() html.HTML {
