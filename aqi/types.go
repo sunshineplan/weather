@@ -1,6 +1,10 @@
 package aqi
 
 import (
+	"encoding"
+	"errors"
+	"strings"
+
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/weather/unit"
 )
@@ -22,6 +26,11 @@ type AQI interface {
 	Level() Level
 }
 
+var (
+	_ encoding.TextMarshaler   = Type(0)
+	_ encoding.TextUnmarshaler = new(Type)
+)
+
 type Type int
 
 const (
@@ -34,6 +43,32 @@ const (
 	UK
 	US
 )
+
+func (t Type) MarshalText() ([]byte, error) {
+	return []byte(t.String()), nil
+}
+
+func (t *Type) UnmarshalText(b []byte) error {
+	s := strings.ToLower(strings.TrimSpace(string(b)))
+	for k, v := range map[Type][]string{
+		Australia:  {"australia", "au"},
+		Canada:     {"canada", "ca"},
+		China:      {"china", "cn"},
+		Europe:     {"europe", "eu"},
+		India:      {"india", "in"},
+		Netherland: {"netherlands", "nl"},
+		UK:         {"uk", "gb"},
+		US:         {"us", "usa"},
+	} {
+		for _, i := range v {
+			if s == i {
+				*t = k
+				return nil
+			}
+		}
+	}
+	return errors.New("unknown AQI type")
+}
 
 func (t Type) String() string {
 	switch t {

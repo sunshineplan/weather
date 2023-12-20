@@ -28,7 +28,7 @@ var (
 )
 
 func report(t time.Time) {
-	days, avg, aqi, err := getAll(*query, *days, aqi.China, t)
+	days, avg, aqi, err := getAll(*query, *days, aqiType, t)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -38,7 +38,7 @@ func report(t time.Time) {
 	zoomEarth(t, true)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference)+
+		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
@@ -48,21 +48,23 @@ func report(t time.Time) {
 
 func daily(t time.Time) {
 	svc.Print("Start sending daily report...")
-	days, avg, aqi, err := getAll(*query, *days, aqi.China, t)
+	days, avg, aqi, err := getAll(*query, *days, aqiType, t)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference)+imageHTML(location.url(*zoom), "cid:attachment"),
+		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference, "0")+
+			html.Br().HTML()+
+			imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
 }
 
-func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Current, t time.Time, diff float64) html.HTML {
-	div := html.Div().Style("font-family:system-ui;margin:8px")
+func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Current, t time.Time, diff float64, margin string) html.HTML {
+	div := html.Div().Style("font-family:system-ui;margin:" + margin)
 	div.AppendContent(
 		html.Span().Style("display:list-item;list-style:circle;margin-left:1em;font-size:1.5em").
 			Contentf("Weather of %s", cases.Title(language.English).String(q)),
@@ -428,7 +430,7 @@ func zoomEarth(t time.Time, isReport bool) {
 }
 
 func alertAQI(_ []weather.Day) (subject string, body *html.Element) {
-	current, err := aqiAPI.Realtime(aqi.China, *query)
+	current, err := aqiAPI.Realtime(aqiType, *query)
 	if err != nil {
 		svc.Print(err)
 		return

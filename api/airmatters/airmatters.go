@@ -105,6 +105,9 @@ func (api *AirMatters) Realtime(aqiType aqi.Type, query string) (aqi.Current, er
 	for i := range res.Latest.Items {
 		res.Latest.Items[i].AQIType = aqiType
 	}
+	if res.Latest.AQI() == nil {
+		return nil, errors.New("no AQI index value found")
+	}
 	return res.Latest, nil
 }
 

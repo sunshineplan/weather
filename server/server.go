@@ -75,7 +75,7 @@ func runServer() error {
 		}
 	})
 	router.GET("/status", func(c *gin.Context) {
-		t := time.Now()
+		now := time.Now()
 		var q string
 		if q = c.Query("q"); q == "" {
 			q = *query
@@ -84,15 +84,19 @@ func runServer() error {
 		if n, _ = strconv.Atoi(c.Query("n")); n < 1 {
 			n = *days
 		}
-		var diff, z float64
+		var t aqi.Type
 		var err error
+		if err = t.UnmarshalText([]byte(c.Query("aqi"))); err != nil {
+			t = aqiType
+		}
+		var diff, z float64
 		if diff, err = strconv.ParseFloat(c.Query("diff"), 64); err != nil {
 			diff = *difference
 		}
 		if z, err = strconv.ParseFloat(c.Query("z"), 64); err != nil {
 			z = *zoom
 		}
-		days, avg, aqi, err := getAll(q, n, aqi.China, t)
+		days, avg, aqi, err := getAll(q, n, t, now)
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")
@@ -118,7 +122,7 @@ func runServer() error {
 					html.Meta().Name("viewport").Attribute("content", "width=device-width"),
 				),
 				html.Body().Style("margin:0").
-					Content(fullHTML(q, days, avg, aqi, t, diff)+image),
+					Content(fullHTML(q, days, avg, aqi, now, diff, "8px")+image),
 			).HTML()),
 		)
 	})
