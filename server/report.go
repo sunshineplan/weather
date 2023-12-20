@@ -14,6 +14,7 @@ import (
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/storm"
+	"github.com/sunshineplan/weather/unit"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -28,7 +29,7 @@ var (
 )
 
 func report(t time.Time) {
-	days, avg, aqi, err := getAll(*query, *days, aqiType, t)
+	_, days, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -38,7 +39,7 @@ func report(t time.Time) {
 	zoomEarth(t, true)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference, "0")+
+		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
@@ -48,14 +49,14 @@ func report(t time.Time) {
 
 func daily(t time.Time) {
 	svc.Print("Start sending daily report...")
-	days, avg, aqi, err := getAll(*query, *days, aqiType, t)
+	_, days, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(fmt.Sprintf("%s(%s)", *query, location), days, avg, aqi, t, *difference, "0")+
+		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(location.url(*zoom), "cid:attachment"),
 		attachment("daily/daily-12h.gif"),
@@ -63,12 +64,35 @@ func daily(t time.Time) {
 	)
 }
 
-func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Current, t time.Time, diff float64, margin string) html.HTML {
+func fullHTML(
+	q string, location *coords,
+	current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current,
+	t time.Time, diff float64, margin string,
+) html.HTML {
 	div := html.Div().Style("font-family:system-ui;margin:" + margin)
+	div.AppendChild(
+		html.Span().Style("display:list-item;list-style:circle;margin-left:1em").AppendChild(
+			html.Span().Style("font-size:1.5em").Contentf("Weather of %s", cases.Title(language.English).String(q)),
+			html.Span().Style("display:inline-block;font-size:.75em;text-align:right;margin-left:1em").AppendChild(
+				html.Span().Style("display:block").Content(location.Latitude()),
+				html.Span().Style("display:block").Content(location.Longitude()),
+			),
+		),
+	)
+	if current.Datetime != "" {
+		div.AppendContent(
+			html.Div().AppendContent(
+				html.Span().Style("display:list-item;margin-left:15px").Content("Current"),
+				current,
+			),
+			html.Br(),
+		)
+	}
 	div.AppendContent(
-		html.Span().Style("display:list-item;list-style:circle;margin-left:1em;font-size:1.5em").
-			Contentf("Weather of %s", cases.Title(language.English).String(q)),
-		days[1],
+		html.Div().AppendContent(
+			html.Span().Style("display:list-item;margin-left:15px").Content("Today"),
+			days[1],
+		),
 		html.Br(),
 		aqi.CurrentHTML(currentAQI),
 		html.Br(),
@@ -118,7 +142,7 @@ func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Curr
 	} else {
 		div.AppendContent(
 			html.Br(),
-			"No Rain Snow Alert.",
+			html.Div().Content("No Rain Snow Alert."),
 		)
 	}
 	if tempRiseFall := weather.WillTempRiseFall(days, diff); len(tempRiseFall) > 0 {
@@ -139,7 +163,7 @@ func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Curr
 	} else {
 		div.AppendContent(
 			html.Br(),
-			"No Temperature Alert.",
+			html.Div().Content("No Temperature Alert."),
 		)
 	}
 	return div.HTML()
@@ -147,7 +171,7 @@ func fullHTML(q string, days []weather.Day, avg weather.Day, currentAQI aqi.Curr
 
 func alert(t time.Time) {
 	svc.Print("Start alerting...")
-	days, err := getWeather(*query, *days, t)
+	_, days, err := getWeather(*query, *days, t, false)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -288,6 +312,7 @@ func forecastHTML(days []weather.Day) html.HTML {
 				html.Th("FLMax"),
 				html.Th("FLMin"),
 				html.Th("Rain%"),
+				html.Th("Wind"),
 			),
 		),
 	)
@@ -302,6 +327,7 @@ func forecastHTML(days []weather.Day) html.HTML {
 				html.Td(day.FeelsLikeMax),
 				html.Td(day.FeelsLikeMin),
 				html.Td(day.PrecipProb),
+				html.Td(html.Span().Style("color:"+day.WindSpeed.ForceColor()).Contentf("%sm/s", unit.FormatFloat64(day.WindSpeed.MPS(), 1))),
 			))
 	}
 	table.AppendChild(tbody)
