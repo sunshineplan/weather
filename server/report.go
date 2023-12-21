@@ -73,10 +73,11 @@ func fullHTML(
 	div.AppendChild(
 		html.Span().Style("display:list-item;list-style:circle;margin-left:1em").AppendChild(
 			html.Span().Style("font-size:1.5em").Contentf("Weather of %s", cases.Title(language.English).String(q)),
-			html.Span().Style("display:inline-block;font-size:.75em;text-align:right;margin-left:1em").AppendChild(
-				html.Span().Style("display:block").Content(location.Latitude()),
-				html.Span().Style("display:block").Content(location.Longitude()),
-			),
+			html.Span().Style("display:inline-block;font-family:monospace;font-size:.75em;text-align:right;margin-left:1em").
+				AppendChild(
+					html.Span().Style("display:block").Content(location.Latitude()),
+					html.Span().Style("display:block").Content(location.Longitude()),
+				),
 		),
 	)
 	if current.Datetime != "" {
@@ -311,7 +312,7 @@ func forecastHTML(days []weather.Day) html.HTML {
 				html.Th("Min"),
 				html.Th("FLMax"),
 				html.Th("FLMin"),
-				html.Th("Rain%"),
+				html.Th("Rain"),
 				html.Th("Wind"),
 			),
 		),

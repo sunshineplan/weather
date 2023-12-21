@@ -3,6 +3,7 @@ package coordinates
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/sunshineplan/weather/unit"
 )
@@ -39,6 +40,7 @@ func newDMS[T ~float64](f T) dms {
 	return dms{degrees, minutes, seconds, negative}
 }
 
+// https://en.wikipedia.org/wiki/ISO_6709
 func (dms dms) str(lat bool) string {
 	var direction string
 	if lat {
@@ -60,5 +62,11 @@ func (dms dms) str(lat bool) string {
 			direction = "E"
 		}
 	}
-	return fmt.Sprintf(`%d°%d'%s" %s`, dms.degrees, dms.minutes, unit.FormatFloat64(dms.seconds, 2), direction)
+	var seconds, dec string
+	s := strings.Split(unit.FormatFloat64(dms.seconds, 3), ".")
+	seconds = s[0]
+	if len(s) == 2 {
+		dec = "." + s[1]
+	}
+	return fmt.Sprintf(`%d°%02d′%02s%s″%s`, dms.degrees, dms.minutes, seconds, dec, direction)
 }
