@@ -53,7 +53,7 @@ func (c LatLong) Longitude() Longitude {
 }
 
 func (c LatLong) String() string {
-	return fmt.Sprintf("%s, %s", c.Latitude(), c.Longitude())
+	return fmt.Sprintf("%s %s", c.Latitude(), c.Longitude())
 }
 
 func (c LongLat) Latitude() Latitude {
@@ -65,5 +65,5 @@ func (c LongLat) Longitude() Longitude {
 }
 
 func (c LongLat) String() string {
-	return fmt.Sprintf("%s, %s", c.Latitude(), c.Longitude())
+	return fmt.Sprintf("%s %s", c.Latitude(), c.Longitude())
 }
