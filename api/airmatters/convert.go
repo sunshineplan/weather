@@ -37,6 +37,43 @@ func unixTime(s string) unit.UnixTime {
 	return unit.UnixTime(t.Unix())
 }
 
+func (standard Standard) Type() aqi.Type {
+	if l := len(standard.BreakPoint); l != 1 && l != len(standard.Levels) && l != len(standard.Color) {
+		panic("bad standard result")
+	}
+	for k, v := range typeMap {
+		if _, ok := standard.BreakPoint[v]; ok {
+			return k
+		}
+	}
+	panic("aqi type not supported")
+}
+
+func (standard Standard) Standard() (res []aqi.AQI) {
+	t := standard.Type()
+	std := typeMap[t]
+	value := standard.BreakPoint[std].AQI
+	levels := standard.Levels[std]
+	color := standard.Color[std]
+	if len(value) != len(levels) && len(levels) != len(color) {
+		panic("bad value or levels or color length")
+	}
+	var s []struct {
+		value        int
+		level, color string
+	}
+	for i := range levels {
+		s = append(s, struct {
+			value        int
+			level, color string
+		}{value[i], levels[i], color[i]})
+	}
+	for _, i := range s {
+		res = append(res, aqi.NewAQI(t, i.value, aqi.NewLevel(i.level, i.color)))
+	}
+	return
+}
+
 var _ aqi.Current = Current{}
 
 func (i Current) Unix() unit.UnixTime {

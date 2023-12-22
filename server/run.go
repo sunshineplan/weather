@@ -46,6 +46,10 @@ func initWeather() (err error) {
 	history = forecast
 	stormAPI = zoomearth.ZoomEarthAPI{}
 	aqiAPI = airmatters.New(res.AirMatters)
+	aqiStandard, err = getAQIStandard()
+	if err != nil {
+		return
+	}
 	client = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber

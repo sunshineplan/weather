@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/sunshineplan/weather/aqi"
-	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 func TestAirMatters(t *testing.T) {
@@ -17,13 +16,19 @@ func TestAirMatters(t *testing.T) {
 		return
 	}
 	api := New(key)
-	if _, err := api.Coordinates("shanghai"); err != nil {
+	for k := range typeMap {
+		if _, err := api.Standard(k); err != nil {
+			t.Error(err)
+		}
+	}
+	coords, err := api.Coordinates("shanghai")
+	if err != nil {
 		t.Error(err)
 	}
 	if _, err := api.Realtime(aqi.China, "shanghai"); err != nil {
 		t.Error(err)
 	}
-	if _, _, err := api.RealtimeNearby(aqi.China, coordinates.New(31.17, 121.47)); err != nil {
+	if _, _, err := api.RealtimeNearby(aqi.China, coords); err != nil {
 		t.Error(err)
 	}
 	if _, err := api.Forecast(aqi.China, "shanghai", 0); err != nil {
