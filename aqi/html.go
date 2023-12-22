@@ -8,7 +8,7 @@ import (
 func CurrentHTML(current Current) html.HTML {
 	div := html.Div()
 	div.AppendChild(
-		html.Div().Style("display:list-item;margin-left:15px").
+		html.Div().Style("display:list-item;list-style-type:disclosure-closed;margin-left:15px").
 			Content(
 				current.AQI().Type(),
 				":",
