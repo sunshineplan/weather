@@ -10,6 +10,28 @@ import (
 	"github.com/sunshineplan/weather/aqi"
 )
 
+func getAQIStandard() (standard int, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("%v", e)
+		}
+	}()
+	std, err := aqiAPI.Standard(aqiType)
+	if err != nil {
+		return
+	}
+	index := std[1]
+	for i := 2; i < len(std); i++ {
+		if index.Level().String() != std[i].Level().String() {
+			index = std[i]
+			break
+		}
+		index = std[i]
+	}
+	standard = index.Value()
+	return
+}
+
 func getWeather(query string, n int, t time.Time, realtime bool) (current weather.Current, days []weather.Day, err error) {
 	c := make(chan error, 3)
 	go func() {

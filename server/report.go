@@ -455,14 +455,16 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 }
 
+var aqiStandard int
+
 func alertAQI(_ []weather.Day) (subject string, body *html.Element) {
 	current, err := aqiAPI.Realtime(aqiType, *query)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
-	if level := current.AQI().Level().String(); level != "Excellent" && level != "Good" {
-		subject = "[Weather]Air Quality Alert - " + level + timestamp()
+	if index := current.AQI(); index.Value() >= aqiStandard {
+		subject = "[Weather]Air Quality Alert - " + index.Level().String() + timestamp()
 		body = html.Background().Content(aqi.CurrentHTML(current))
 	}
 	return

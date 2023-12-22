@@ -25,6 +25,8 @@ func runServer() error {
 	}
 	svc.Println("Location:", *query)
 	svc.Println("Coordinates:", location)
+	svc.Println("AQI Type:", aqiType)
+	svc.Println("AQI alert standard:", aqiStandard)
 
 	router := gin.Default()
 	router.Use(cors.Default())

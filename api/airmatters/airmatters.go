@@ -44,6 +44,25 @@ func (api *AirMatters) Request(endpoint string, query url.Values, data any) erro
 	return json.NewDecoder(resp.Body).Decode(data)
 }
 
+func (api *AirMatters) Standard(t aqi.Type) ([]aqi.AQI, error) {
+	standard, ok := typeMap[t]
+	if !ok {
+		return nil, errors.New("aqi type not supported")
+	}
+	var res Standard
+	if err := api.Request("standard", url.Values{"standard": {standard}}, &res); err != nil {
+		return nil, err
+	}
+	if len(res.BreakPoint) == 0 {
+		return nil, errors.New("no result")
+	}
+	if aqi := res.Standard(); aqi[0].Type() != t {
+		return nil, errors.New("bad result")
+	} else {
+		return aqi, nil
+	}
+}
+
 func (api *AirMatters) Places(query string) ([]Place, error) {
 	var places struct{ Places []Place }
 	if err := api.Request("place_search", url.Values{"content": {query}}, &places); err != nil {

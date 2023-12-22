@@ -2,6 +2,12 @@ package airmatters
 
 import "github.com/sunshineplan/weather/aqi"
 
+type Standard struct {
+	BreakPoint map[string]struct{ AQI []int } `json:"break_point,omitempty"`
+	Levels     map[string][]string            `json:"levels,omitempty"`
+	Color      map[string][]string            `json:"color,omitempty"`
+}
+
 type Place struct {
 	ID          string  `json:"place_id,omitempty"`
 	Type        string  `json:"type,omitempty"`
