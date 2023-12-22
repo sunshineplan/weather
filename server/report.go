@@ -81,21 +81,20 @@ func fullHTML(
 		),
 	)
 	if current.Datetime != "" {
-		div.AppendContent(
-			html.Div().AppendContent(
-				html.Span().Style("display:list-item;margin-left:15px").Content("Current"),
-				current,
-			),
-			html.Br(),
+		now := html.Div().AppendContent(
+			html.Span().Style("display:list-item;margin-left:15px").Content("Current"),
+			current,
 		)
+		if currentAQI != nil {
+			now.AppendContent(aqi.CurrentHTML(currentAQI))
+		}
+		div.AppendChild(now.AppendContent(html.Br()))
 	}
 	div.AppendContent(
 		html.Div().AppendContent(
 			html.Span().Style("display:list-item;margin-left:15px").Content("Today"),
 			days[1],
 		),
-		html.Br(),
-		aqi.CurrentHTML(currentAQI),
 		html.Br(),
 		html.Div().AppendChild(
 			html.Span().Style("display:list-item;margin-left:15px").Content("Compared with Yesterday"),

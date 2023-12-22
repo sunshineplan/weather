@@ -77,7 +77,9 @@ func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool,
 	}()
 	go func() {
 		var err error
-		currentAQI, err = getAQI(aqiType, q)
+		if realtime {
+			currentAQI, err = getAQI(aqiType, q)
+		}
 		c <- err
 	}()
 	for i := 0; i < 3; i++ {
