@@ -3,7 +3,6 @@ package coordinates
 import (
 	"fmt"
 	"math"
-	"strings"
 
 	"github.com/sunshineplan/weather/unit"
 )
@@ -62,11 +61,5 @@ func (dms dms) str(lat bool) string {
 			direction = "E"
 		}
 	}
-	var seconds, dec string
-	s := strings.Split(unit.FormatFloat64(dms.seconds, 3), ".")
-	seconds = s[0]
-	if len(s) == 2 {
-		dec = "." + s[1]
-	}
-	return fmt.Sprintf(`%d°%02d′%02s%s″%s`, dms.degrees, dms.minutes, seconds, dec, direction)
+	return fmt.Sprintf(`%d°%02d′%02s″%s`, dms.degrees, dms.minutes, unit.FormatFloat64(dms.seconds, 0), direction)
 }

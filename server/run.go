@@ -33,15 +33,15 @@ func initWeather() (err error) {
 		return
 	}
 	realtime = weatherapi.New(res.WeatherAPI)
-	location, err = getCoords(*query)
-	if err != nil {
-		return
-	}
 	switch *provider {
 	case "weatherapi":
 		forecast = realtime
 	default:
 		forecast = visualcrossing.New(res.VisualCrossing)
+	}
+	location, err = getCoords(*query, forecast)
+	if err != nil {
+		return
 	}
 	history = forecast
 	stormAPI = zoomearth.ZoomEarthAPI{}
@@ -87,6 +87,10 @@ func run() error {
 		return err
 	}
 	defer client.Close()
+
+	if _, _, _, _, err := getAll(*query, *days, aqiType, time.Now(), false); err != nil {
+		return err
+	}
 
 	run := scheduler.NewScheduler
 	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)

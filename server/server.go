@@ -60,7 +60,7 @@ func runServer() error {
 		if q == *query {
 			c.File("daily/daily-24h.gif")
 		} else {
-			coords, err := getCoords(q)
+			coords, err := getCoords(q, forecast)
 			if err != nil {
 				svc.Print(err)
 				c.String(400, "")
@@ -99,9 +99,18 @@ func runServer() error {
 		}
 		current, days, avg, aqi, err := getAll(q, n, t, now, true)
 		if err != nil {
-			svc.Print(err)
-			c.String(500, "")
-			return
+			coords, err := getCoords(q, nil)
+			if err != nil {
+				svc.Print(err)
+				c.String(400, "")
+				return
+			}
+			current, days, avg, aqi, err = getAllByCoordinates(coords, n, t, now, true)
+			if err != nil {
+				svc.Print(err)
+				c.String(500, "")
+				return
+			}
 		}
 		var coords *coords
 		var image html.HTML
@@ -109,7 +118,7 @@ func runServer() error {
 			coords = location
 			image = imageHTML(location.url(z), "/6h")
 		} else {
-			coords, err = getCoords(q)
+			coords, err = getCoords(q, nil)
 			if err != nil {
 				svc.Print(err)
 				c.String(400, "")

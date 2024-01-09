@@ -8,6 +8,7 @@ import (
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/airmatters"
 	"github.com/sunshineplan/weather/aqi"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 func getAQIStandard() (standard int, err error) {
@@ -70,14 +71,57 @@ func getWeather(query string, n int, t time.Time, realtime bool) (current weathe
 	return
 }
 
+func getWeatherByCoordinates(coords coordinates.Coordinates, n int, t time.Time, realtime bool,
+) (current weather.Current, days []weather.Day, err error) {
+	c := make(chan error, 3)
+	go func() {
+		var err error
+		if realtime {
+			current, err = forecast.RealtimeByCoordinates(coords)
+		}
+		c <- err
+	}()
+	var forecasts []weather.Day
+	go func() {
+		var err error
+		forecasts, err = forecast.ForecastByCoordinates(coords, n)
+		if err != nil {
+			c <- err
+		} else if len(forecasts) < n {
+			c <- fmt.Errorf("bad forecast number: %d", len(forecasts))
+		} else if date := t.Format("01-02"); !strings.HasSuffix(forecasts[0].Date, date) {
+			c <- fmt.Errorf("the first forecast date(%s) does not match the input(%s)", forecasts[0].Date, date)
+		} else {
+			c <- nil
+		}
+	}()
+	var yesterday weather.Day
+	go func() {
+		var err error
+		yesterday, err = history.HistoryByCoordinates(coords, t.AddDate(0, 0, -1))
+		c <- err
+	}()
+	for i := 0; i < 3; i++ {
+		if err = <-c; err != nil {
+			return
+		}
+	}
+	days = append([]weather.Day{yesterday}, forecasts...)
+	return
+}
+
 func getAQI(aqiType aqi.Type, q string) (aqi.Current, error) {
 	if res, err := aqiAPI.Realtime(aqiType, q); err == nil {
 		return res, nil
 	}
-	coords, err := getCoords(q)
+	coords, err := getCoords(q, forecast)
 	if err != nil {
 		return nil, err
 	}
+	return getAQIByCoordinates(aqiType, coords)
+}
+
+func getAQIByCoordinates(aqiType aqi.Type, coords coordinates.Coordinates) (aqi.Current, error) {
 	_, res, err := aqiAPI.(*airmatters.AirMatters).RealtimeNearby(aqiType, coords)
 	return res, err
 }
@@ -105,6 +149,29 @@ func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool,
 		c <- err
 	}()
 	for i := 0; i < 3; i++ {
+		if err = <-c; err != nil {
+			return
+		}
+	}
+	return
+}
+
+func getAllByCoordinates(coords coordinates.Coordinates, n int, aqiType aqi.Type, t time.Time, realtime bool,
+) (current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current, err error) {
+	c := make(chan error, 2)
+	go func() {
+		var err error
+		current, days, err = getWeatherByCoordinates(coords, n, t, realtime)
+		c <- err
+	}()
+	go func() {
+		var err error
+		if realtime {
+			currentAQI, err = getAQIByCoordinates(aqiType, coords)
+		}
+		c <- err
+	}()
+	for i := 0; i < 2; i++ {
 		if err = <-c; err != nil {
 			return
 		}
