@@ -85,3 +85,15 @@ func (api *WeatherAPI) History(query string, date time.Time) (day weather.Day, e
 	}
 	return
 }
+
+func (api *WeatherAPI) RealtimeByCoordinates(coords coordinates.Coordinates) (weather.Current, error) {
+	return api.Realtime(fmt.Sprintf("%g,%g", coords.Latitude(), coords.Longitude()))
+}
+
+func (api *WeatherAPI) ForecastByCoordinates(coords coordinates.Coordinates, n int) ([]weather.Day, error) {
+	return api.Forecast(fmt.Sprintf("%g,%g", coords.Latitude(), coords.Longitude()), n)
+}
+
+func (api *WeatherAPI) HistoryByCoordinates(coords coordinates.Coordinates, date time.Time) (weather.Day, error) {
+	return api.History(fmt.Sprintf("%g,%g", coords.Latitude(), coords.Longitude()), date)
+}
