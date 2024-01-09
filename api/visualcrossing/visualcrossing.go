@@ -97,3 +97,15 @@ func (api *VisualCrossing) History(query string, date time.Time) (day weather.Da
 	}
 	return
 }
+
+func (api *VisualCrossing) RealtimeByCoordinates(coords coordinates.Coordinates) (weather.Current, error) {
+	return api.Realtime(fmt.Sprintf("%g,%g", coords.Latitude(), coords.Longitude()))
+}
+
+func (api *VisualCrossing) ForecastByCoordinates(coords coordinates.Coordinates, n int) ([]weather.Day, error) {
+	return api.Forecast(fmt.Sprintf("%g,%g", coords.Latitude(), coords.Longitude()), n)
+}
+
+func (api *VisualCrossing) HistoryByCoordinates(coords coordinates.Coordinates, date time.Time) (weather.Day, error) {
+	return api.History(fmt.Sprintf("%g,%g", coords.Latitude(), coords.Longitude()), date)
+}
