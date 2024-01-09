@@ -10,17 +10,26 @@ var coordsMap sync.Map
 
 type coords struct{ coordinates.Coordinates }
 
-func getCoords(query string) (*coords, error) {
+func getCoords(query string, api coordinates.GeoLocator) (res *coords, err error) {
 	if v, ok := coordsMap.Load(query); ok {
-		return v.(*coords), nil
+		res = v.(*coords)
+		return
 	}
-	coordinates, err := realtime.Coordinates(query)
+	var c coordinates.Coordinates
+	if api != nil {
+		c, err = api.Coordinates(query)
+	} else {
+		c, err = forecast.Coordinates(query)
+		if err != nil {
+			c, err = realtime.Coordinates(query)
+		}
+	}
 	if err != nil {
-		return nil, err
+		return
 	}
-	coords := &coords{coordinates}
-	coordsMap.Store(query, coords)
-	return coords, nil
+	res = &coords{c}
+	coordsMap.Store(query, res)
+	return
 }
 
 func (c *coords) offset(x, y float64) coords {

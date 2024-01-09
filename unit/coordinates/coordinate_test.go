@@ -11,7 +11,7 @@ func TestDMS(t *testing.T) {
 		{1, true, "1°00′00″N"},
 		{1.1, false, "1°06′00″E"},
 		{-1.11, true, "1°06′36″S"},
-		{-1.111, false, "1°06′39.6″W"},
+		{-1.111, false, "1°06′40″W"}, //1°06′39.6″
 		{121.41, false, "121°24′36″E"},
 	} {
 		dms := newDMS(testcase.f)
