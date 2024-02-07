@@ -307,10 +307,8 @@ func forecastHTML(days []weather.Day) html.HTML {
 		html.Thead().AppendChild(
 			html.Tr(
 				html.Th("Date").Colspan(2),
-				html.Th("Max"),
-				html.Th("Min"),
-				html.Th("FLMax"),
-				html.Th("FLMin"),
+				html.Th("Temp"),
+				html.Th("FeelsLike"),
 				html.Th("Rain"),
 				html.Th("Wind"),
 			),
@@ -320,13 +318,17 @@ func forecastHTML(days []weather.Day) html.HTML {
 	for _, day := range days {
 		tbody.AppendChild(
 			html.Tr(
-				html.Td(day.DateInfo(false)[11:]).Style("text-wrap:nowrap"),
+				html.Td(html.Background().AppendChild(
+					html.Span().Content(day.DateEpoch.Time().Format("01-02")),
+					html.Span().Content(day.DateEpoch.Weekday()),
+				)).Style("display:grid;text-align:center;font-size:.9em"),
 				html.Td(day.Condition.Img(day.Icon)),
-				html.Td(day.TempMax),
-				html.Td(day.TempMin),
-				html.Td(day.FeelsLikeMax),
-				html.Td(day.FeelsLikeMin),
-				html.Td(day.PrecipProb),
+				html.Td(html.HTML(strings.ReplaceAll(string(day.TempMax.HTML()), "°C", ""))+" / "+day.TempMin.HTML()),
+				html.Td(html.HTML(strings.ReplaceAll(string(day.FeelsLikeMax.HTML()), "°C", ""))+" / "+day.FeelsLikeMin.HTML()),
+				html.Td(html.Background().AppendChild(
+					html.Span().Contentf("%gmm", day.Precip),
+					html.Span().Content(day.PrecipProb),
+				)).Style("display:grid;text-align:center;font-size:.9em"),
 				html.Td(html.Span().Style("color:"+day.WindSpeed.ForceColor()).Contentf("%sm/s", unit.FormatFloat64(day.WindSpeed.MPS(), 1))),
 			))
 	}
