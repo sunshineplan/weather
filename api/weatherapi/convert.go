@@ -10,7 +10,6 @@ func (current *Current) Convert() weather.Current {
 		FeelsLike:     current.FeelsLike,
 		WindSpeed:     current.WindKph,
 		WindDegree:    current.WindDegree,
-		WindDir:       current.WindDir,
 		Pressure:      current.PressureMb,
 		Precip:        current.PrecipMm,
 		Humidity:      current.Humidity,

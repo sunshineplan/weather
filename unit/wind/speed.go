@@ -1,19 +1,20 @@
-package unit
+package wind
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/sunshineplan/utils/html"
+	"github.com/sunshineplan/weather/unit"
 )
 
 var (
-	_ json.Marshaler = WindSpeed(nil)
+	_ json.Marshaler = Speed(nil)
 
-	_ WindSpeed = WindKPH(0)
+	_ Speed = KPH(0)
 )
 
-type WindSpeed interface {
+type Speed interface {
 	MPS() float64
 	Force() int
 	ForceColor() string
@@ -22,7 +23,7 @@ type WindSpeed interface {
 	HTML() html.HTML
 }
 
-func WindForceColor(force int) string {
+func ForceColor(force int) string {
 	return map[int]string{
 		0:  "#FFFFFF",
 		1:  "#AEF1F9",
@@ -40,13 +41,13 @@ func WindForceColor(force int) string {
 	}[force]
 }
 
-type WindKPH float64
+type KPH float64
 
-func (f WindKPH) MPS() float64 {
+func (f KPH) MPS() float64 {
 	return float64(f * 1000 / 60 / 60)
 }
 
-func (f WindKPH) Force() int {
+func (f KPH) Force() int {
 	if f < 2 {
 		return 0
 	} else if f < 6 {
@@ -75,18 +76,18 @@ func (f WindKPH) Force() int {
 	return 12
 }
 
-func (f WindKPH) ForceColor() string {
-	return WindForceColor(f.Force())
+func (f KPH) ForceColor() string {
+	return ForceColor(f.Force())
 }
 
-func (f WindKPH) String() string {
-	return fmt.Sprintf("%sm/s(%d)", FormatFloat64(f.MPS(), 1), f.Force())
+func (f KPH) String() string {
+	return fmt.Sprintf("%sm/s(%d)", unit.FormatFloat64(f.MPS(), 1), f.Force())
 }
 
-func (f WindKPH) MarshalJSON() ([]byte, error) {
+func (f KPH) MarshalJSON() ([]byte, error) {
 	return json.Marshal(float64(f))
 }
 
-func (f WindKPH) HTML() html.HTML {
-	return html.Span().Style("color:"+f.ForceColor()).Contentf("%sm/s(%d)", FormatFloat64(f.MPS(), 1), f.Force()).HTML()
+func (f KPH) HTML() html.HTML {
+	return html.Span().Style("color:"+f.ForceColor()).Contentf("%sm/s(%d)", unit.FormatFloat64(f.MPS(), 1), f.Force()).HTML()
 }
