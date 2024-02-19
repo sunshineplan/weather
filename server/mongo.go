@@ -76,7 +76,7 @@ func export(month string, delete bool) (string, error) {
 		FeelsLikeMax any               `json:"feelslikemax"`
 		FeelsLikeMin any               `json:"feelslikemin"`
 		FeelsLike    any               `json:"feelslike"`
-		Humidity     weather.Percent   `json:"humidity"`
+		Humidity     unit.Percent      `json:"humidity"`
 		Dew          any               `json:"dew"`
 		Precip       float64           `json:"precip"`
 		PrecipCover  float64           `json:"precipcover"`

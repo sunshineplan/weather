@@ -3,12 +3,12 @@ package weather
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"slices"
 	"strings"
 
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/weather/unit"
+	"github.com/sunshineplan/weather/unit/wind"
 )
 
 type Current struct {
@@ -16,17 +16,16 @@ type Current struct {
 	DatetimeEpoch unit.UnixTime    `json:"datetimeEpoch,omitempty"`
 	Temp          unit.Temperature `json:"temp"`
 	FeelsLike     unit.Temperature `json:"feelslike"`
-	Humidity      Percent          `json:"humidity,omitempty"`
+	Humidity      unit.Percent     `json:"humidity,omitempty"`
 	Dew           unit.Temperature `json:"dew"`
 	Precip        float64          `json:"precip,omitempty"`
 	PrecipType    []string         `json:"preciptype,omitempty"`
-	WindGust      unit.WindSpeed   `json:"windgust,omitempty"`
-	WindSpeed     unit.WindSpeed   `json:"windspeed,omitempty"`
-	WindDegree    float64          `json:"winddegree,omitempty"`
-	WindDir       string           `json:"winddir,omitempty"`
+	WindGust      wind.Speed       `json:"windgust,omitempty"`
+	WindSpeed     wind.Speed       `json:"windspeed,omitempty"`
+	WindDegree    wind.Degree      `json:"winddegree,omitempty"`
 	Pressure      float64          `json:"pressure,omitempty"`
 	Visibility    float64          `json:"visibility,omitempty"`
-	CloudCover    Percent          `json:"cloudcover"`
+	CloudCover    unit.Percent     `json:"cloudcover"`
 	UVIndex       unit.UVIndex     `json:"uvindex,omitempty"`
 	Condition     Condition        `json:"condition,omitempty"`
 	Icon          string           `json:"icon,omitempty"`
@@ -49,7 +48,7 @@ func (current Current) HTML() html.HTML {
 				html.Tr(
 					html.Td("Pressure:"), html.Td(fmt.Sprintf("%ghPa", current.Pressure)),
 					html.Td("Precip:"), html.Td(fmt.Sprintf("%gmm", current.Precip)),
-					html.Td("WindSpeed:"), html.Td(current.WindSpeed),
+					html.Td("Wind:"), html.Td(current.WindSpeed),
 				),
 				html.Tr(
 					html.Td("CloudCover:"), html.Td(current.CloudCover),
@@ -68,19 +67,19 @@ type Day struct {
 	FeelsLikeMax unit.Temperature `json:"feelslikemax"`
 	FeelsLikeMin unit.Temperature `json:"feelslikemin"`
 	FeelsLike    unit.Temperature `json:"feelslike"`
-	Humidity     Percent          `json:"humidity,omitempty"`
+	Humidity     unit.Percent     `json:"humidity,omitempty"`
 	Dew          unit.Temperature `json:"dew"`
 	Precip       float64          `json:"precip,omitempty"`
-	PrecipProb   Percent          `json:"precipprob,omitempty"`
-	PrecipCover  Percent          `json:"precipcover,omitempty"`
+	PrecipProb   unit.Percent     `json:"precipprob,omitempty"`
+	PrecipCover  unit.Percent     `json:"precipcover,omitempty"`
 	Snow         float64          `json:"snow,omitempty"`
 	SnowDepth    float64          `json:"snowdepth,omitempty"`
 	PrecipType   []string         `json:"preciptype,omitempty"`
-	WindGust     unit.WindSpeed   `json:"windgust,omitempty"`
-	WindSpeed    unit.WindSpeed   `json:"windspeed,omitempty"`
-	WindDir      float64          `json:"winddir,omitempty"`
+	WindGust     wind.Speed       `json:"windgust,omitempty"`
+	WindSpeed    wind.Speed       `json:"windspeed,omitempty"`
+	WindDir      wind.Degree      `json:"winddir,omitempty"`
 	Pressure     float64          `json:"pressure,omitempty"`
-	CloudCover   Percent          `json:"cloudcover"`
+	CloudCover   unit.Percent     `json:"cloudcover"`
 	Visibility   float64          `json:"visibility,omitempty"`
 	UVIndex      unit.UVIndex     `json:"uvindex,omitempty"`
 	SevereRisk   float64          `json:"severerisk,omitempty"`
@@ -184,7 +183,7 @@ func (day Day) String() string {
 	fmt.Fprintln(&b, day.Temperature())
 	fmt.Fprintf(&b, "Humidity: %s, Dew Point: %s, Pressure: %ghPa\n", day.Humidity, day.Dew, day.Pressure)
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
-	fmt.Fprintf(&b, "WindGust: %s, WindSpeed: %s, WindDir: %g°\n", day.WindGust, day.WindSpeed, day.WindDir)
+	fmt.Fprintf(&b, "WindGust: %s, WindSpeed: %s, WindDir: %s %s\n", day.WindGust, day.WindSpeed, day.WindDir, day.WindDir.Direction())
 	fmt.Fprintf(&b, "CloudCover: %s, Visibility: %gkm, UVIndex: %s", day.CloudCover, day.Visibility, day.UVIndex)
 	return b.String()
 }
@@ -208,7 +207,7 @@ func (day Day) HTML() html.HTML {
 				html.Tr(
 					html.Td("WindGust:"), html.Td(day.WindGust),
 					html.Td("WindSpeed:"), html.Td(day.WindSpeed),
-					html.Td("WindDir:"), html.Td(fmt.Sprintf("%g°", day.WindDir)),
+					html.Td("WindDir:"), html.Td(day.WindDir),
 				),
 				html.Tr(
 					html.Td("CloudCover:"), html.Td(day.CloudCover),
@@ -223,19 +222,19 @@ type Hour struct {
 	TimeEpoch      unit.UnixTime    `json:"timeEpoch,omitempty"`
 	Temp           unit.Temperature `json:"temp"`
 	FeelsLike      unit.Temperature `json:"feelslike"`
-	Humidity       Percent          `json:"humidity"`
+	Humidity       unit.Percent     `json:"humidity"`
 	Dew            unit.Temperature `json:"dew"`
 	Precip         float64          `json:"precip,omitempty"`
-	PrecipProb     Percent          `json:"precipprob,omitempty"`
+	PrecipProb     unit.Percent     `json:"precipprob,omitempty"`
 	Snow           float64          `json:"snow,omitempty"`
 	SnowDepth      float64          `json:"snowdepth,omitempty"`
 	PrecipType     []string         `json:"preciptype,omitempty"`
-	WindGust       unit.WindSpeed   `json:"windgust,omitempty"`
-	WindSpeed      unit.WindSpeed   `json:"windspeed,omitempty"`
-	WindDir        float64          `json:"winddir,omitempty"`
+	WindGust       wind.Speed       `json:"windgust,omitempty"`
+	WindSpeed      wind.Speed       `json:"windspeed,omitempty"`
+	WindDir        wind.Degree      `json:"winddir,omitempty"`
 	Pressure       float64          `json:"pressure,omitempty"`
 	Visibility     float64          `json:"visibility,omitempty"`
-	CloudCover     Percent          `json:"cloudcover"`
+	CloudCover     unit.Percent     `json:"cloudcover"`
 	SolarRadiation float64          `json:"solarradiation,omitempty"`
 	SolarEnergy    float64          `json:"solarenergy,omitempty"`
 	UVIndex        unit.UVIndex     `json:"uvindex,omitempty"`
@@ -249,16 +248,16 @@ func (hour Hour) String() string {
 		Time       string       `json:"time"`
 		Temp       string       `json:"temp"`
 		FeelsLike  string       `json:"feelslike"`
-		Humidity   Percent      `json:"humidity"`
+		Humidity   unit.Percent `json:"humidity"`
 		Dew        string       `json:"dew"`
 		Precip     float64      `json:"precip"`
-		PrecipProb Percent      `json:"precipprob"`
+		PrecipProb unit.Percent `json:"precipprob"`
 		WindGust   string       `json:"windgust"`
 		WindSpeed  string       `json:"windspeed"`
 		WindDir    float64      `json:"winddir"`
 		Pressure   float64      `json:"pressure"`
 		Visibility float64      `json:"visibility"`
-		CloudCover Percent      `json:"cloudcover"`
+		CloudCover unit.Percent `json:"cloudcover"`
 		UVIndex    unit.UVIndex `json:"uvindex"`
 		SevereRisk float64      `json:"severerisk"`
 		Condition  Condition    `json:"condition"`
@@ -267,16 +266,6 @@ func (hour Hour) String() string {
 	json.Unmarshal(b, &format)
 	b, _ = json.Marshal(format)
 	return string(b)
-}
-
-type Percent float64
-
-func (f Percent) Max(i Percent) Percent {
-	return Percent(math.Max(float64(f), float64(i)))
-}
-
-func (f Percent) String() string {
-	return fmt.Sprintf("%g%%", f)
 }
 
 type Condition string

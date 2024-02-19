@@ -3,6 +3,7 @@ package visualcrossing
 import (
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/unit"
+	"github.com/sunshineplan/weather/unit/wind"
 )
 
 type Response struct {
@@ -21,19 +22,19 @@ type Current struct {
 	DatetimeEpoch  unit.UnixTime     `json:"datetimeEpoch,omitempty"`
 	Temp           unit.Celsius      `json:"temp"`
 	FeelsLike      unit.Celsius      `json:"feelslike"`
-	Humidity       weather.Percent   `json:"humidity"`
+	Humidity       unit.Percent      `json:"humidity"`
 	Dew            unit.Celsius      `json:"dew"`
 	Precip         float64           `json:"precip,omitempty"`
-	PrecipProb     weather.Percent   `json:"precipprob,omitempty"`
+	PrecipProb     unit.Percent      `json:"precipprob,omitempty"`
 	Snow           float64           `json:"snow,omitempty"`
 	SnowDepth      float64           `json:"snowdepth,omitempty"`
 	PrecipType     []string          `json:"preciptype,omitempty"`
-	WindGust       unit.WindKPH      `json:"windgust,omitempty"`
-	WindSpeed      unit.WindKPH      `json:"windspeed,omitempty"`
-	WindDir        float64           `json:"winddir,omitempty"`
+	WindGust       wind.KPH          `json:"windgust,omitempty"`
+	WindSpeed      wind.KPH          `json:"windspeed,omitempty"`
+	WindDir        wind.Degree       `json:"winddir,omitempty"`
 	Pressure       float64           `json:"pressure,omitempty"`
 	Visibility     float64           `json:"visibility,omitempty"`
-	CloudCover     weather.Percent   `json:"cloudcover"`
+	CloudCover     unit.Percent      `json:"cloudcover"`
 	SolarRadiation float64           `json:"solarradiation,omitempty"`
 	SolarEnergy    float64           `json:"solarenergy,omitempty"`
 	UVIndex        unit.UVIndex      `json:"uvindex,omitempty"`
@@ -55,19 +56,19 @@ type Day struct {
 	FeelsLikeMax   unit.Celsius      `json:"feelslikemax"`
 	FeelsLikeMin   unit.Celsius      `json:"feelslikemin"`
 	FeelsLike      unit.Celsius      `json:"feelslike"`
-	Humidity       weather.Percent   `json:"humidity"`
+	Humidity       unit.Percent      `json:"humidity"`
 	Dew            unit.Celsius      `json:"dew"`
 	Precip         float64           `json:"precip,omitempty"`
-	PrecipProb     weather.Percent   `json:"precipprob,omitempty"`
-	PrecipCover    weather.Percent   `json:"precipcover,omitempty"`
+	PrecipProb     unit.Percent      `json:"precipprob,omitempty"`
+	PrecipCover    unit.Percent      `json:"precipcover,omitempty"`
 	Snow           float64           `json:"snow,omitempty"`
 	SnowDepth      float64           `json:"snowdepth,omitempty"`
 	PrecipType     []string          `json:"preciptype,omitempty"`
-	WindGust       unit.WindKPH      `json:"windgust,omitempty"`
-	WindSpeed      unit.WindKPH      `json:"windspeed,omitempty"`
-	WindDir        float64           `json:"winddir,omitempty"`
+	WindGust       wind.KPH          `json:"windgust,omitempty"`
+	WindSpeed      wind.KPH          `json:"windspeed,omitempty"`
+	WindDir        wind.Degree       `json:"winddir,omitempty"`
 	Pressure       float64           `json:"pressure,omitempty"`
-	CloudCover     weather.Percent   `json:"cloudcover"`
+	CloudCover     unit.Percent      `json:"cloudcover"`
 	Visibility     float64           `json:"visibility,omitempty"`
 	SolarRadiation float64           `json:"solarradiation,omitempty"`
 	SolarEnergy    float64           `json:"solarenergy,omitempty"`
@@ -89,19 +90,19 @@ type Hour struct {
 	DatetimeEpoch  unit.UnixTime     `json:"datetimeEpoch,omitempty"`
 	Temp           unit.Celsius      `json:"temp"`
 	FeelsLike      unit.Celsius      `json:"feelslike"`
-	Humidity       weather.Percent   `json:"humidity"`
+	Humidity       unit.Percent      `json:"humidity"`
 	Dew            unit.Celsius      `json:"dew"`
 	Precip         float64           `json:"precip,omitempty"`
-	PrecipProb     weather.Percent   `json:"precipprob,omitempty"`
+	PrecipProb     unit.Percent      `json:"precipprob,omitempty"`
 	Snow           float64           `json:"snow,omitempty"`
 	SnowDepth      float64           `json:"snowdepth,omitempty"`
 	PrecipType     []string          `json:"preciptype,omitempty"`
-	WindGust       unit.WindKPH      `json:"windgust,omitempty"`
-	WindSpeed      unit.WindKPH      `json:"windspeed,omitempty"`
-	WindDir        float64           `json:"winddir,omitempty"`
+	WindGust       wind.KPH          `json:"windgust,omitempty"`
+	WindSpeed      wind.KPH          `json:"windspeed,omitempty"`
+	WindDir        wind.Degree       `json:"winddir,omitempty"`
 	Pressure       float64           `json:"pressure,omitempty"`
 	Visibility     float64           `json:"visibility,omitempty"`
-	CloudCover     weather.Percent   `json:"cloudcover"`
+	CloudCover     unit.Percent      `json:"cloudcover"`
 	SolarRadiation float64           `json:"solarradiation,omitempty"`
 	SolarEnergy    float64           `json:"solarenergy,omitempty"`
 	UVIndex        unit.UVIndex      `json:"uvindex,omitempty"`
