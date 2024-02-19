@@ -54,6 +54,6 @@ func (s Direction) String() string {
 	return string(s.Direction())
 }
 
-func (s Direction) SVG() *html.Element {
-	return s.Degree().SVG()
+func (s Direction) HTML() html.HTML {
+	return s.Degree().HTML()
 }

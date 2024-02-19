@@ -122,7 +122,7 @@ func fullHTML(
 			html.Br(),
 		)
 	}
-	div.AppendContent(forecastHTML(days[1:]))
+	div.AppendContent(forecastHTML(days[1:], current.Datetime != ""))
 
 	if rainSnow := weather.WillRainSnow(days[1:]); len(rainSnow) > 0 {
 		res := html.Div()
@@ -296,45 +296,46 @@ func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element) 
 	return
 }
 
-func forecastHTML(days []weather.Day) html.HTML {
+func forecastHTML(days []weather.Day, dir bool) html.HTML {
 	if len(days) > 10 {
 		days = days[:10]
 	}
 	div := html.Div()
 	div.AppendChild(html.Span().Style("display:list-item;margin-left:15px").Content("Forecast"))
 	table := html.Table().Attribute("border", "1").Attribute("cellspacing", "0")
-	table.AppendChild(
-		html.Thead().AppendChild(
-			html.Tr(
-				html.Th("Date").Colspan(2),
-				html.Th("Temp"),
-				html.Th("FeelsLike"),
-				html.Th("Rain"),
-				html.Th("Wind"),
-			),
-		),
-	)
+	th := []*html.TableCell{
+		html.Th("Date").Colspan(2),
+		html.Th("Temp"),
+		html.Th("FeelsLike"),
+		html.Th("Rain"),
+		html.Th("Wind"),
+	}
+	if dir {
+		th = append(th, html.Th("Dir"))
+	}
+	table.AppendChild(html.Thead().AppendChild(html.Tr(th...)))
 	tbody := html.Tbody()
 	for _, day := range days {
-		tbody.AppendChild(
-			html.Tr(
-				html.Td(html.Background().AppendChild(
-					html.Span().Content(day.DateEpoch.Time().Format("01-02")),
-					html.Span().Content(day.DateEpoch.Weekday()),
-				)).Style("display:grid;text-align:center;font-size:.9em"),
-				html.Td(day.Condition.Img(day.Icon)),
-				html.Td(html.HTML(strings.ReplaceAll(string(day.TempMax.HTML()), "°C", ""))+" / "+day.TempMin.HTML()),
-				html.Td(html.HTML(strings.ReplaceAll(string(day.FeelsLikeMax.HTML()), "°C", ""))+" / "+day.FeelsLikeMin.HTML()),
-				html.Td(html.Background().AppendChild(
-					html.Span().Contentf("%gmm", day.Precip),
-					html.Span().Content(day.PrecipProb),
-				)).Style("display:grid;text-align:center;font-size:.9em"),
-				html.Td(html.Span().Style("color:"+day.WindSpeed.ForceColor()).Contentf("%sm/s", unit.FormatFloat64(day.WindSpeed.MPS(), 1))),
-			))
+		td := []*html.TableCell{
+			html.Td(html.Background().AppendChild(
+				html.Span().Content(day.DateEpoch.Time().Format("01-02")),
+				html.Span().Content(day.DateEpoch.Weekday()),
+			)).Style("display:grid;text-align:center;font-size:.9em"),
+			html.Td(day.Condition.Img(day.Icon)),
+			html.Td(html.HTML(strings.ReplaceAll(string(day.TempMax.HTML()), "°C", "")) + " / " + day.TempMin.HTML()),
+			html.Td(html.HTML(strings.ReplaceAll(string(day.FeelsLikeMax.HTML()), "°C", "")) + " / " + day.FeelsLikeMin.HTML()),
+			html.Td(html.Background().AppendChild(
+				html.Span().Contentf("%gmm", day.Precip),
+				html.Span().Content(day.PrecipProb),
+			)).Style("display:grid;text-align:center;font-size:.9em"),
+			html.Td(html.Span().Style("color:"+day.WindSpeed.ForceColor()).Contentf("%sm/s", unit.FormatFloat64(day.WindSpeed.MPS(), 1))),
+		}
+		if dir {
+			td = append(td, html.Td(html.Div().Style("display:flex;justify-content:center").Content(day.WindDir)))
+		}
+		tbody.AppendChild(html.Tr(td...))
 	}
-	table.AppendChild(tbody)
-	div.AppendChild(table)
-	return div.HTML()
+	return div.AppendChild(table.AppendChild(tbody)).HTML()
 }
 
 func zoomEarth(t time.Time, isReport bool) {

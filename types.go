@@ -48,7 +48,7 @@ func (current Current) HTML() html.HTML {
 				html.Tr(
 					html.Td("Pressure:"), html.Td(fmt.Sprintf("%ghPa", current.Pressure)),
 					html.Td("Precip:"), html.Td(fmt.Sprintf("%gmm", current.Precip)),
-					html.Td("Wind:"), html.Td(current.WindSpeed),
+					html.Td("Wind:"), html.Td(current.WindSpeed.HTML()+current.WindDegree.HTML()).Style("display:flex;align-items:center"),
 				),
 				html.Tr(
 					html.Td("CloudCover:"), html.Td(current.CloudCover),
@@ -183,7 +183,7 @@ func (day Day) String() string {
 	fmt.Fprintln(&b, day.Temperature())
 	fmt.Fprintf(&b, "Humidity: %s, Dew Point: %s, Pressure: %ghPa\n", day.Humidity, day.Dew, day.Pressure)
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
-	fmt.Fprintf(&b, "WindGust: %s, WindSpeed: %s, WindDir: %s %s\n", day.WindGust, day.WindSpeed, day.WindDir, day.WindDir.Direction())
+	fmt.Fprintf(&b, "WindGust: %s, WindSpeed: %s, WindDir: %s\n", day.WindGust, day.WindSpeed, day.WindDir)
 	fmt.Fprintf(&b, "CloudCover: %s, Visibility: %gkm, UVIndex: %s", day.CloudCover, day.Visibility, day.UVIndex)
 	return b.String()
 }
@@ -207,7 +207,7 @@ func (day Day) HTML() html.HTML {
 				html.Tr(
 					html.Td("WindGust:"), html.Td(day.WindGust),
 					html.Td("WindSpeed:"), html.Td(day.WindSpeed),
-					html.Td("WindDir:"), html.Td(day.WindDir),
+					html.Td("WindDir:"), html.Td(day.WindDir.String()),
 				),
 				html.Tr(
 					html.Td("CloudCover:"), html.Td(day.CloudCover),
