@@ -60,20 +60,35 @@ func (coords coords) screenshot(zoom float64, quality int, retry int) (b []byte,
 	case <-ctx.Done():
 		panic("screenshot timeout, wait for retry")
 	}
-	if err = chromedp.Run(
-		ctx,
-		chromedp.EvaluateAsDevTools(`
-$('button.title').style.display='none'
-$('button.search').style.display='none'
-$('.geolocation').style.display='none'
-$('.group.overlays').style.display='none'
-$('.group.layers').style.display='none'
-$('.notifications').style.display='none'
-
+	ctx, cancel = context.WithTimeout(c, 5*time.Second)
+	defer cancel()
+	if err := chromedp.Run(ctx, chromedp.Click(".intro-app>button", chromedp.NodeVisible)); err == nil {
+		if err := chromedp.Run(
+			ctx,
+			chromedp.EvaluateAsDevTools(`
+$('.app-link.header').style.display='none'
+$('.timeline .play').style.display='none'
+$('.timeline .latest').style.display='none'
+$('.scroll').style.display='none'
+$('.time-indicator').style.display='none'
+$('.timeline').style.top='22px'
+$('.timeline').style.height='36px'
+$('.timeline').style.width='150px'
+$('.timeline').style.margin='0 auto'
+$('span.day').innerText=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',})`, nil),
+		); err != nil {
+			panic(err)
+		}
+	} else {
+		ctx, cancel = context.WithTimeout(c, 3*time.Second)
+		defer cancel()
+		if err := chromedp.Run(
+			ctx,
+			chromedp.EvaluateAsDevTools(`
 $$('.up,.down').forEach(e=>e.remove())
 $$('div .text').forEach(e=>{e.style.top='18px'})
-$('.play').style.display='none'
-$('.latest').style.display='none'
+$('.clock .play').style.display='none'
+$('.clock .latest').style.display='none'
 $('.clock').style.top='22px'
 $('.clock').style.height='50px'
 $('.clock').style.width='180px'
@@ -84,6 +99,21 @@ $('.colon').style.left='108px'
 $('.colon').style.animation='none'
 $('.minute').style.left='110px'
 $('.am-pm').style.left='146px'`, nil),
+		); err != nil {
+			panic(err)
+		}
+	}
+	ctx, cancel = context.WithTimeout(c, time.Minute)
+	defer cancel()
+	if err = chromedp.Run(
+		ctx,
+		chromedp.EvaluateAsDevTools(`
+$('button.title').style.display='none'
+$('button.search').style.display='none'
+$('.geolocation').style.display='none'
+$('.group.overlays').style.display='none'
+$('button.layers').style.display='none'
+$('.notifications').style.display='none'`, nil),
 		chromedp.Sleep(time.Second*2),
 		chromedp.FullScreenshot(&b, quality),
 	); err != nil {
