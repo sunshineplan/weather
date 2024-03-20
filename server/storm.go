@@ -109,6 +109,7 @@ $('.am-pm').style.left='146px'`, nil),
 		ctx,
 		chromedp.EvaluateAsDevTools(`
 $('button.title').style.display='none'
+$('button.settings').style.display='none'
 $('button.search').style.display='none'
 $('.geolocation').style.display='none'
 $('.group.overlays').style.display='none'
