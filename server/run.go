@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/sunshineplan/ai"
+	"github.com/sunshineplan/ai/client"
 	"github.com/sunshineplan/database/mongodb/api"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
@@ -26,6 +29,7 @@ func initWeather() (err error) {
 		Mongo          api.Client
 		Dialer         mail.Dialer
 		Subscriber     mail.Receipts
+		AI             ai.ClientConfig
 	}
 	if err = retry.Do(func() error {
 		return meta.Get("weather", &res)
@@ -50,11 +54,23 @@ func initWeather() (err error) {
 	if err != nil {
 		return
 	}
-	client = &res.Mongo
+	db = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber
 
-	return client.Connect()
+	if res.AI.LLMs != "" {
+		chatbot, err = client.New(res.AI)
+		if err != nil {
+			svc.Error("Failed to connenct AI chatbot", "error", err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if model, err = chatbot.Model(ctx); err != nil {
+			svc.Error("Failed to get AI model", "error", err)
+		}
+	}
+
+	return db.Connect()
 }
 
 func test() (err error) {
@@ -62,7 +78,7 @@ func test() (err error) {
 	if e1 != nil {
 		fmt.Println("Failed to initialize weather config:", e1)
 	} else {
-		client.Close()
+		db.Close()
 	}
 
 	_, e2 := realtime.Realtime("Shanghai")
@@ -86,7 +102,7 @@ func run() error {
 	if err := initWeather(); err != nil {
 		return err
 	}
-	defer client.Close()
+	defer db.Close()
 
 	if _, _, _, _, err := getAll(*query, *days, aqiType, time.Now(), false); err != nil {
 		return err

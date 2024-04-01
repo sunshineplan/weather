@@ -27,6 +27,10 @@ func runServer() error {
 	svc.Println("Coordinates:", location)
 	svc.Println("AQI Type:", aqiType)
 	svc.Println("AQI alert standard:", aqiStandard)
+	if chatbot != nil {
+		svc.Println("AI:", chatbot.LLMs())
+		svc.Println("Model:", model)
+	}
 
 	router := gin.Default()
 	router.Use(cors.Default())

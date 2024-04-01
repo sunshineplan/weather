@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/sunshineplan/ai"
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/service"
@@ -20,7 +21,7 @@ import (
 var (
 	svc    = service.New()
 	meta   metadata.Server
-	client mongodb.Client
+	db     mongodb.Client
 	dialer mail.Dialer
 
 	realtime *weatherapi.WeatherAPI
@@ -28,6 +29,9 @@ var (
 	history  weather.API
 	stormAPI storm.API
 	aqiAPI   aqi.API
+
+	chatbot ai.AI
+	model   string
 )
 
 func init() {
