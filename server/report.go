@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sunshineplan/ai/prompt"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
@@ -42,9 +43,18 @@ func report(t time.Time) {
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(location.url(*zoom), "cid:attachment"),
+		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
+	if chatbot != nil {
+		res, err := aiReport(*query, days, t)
+		if err != nil {
+			svc.Print(err)
+			return
+		}
+		sendMail("[Weather]Daily AI Report"+timestamp(), res, mail.TextPlain, nil, true)
+	}
 }
 
 func daily(t time.Time) {
@@ -54,14 +64,24 @@ func daily(t time.Time) {
 		svc.Print(err)
 		return
 	}
-	sendMail(
+	go sendMail(
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(location.url(*zoom), "cid:attachment"),
+		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
 	)
+	if chatbot != nil {
+		svc.Print("Start sending daily AI report...")
+		res, err := aiReport(*query, days, t)
+		if err != nil {
+			svc.Print(err)
+			return
+		}
+		go sendMail("[Weather]Daily AI Report"+timestamp(), res, mail.TextPlain, nil, true)
+	}
 }
 
 func fullHTML(
@@ -169,6 +189,26 @@ func fullHTML(
 	return div.HTML()
 }
 
+func aiReport(query string, days []weather.Day, t time.Time) (string, error) {
+	var s []string
+	for _, i := range days {
+		s = append(s, i.String())
+	}
+	q := prompt.New(fmt.Sprintf(`Today's date is %s and location is %s.
+Based on the provided weather data, please compare today's weather with yesterday's,
+analyze temperature and precipitation trends (including precipitation amount, probability, and coverage), and generate a forecast.
+The output result language is required to be the location language.`, t.Format("2006-01-02"), query))
+	c, _, err := q.Execute(chatbot, s, "")
+	if err != nil {
+		return "", err
+	}
+	res := <-c
+	if res.Error != nil {
+		return "", res.Error
+	}
+	return res.Result[0], nil
+}
+
 func alert(t time.Time) {
 	svc.Print("Start alerting...")
 	_, days, err := getWeather(*query, *days, t, false)
@@ -199,7 +239,7 @@ func alert(t time.Time) {
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element)) {
 	if subject, body := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, html.Div().Style("font-family:system-ui;margin:0").AppendChild(body).HTML(), nil, false)
+		sendMail(subject, html.Div().Style("font-family:system-ui;margin:0").AppendChild(body).HTML(), mail.TextHTML, nil, false)
 	}
 }
 
@@ -297,9 +337,6 @@ func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element) 
 }
 
 func forecastHTML(days []weather.Day, dir bool) html.HTML {
-	if len(days) > 10 {
-		days = days[:10]
-	}
 	div := html.Div()
 	div.AppendChild(html.Span().Style("display:list-item;margin-left:15px").Content("Forecast"))
 	table := html.Table().Attribute("border", "1").Attribute("cellspacing", "0")
@@ -452,6 +489,7 @@ func zoomEarth(t time.Time, isReport bool) {
 		sendMail(
 			fmt.Sprintf("[Weather]Storm Alert - %s%s", strings.Join(affectStorms, "|"), timestamp()),
 			html.HTML(strings.Join(bodys, "\n")),
+			mail.TextHTML,
 			attachments,
 			true,
 		)

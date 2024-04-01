@@ -25,7 +25,7 @@ func record(date time.Time) (err error) {
 		return
 	}
 
-	_, err = client.UpdateOne(
+	_, err = db.UpdateOne(
 		mongodb.M{"dateEpoch": day.DateEpoch, "date": day.Date},
 		mongodb.M{"$set": day},
 		&mongodb.UpdateOpt{Upsert: true},
@@ -35,7 +35,7 @@ func record(date time.Time) (err error) {
 
 func average(date string, round int) (weather.Day, error) {
 	var res []visualcrossing.Day
-	if err := client.Aggregate(
+	if err := db.Aggregate(
 		[]mongodb.M{
 			{"$match": mongodb.M{"date": mongodb.M{"$regex": date + "$"}}},
 			{"$group": mongodb.M{
@@ -87,7 +87,7 @@ func export(month string, delete bool) (string, error) {
 		Condition    weather.Condition `json:"condition"`
 		Description  string            `json:"description"`
 	}
-	if err := client.Find(
+	if err := db.Find(
 		mongodb.M{"date": mongodb.M{"$regex": month}},
 		&mongodb.FindOpt{Sort: mongodb.M{"date": 1}},
 		&res,
@@ -101,7 +101,7 @@ func export(month string, delete bool) (string, error) {
 	}
 	if delete {
 		go func() {
-			if _, err := client.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
+			if _, err := db.DeleteMany(mongodb.M{"date": mongodb.M{"$regex": month}}); err != nil {
 				svc.Print(err)
 			}
 		}()
