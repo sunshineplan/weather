@@ -134,7 +134,7 @@ func (day Day) Precipitation() string {
 		fmt.Fprint(&b, "PrecipHours: ", strings.Join(precipHours, ", "))
 	}
 	if len(day.PrecipType) > 0 {
-		fmt.Fprintf(&b, "\nPrecipType: %s", strings.Join(day.PrecipType, ", "))
+		fmt.Fprint(&b, "\nPrecipType: ", strings.Join(day.PrecipType, ", "))
 	}
 	return b.String()
 }

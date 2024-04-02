@@ -192,11 +192,22 @@ func fullHTML(
 func aiReport(query string, days []weather.Day, t time.Time) (string, error) {
 	var s []string
 	for _, i := range days {
-		s = append(s, i.String())
+		day := i.String()
+		_, precipHours := i.PrecipHours()
+		if len(precipHours) != 0 {
+			day += "\nPrecipHours: " + strings.Join(precipHours, ", ")
+		}
+		if len(i.PrecipType) > 0 {
+			day += "\nPrecipType: " + strings.Join(i.PrecipType, ", ")
+		}
+		s = append(s, day)
 	}
 	q := prompt.New(fmt.Sprintf(`Today's date is %s and location is %s.
-Based on the provided weather data, please compare today's weather with yesterday's,
-analyze temperature and precipitation trends (including precipitation amount, probability, and coverage), and generate a forecast.
+Based on the provided weather data, please:
+1. Compare today's weather with yesterday's.
+2. Analyze temperature trends.
+3. Analyze precipitation trends, including precipitation hour, amount, probability, and coverage.
+4. Generate a weather forecast.
 The output result language is required to be the location language.`, t.Format("2006-01-02"), query))
 	c, _, err := q.Execute(chatbot, s, "")
 	if err != nil {
