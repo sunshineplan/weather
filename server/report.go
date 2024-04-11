@@ -102,7 +102,8 @@ func fullHTML(
 	)
 	if current.Datetime != "" {
 		now := html.Div().AppendContent(
-			html.Span().Style("display:list-item;margin-left:15px").Content("Current"),
+			html.Span().Style("display:list-item;margin-left:15px").
+				Contentf("Current(%s %s)", t.Format("2006-01-02"), t.Weekday().String()[:3]),
 			current,
 		)
 		if currentAQI != nil {
