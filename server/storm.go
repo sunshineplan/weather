@@ -62,7 +62,7 @@ func (coords coords) screenshot(zoom float64, quality int, retry int) (b []byte,
 	}
 	ctx, cancel = context.WithTimeout(c, 5*time.Second)
 	defer cancel()
-	if err := chromedp.Run(ctx, chromedp.Click(".intro-app>button", chromedp.NodeVisible)); err == nil {
+	if err := chromedp.Run(ctx, chromedp.Click(".welcome .continue", chromedp.NodeVisible)); err == nil {
 		if err := chromedp.Run(
 			ctx,
 			chromedp.EvaluateAsDevTools(`
@@ -70,7 +70,6 @@ $('.app-link.header').style.display='none'
 $('.timeline .play').style.display='none'
 $('.timeline .latest').style.display='none'
 $('.scroll').style.display='none'
-$('.time-indicator').style.display='none'
 $('.timeline').style.top='calc(6px + env(safe-area-inset-top))'
 $('.timeline').style.left='calc(50px + env(safe-area-inset-left))'
 $('.timeline').style.right='calc(50px + env(safe-area-inset-right))'
