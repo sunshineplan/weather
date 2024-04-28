@@ -390,6 +390,7 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 func zoomEarth(t time.Time, isReport bool) {
 	if !isReport {
 		go func() {
+			svc.Print("Start saving satellite map...")
 			zoomMutex.Lock()
 			defer zoomMutex.Unlock()
 			b, err := location.offset(0, *offset).screenshot(*zoom, *quality, 5)
