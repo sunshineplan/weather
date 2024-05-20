@@ -8,7 +8,7 @@ require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sunshineplan/ai v1.0.11
-	github.com/sunshineplan/chrome v1.1.10
+	github.com/sunshineplan/chrome v1.1.11
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.19
