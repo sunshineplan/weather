@@ -12,7 +12,9 @@ import (
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/log"
+	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
+	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 var server = httpsvr.New()
@@ -70,7 +72,7 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			b, err := coords.screenshot(z, 95, 3)
+			b, err := mapAPI.Realtime(weather.Satellite, coords, mapOptions(z, 95))
 			if err != nil {
 				svc.Print(err)
 				c.String(500, "")
@@ -116,11 +118,11 @@ func runServer() error {
 				return
 			}
 		}
-		var coords *coords
+		var coords coordinates.Coordinates
 		var image html.HTML
 		if q == *query {
 			coords = location
-			image = imageHTML(location.url(z), "/6h")
+			image = imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(z, 0)), "/6h")
 		} else {
 			coords, err = getCoords(q, nil)
 			if err != nil {
@@ -128,7 +130,7 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			image = imageHTML(coords.url(z), "/map?q="+url.QueryEscape(q))
+			image = imageHTML(mapAPI.URL(weather.Satellite, coords, mapOptions(z, 0)), "/map?q="+url.QueryEscape(q))
 		}
 		c.Data(200, "text/html", []byte(
 			html.NewHTML().AppendChild(

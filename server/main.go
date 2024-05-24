@@ -27,6 +27,7 @@ var (
 	realtime *weatherapi.WeatherAPI
 	forecast weather.API
 	history  weather.API
+	mapAPI   weather.MapAPI
 	stormAPI storm.API
 	aqiAPI   aqi.API
 
@@ -71,7 +72,6 @@ var (
 	days        = flag.Int("days", 15, "forecast days")
 	difference  = flag.Float64("difference", 5, "temperature difference")
 	aqiType     aqi.Type
-	offset      = flag.Float64("offset", 0, "daily screenshot offset")
 	zoom        = flag.Float64("zoom", 7, "daily screenshot zoom")
 	quality     = flag.Int("quality", 95, "screenshot quality")
 	radius      = flag.Float64("radius", 700, "storm affect radius (unit: km)")

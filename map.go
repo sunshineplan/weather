@@ -15,11 +15,7 @@ const (
 	Pressure
 )
 
-type MapOption interface {
-	Value() any
-	Compatibility(MapAPI) bool
-}
-
 type MapAPI interface {
-	Realtime(t MapType, coords coordinates.Coordinates, zoom float64, quality int, opt MapOption) ([]byte, error)
+	URL(t MapType, coords coordinates.Coordinates, opt any) string
+	Realtime(t MapType, coords coordinates.Coordinates, opt any) ([]byte, error)
 }

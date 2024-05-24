@@ -48,6 +48,7 @@ func initWeather() (err error) {
 		return
 	}
 	history = forecast
+	mapAPI = zoomearth.ZoomEarthAPI{}
 	stormAPI = zoomearth.ZoomEarthAPI{}
 	aqiAPI = airmatters.New(res.AirMatters)
 	aqiStandard, err = getAQIStandard()
