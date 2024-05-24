@@ -3,35 +3,44 @@ package main
 import (
 	"sync"
 
+	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 var coordsMap sync.Map
 
-type coords struct{ coordinates.Coordinates }
-
-func getCoords(query string, api coordinates.GeoLocator) (res *coords, err error) {
+func getCoords(query string, api coordinates.GeoLocator) (res coordinates.Coordinates, err error) {
 	if v, ok := coordsMap.Load(query); ok {
-		res = v.(*coords)
+		res = v.(coordinates.Coordinates)
 		return
 	}
-	var c coordinates.Coordinates
 	if api != nil {
-		c, err = api.Coordinates(query)
+		res, err = api.Coordinates(query)
 	} else {
-		c, err = forecast.Coordinates(query)
+		res, err = forecast.Coordinates(query)
 		if err != nil {
-			c, err = realtime.Coordinates(query)
+			res, err = realtime.Coordinates(query)
 		}
 	}
 	if err != nil {
 		return
 	}
-	res = &coords{c}
 	coordsMap.Store(query, res)
 	return
 }
 
-func (c *coords) offset(x, y float64) coords {
-	return coords{coordinates.New(float64(c.Latitude())+x, float64(c.Longitude())+y)}
+func willAffect(storm storm.Data, coords coordinates.Coordinates, radius float64) (affect, future bool) {
+	if !storm.Active {
+		return
+	}
+	for _, i := range storm.Track {
+		if coordinates.Distance(i.Coordinates(), coords) <= radius {
+			affect = true
+			if i.Forecast() {
+				future = true
+				break
+			}
+		}
+	}
+	return
 }

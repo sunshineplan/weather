@@ -1,10 +1,10 @@
 package zoomearth
 
 import (
-	"errors"
 	"time"
 
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/option"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
@@ -18,16 +18,31 @@ func (ZoomEarthAPI) GetStorms(t time.Time) ([]storm.Storm, error) {
 	return GetStorms(t)
 }
 
-func (ZoomEarthAPI) Realtime(
-	t weather.MapType, coords coordinates.Coordinates, zoom float64, quality int, opt weather.MapOption,
-) ([]byte, error) {
-	path, ok := mapPath[t]
-	if !ok {
-		return nil, errors.New("unsupported map type")
+func (ZoomEarthAPI) URL(t weather.MapType, coords coordinates.Coordinates, opt any) string {
+	zoom := defaultMapOptions.zoom
+	if opt, ok := opt.(option.Zoom); ok {
+		zoom = opt.Zoom()
 	}
-	var overlays Overlays
-	if opt != nil && opt.Compatibility(ZoomEarthAPI{}) {
-		overlays = opt.Value().(Overlays)
+	overlays := defaultMapOptions.overlays
+	if opt, ok := opt.(option.Overlays); ok {
+		overlays = opt.Overlays()
 	}
-	return Realtime(path, overlays, coords, zoom, quality)
+	return URL(mapPath[t], coords, zoom, overlays)
+}
+
+func (ZoomEarthAPI) Realtime(t weather.MapType, coords coordinates.Coordinates, opt any) ([]byte, error) {
+	if opt == nil {
+		return Realtime(mapPath[t], coords, nil)
+	}
+	o := defaultMapOptions
+	if opt, ok := opt.(option.Zoom); ok {
+		o.zoom = opt.Zoom()
+	}
+	if opt, ok := opt.(option.Quality); ok {
+		o.quality = opt.Quality()
+	}
+	if opt, ok := opt.(option.Overlays); ok {
+		o.overlays = opt.Overlays()
+	}
+	return Realtime(mapPath[t], coords, &o)
 }

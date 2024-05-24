@@ -3,12 +3,9 @@ module weather
 go 1.22
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20240519224452-66462be74baa
-	github.com/chromedp/chromedp v0.9.5
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sunshineplan/ai v1.0.11
-	github.com/sunshineplan/chrome v1.1.11
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.19
@@ -26,6 +23,8 @@ require (
 	cloud.google.com/go/longrunning v0.5.6 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
+	github.com/chromedp/cdproto v0.0.0-20240519224452-66462be74baa // indirect
+	github.com/chromedp/chromedp v0.9.5 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
@@ -62,6 +61,7 @@ require (
 	github.com/pschlump/MiscLib v1.0.3 // indirect
 	github.com/pschlump/json v1.12.0 // indirect
 	github.com/sashabaranov/go-openai v1.23.1 // indirect
+	github.com/sunshineplan/chrome v1.1.11 // indirect
 	github.com/sunshineplan/cipher v1.0.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect

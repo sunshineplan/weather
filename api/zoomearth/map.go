@@ -2,7 +2,6 @@ package zoomearth
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/option"
 	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
@@ -26,32 +26,64 @@ var mapPath = map[weather.MapType]string{
 	weather.Pressure:      "pressure",
 }
 
-var _ weather.MapOption = Overlays(nil)
-
-func (s Overlays) Value() any {
-	return s
+var defaultMapOptions = MapOptions{
+	zoom:     4,
+	quality:  75,
+	overlays: []string{"radar", "wind"},
 }
 
-func (s Overlays) String() string {
-	if len(s) != 0 {
-		return "/overlays=" + strings.Join(s, ",")
-	}
-	return ""
+var (
+	_ option.Zoom     = MapOptions{}
+	_ option.Quality  = MapOptions{}
+	_ option.Overlays = MapOptions{}
+)
+
+func NewMapOptions(zoom float64, quality int, overlays []string) *MapOptions {
+	return &MapOptions{zoom, quality, overlays}
 }
 
-func (s Overlays) Compatibility(api weather.MapAPI) bool {
-	_, ok := api.(ZoomEarthAPI)
-	return ok
+func (o MapOptions) Zoom() float64 {
+	return o.zoom
 }
 
-func url(path string, coords coordinates.Coordinates, zoom float64, overlays Overlays) string {
-	return fmt.Sprintf("https://zoom.earth/maps/%s/#view=%g,%g,%sz%s",
-		path, coords.Latitude(), coords.Longitude(), unit.FormatFloat64(zoom, 2), overlays)
+func (o MapOptions) Quality() int {
+	return o.quality
 }
 
-func Realtime(path string, overlays Overlays, coords coordinates.Coordinates, zoom float64, quality int) (b []byte, err error) {
+func (o MapOptions) Overlays() []string {
+	return o.overlays
+}
+
+func URL(path string, coords coordinates.Coordinates, zoom float64, overlays []string) string {
 	if path == "" {
-		return nil, errors.New("path is empty")
+		path = mapPath[weather.Satellite]
+	}
+	if zoom == 0 {
+		zoom = defaultMapOptions.zoom
+	}
+	url := fmt.Sprintf(
+		"https://zoom.earth/maps/%s/#view=%g,%g,%sz", path, coords.Latitude(), coords.Longitude(), unit.FormatFloat64(zoom, 2),
+	)
+	if len(overlays) > 0 {
+		url += "/overlays=" + strings.Join(overlays, ",")
+	}
+	return url
+}
+
+func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (b []byte, err error) {
+	if path == "" {
+		path = mapPath[weather.Satellite]
+	}
+	o := defaultMapOptions
+	if opt != nil {
+		o.zoom = opt.zoom
+		o.quality = opt.quality
+		o.overlays = opt.overlays
+	}
+	if o.quality < 1 {
+		o.quality = 1
+	} else if o.quality > 100 {
+		o.quality = 100
 	}
 	c := chrome.Headless().AddFlags(chromedp.WindowSize(600, 800))
 	defer c.Close()
@@ -63,7 +95,7 @@ func Realtime(path string, overlays Overlays, coords coordinates.Coordinates, zo
 		return
 	}
 	notify := chrome.ListenEvent(ctx, "https://tiles.zoom.earth/times/geocolor.json", "GET", false)
-	if err = chromedp.Run(ctx, chromedp.Navigate(url(path, coords, zoom, overlays))); err != nil {
+	if err = chromedp.Run(ctx, chromedp.Navigate(URL(path, coords, o.zoom, o.overlays))); err != nil {
 		return
 	}
 	done := make(chan struct{})
@@ -139,7 +171,7 @@ $('.group.overlays').style.display='none'
 $('button.layers').style.display='none'
 $('.notifications').style.display='none'`, nil),
 		chromedp.Sleep(time.Second*2),
-		chromedp.FullScreenshot(&b, quality),
+		chromedp.FullScreenshot(&b, o.quality),
 	)
 	return
 }

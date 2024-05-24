@@ -16,12 +16,13 @@ import (
 	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit"
+	"github.com/sunshineplan/weather/unit/coordinates"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 var (
-	location     *coords
+	location     coordinates.Coordinates
 	rainSnow     []weather.RainSnow
 	tempRiseFall []weather.TempRiseFall
 
@@ -42,7 +43,7 @@ func report(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(location.url(*zoom), "cid:attachment"),
+			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom, 0)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -68,7 +69,7 @@ func daily(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(location.url(*zoom), "cid:attachment"),
+			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom, 0)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -85,7 +86,7 @@ func daily(t time.Time) {
 }
 
 func fullHTML(
-	q string, location *coords,
+	q string, location coordinates.Coordinates,
 	current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current,
 	t time.Time, diff float64, margin string,
 ) html.HTML {
@@ -393,7 +394,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			svc.Print("Start saving satellite map...")
 			zoomMutex.Lock()
 			defer zoomMutex.Unlock()
-			b, err := location.offset(0, *offset).screenshot(*zoom, *quality, 5)
+			b, err := mapAPI.Realtime(weather.Satellite, location, mapOptions(*zoom, *quality))
 			if err != nil {
 				svc.Print(err)
 				return
@@ -456,7 +457,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			b, err := coords{i.Coordinates}.screenshot(5.4, *quality, 3)
+			b, err := mapAPI.Realtime(weather.Satellite, i.Coordinates, mapOptions(5.4, *quality))
 			if err != nil {
 				svc.Print(err)
 				return

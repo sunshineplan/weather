@@ -13,6 +13,7 @@ import (
 
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/scheduler"
+	"github.com/sunshineplan/weather/api/zoomearth"
 )
 
 var to mail.Receipts
@@ -48,6 +49,10 @@ func sendMail[T ~string](subject string, body T, contentType mail.ContentType, a
 			svc.Print(err)
 		}
 	}
+}
+
+func mapOptions(zoom float64, quality int) *zoomearth.MapOptions {
+	return zoomearth.NewMapOptions(zoom, quality, []string{"radar", "wind"})
 }
 
 func timestamp() string {

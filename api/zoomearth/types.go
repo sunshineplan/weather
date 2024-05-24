@@ -30,4 +30,8 @@ type Track struct {
 	Forecast    bool
 }
 
-type Overlays []string
+type MapOptions struct {
+	zoom     float64
+	quality  int
+	overlays []string
+}
