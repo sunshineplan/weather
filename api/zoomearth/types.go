@@ -29,3 +29,5 @@ type Track struct {
 	Coordinates coordinates.LongLat
 	Forecast    bool
 }
+
+type Overlays []string
