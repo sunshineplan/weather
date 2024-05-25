@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/jpeg"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -43,7 +44,7 @@ func report(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom, 0)), "cid:attachment"),
+			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -69,7 +70,7 @@ func daily(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom, 0)), "cid:attachment"),
+			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -394,7 +395,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			svc.Print("Start saving satellite map...")
 			zoomMutex.Lock()
 			defer zoomMutex.Unlock()
-			b, err := mapAPI.Realtime(weather.Satellite, location, mapOptions(*zoom, *quality))
+			_, img, err := mapAPI.Realtime(weather.Satellite, location, mapOptions(*zoom))
 			if err != nil {
 				svc.Print(err)
 				return
@@ -404,7 +405,13 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				return
 			}
-			if err := os.WriteFile(file, b, 0644); err != nil {
+			f, err := os.Create(file)
+			if err != nil {
+				svc.Print(err)
+				return
+			}
+			defer f.Close()
+			if err := jpeg.Encode(f, img, &jpeg.Options{Quality: *quality}); err != nil {
 				svc.Print(err)
 				return
 			}
@@ -457,7 +464,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			b, err := mapAPI.Realtime(weather.Satellite, i.Coordinates, mapOptions(5.4, *quality))
+			_, img, err := mapAPI.Realtime(weather.Satellite, i.Coordinates, mapOptions(5.4))
 			if err != nil {
 				svc.Print(err)
 				return
@@ -468,7 +475,13 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				continue
 			}
-			if err := os.WriteFile(file, b, 0644); err != nil {
+			f, err := os.Create(file)
+			if err != nil {
+				svc.Print(err)
+				continue
+			}
+			defer f.Close()
+			if err := jpeg.Encode(f, img, &jpeg.Options{Quality: *quality}); err != nil {
 				svc.Print(err)
 				continue
 			}

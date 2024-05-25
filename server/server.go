@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"image/jpeg"
 	"net/url"
 	"path/filepath"
 	"strconv"
@@ -72,13 +74,19 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			b, err := mapAPI.Realtime(weather.Satellite, coords, mapOptions(z, 95))
+			_, img, err := mapAPI.Realtime(weather.Satellite, coords, mapOptions(z))
 			if err != nil {
 				svc.Print(err)
 				c.String(500, "")
 				return
 			}
-			c.Data(200, "image/jpeg", b)
+			var buf bytes.Buffer
+			if err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: *quality}); err != nil {
+				svc.Print(err)
+				c.String(500, "")
+				return
+			}
+			c.Data(200, "image/jpeg", buf.Bytes())
 		}
 	})
 	router.GET("/status", func(c *gin.Context) {
@@ -122,7 +130,7 @@ func runServer() error {
 		var image html.HTML
 		if q == *query {
 			coords = location
-			image = imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(z, 0)), "/6h")
+			image = imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(z)), "/6h")
 		} else {
 			coords, err = getCoords(q, nil)
 			if err != nil {
@@ -130,7 +138,7 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			image = imageHTML(mapAPI.URL(weather.Satellite, coords, mapOptions(z, 0)), "/map?q="+url.QueryEscape(q))
+			image = imageHTML(mapAPI.URL(weather.Satellite, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
 		}
 		c.Data(200, "text/html", []byte(
 			html.NewHTML().AppendChild(

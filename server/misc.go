@@ -51,8 +51,11 @@ func sendMail[T ~string](subject string, body T, contentType mail.ContentType, a
 	}
 }
 
-func mapOptions(zoom float64, quality int) *zoomearth.MapOptions {
-	return zoomearth.NewMapOptions(zoom, quality, []string{"radar", "wind"})
+func mapOptions(zoom float64) *zoomearth.MapOptions {
+	return zoomearth.NewMapOptions().
+		SetSize(600, 800).
+		SetZoom(zoom).
+		SetOverlays([]string{"radar", "wind"})
 }
 
 func timestamp() string {
