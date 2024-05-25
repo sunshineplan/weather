@@ -110,7 +110,7 @@ func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t t
 			o.timezone = opt.timezone
 		}
 	}
-	c := chrome.Headful().AddFlags(chromedp.WindowSize(o.width, o.height))
+	c := chrome.Headless().AddFlags(chromedp.WindowSize(o.width, o.height))
 	defer c.Close()
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
