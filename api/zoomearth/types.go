@@ -31,7 +31,9 @@ type Track struct {
 }
 
 type MapOptions struct {
+	width    int
+	height   int
 	zoom     float64
-	quality  int
 	overlays []string
+	timezone *time.Location
 }

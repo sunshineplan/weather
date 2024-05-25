@@ -1,6 +1,11 @@
 package weather
 
-import "github.com/sunshineplan/weather/unit/coordinates"
+import (
+	"image"
+	"time"
+
+	"github.com/sunshineplan/weather/unit/coordinates"
+)
 
 type MapType int
 
@@ -17,5 +22,5 @@ const (
 
 type MapAPI interface {
 	URL(t MapType, coords coordinates.Coordinates, opt any) string
-	Realtime(t MapType, coords coordinates.Coordinates, opt any) ([]byte, error)
+	Realtime(t MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
 }

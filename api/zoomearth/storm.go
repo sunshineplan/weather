@@ -14,11 +14,11 @@ import (
 var _ storm.Storm = StormID("")
 
 func (id StormID) URL() string {
-	return fmt.Sprintf("https://zoom.earth/storms/%s/", id)
+	return fmt.Sprintf("%s/storms/%s/", root, id)
 }
 
 func (id StormID) Data() (storm.Data, error) {
-	resp, err := http.Get(fmt.Sprint("https://zoom.earth/data/storms/?id=", id))
+	resp, err := http.Get(fmt.Sprint(root, "/data/storms/?id=", id))
 	if err != nil {
 		return storm.Data{}, err
 	}
@@ -64,7 +64,7 @@ func (data *StormData) calcCoordinates() {
 
 func GetStorms(t time.Time) (storms []storm.Storm, err error) {
 	t = t.UTC().Truncate(6 * time.Hour)
-	resp, err := http.Get("https://zoom.earth/data/storms/?date=" + t.Format("2006-01-02T15:04Z"))
+	resp, err := http.Get(root + "/data/storms/?date=" + t.Format("2006-01-02T15:04Z"))
 	if err != nil {
 		return
 	}
