@@ -449,7 +449,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			svc.Print(err)
 			continue
 		}
-		if affect, future := willAffect(storm, location, *radius); affect {
+		if affect, future := storm.Affect(location, *radius); affect {
 			found = append(found, storm)
 			if future {
 				alert = append(alert, storm)

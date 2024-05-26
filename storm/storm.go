@@ -30,3 +30,19 @@ type Track interface {
 	Coordinates() coordinates.Coordinates
 	Forecast() bool
 }
+
+func (storm Data) Affect(coords coordinates.Coordinates, radius float64) (affect, future bool) {
+	if !storm.Active {
+		return
+	}
+	for _, i := range storm.Track {
+		if coordinates.Distance(i.Coordinates(), coords) <= radius {
+			affect = true
+			if i.Forecast() {
+				future = true
+				break
+			}
+		}
+	}
+	return
+}
