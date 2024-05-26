@@ -110,7 +110,7 @@ func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t t
 			o.timezone = opt.timezone
 		}
 	}
-	c := chrome.Headless().AddFlags(chromedp.WindowSize(o.width, o.height))
+	c := chrome.Headless()
 	defer c.Close()
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
@@ -192,6 +192,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 	if err = chromedp.Run(
 		ctx,
 		chromedp.EvaluateAsDevTools(fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil),
+		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
 		chromedp.Sleep(time.Second*2),
 		chromedp.FullScreenshot(&b, 100),
 	); err != nil {

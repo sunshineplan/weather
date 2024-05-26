@@ -177,8 +177,8 @@ github.com/sunshineplan/metadata v1.1.1 h1:nlufF4CnAgwenW/Esi4iK6uGVxval/PdtV6Wr
 github.com/sunshineplan/metadata v1.1.1/go.mod h1:ENxneH9PDpQuw3IVJMu38rkfS1p+KVG4pddySkEEDSU=
 github.com/sunshineplan/service v1.0.19 h1:lxf98DVN6mLhUsdTUhV5jpge1B2IlbizzuC9HA2+lzA=
 github.com/sunshineplan/service v1.0.19/go.mod h1:3RFUNitk8eESkVmcmXKHBpDwsjVT1CAaAevaNzoALY8=
-github.com/sunshineplan/utils v0.1.65 h1:T1vDRrLtKfJao6vZFSuJngBEAb+sHNqmgEr0fu9G430=
-github.com/sunshineplan/utils v0.1.65/go.mod h1:QMe2vCEFq9VliPac8WfXndi5jP0ZrPHus8wvJlgBy5M=
+github.com/sunshineplan/utils v0.1.66 h1:YwIuVQxmaL0bEnEKHU64pseCC18w2MZVtyrmY4VFOew=
+github.com/sunshineplan/utils v0.1.66/go.mod h1:QMe2vCEFq9VliPac8WfXndi5jP0ZrPHus8wvJlgBy5M=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
