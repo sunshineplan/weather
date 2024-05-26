@@ -126,10 +126,11 @@ func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t t
 	}
 	storageID := &domstorage.StorageID{StorageKey: domstorage.SerializedStorageKey(root + "/"), IsLocalStorage: true}
 	for k, v := range map[string]string{
-		"ze_timeZone":    "utc",
-		"ze_timeFormat":  "hour24",
-		"ze_timeControl": "timeline",
-		"ze_welcome":     "false",
+		"ze_distanceUnit": "metric",
+		"ze_timeControl":  "timeline",
+		"ze_timeFormat":   "hour24",
+		"ze_timeZone":     "utc",
+		"ze_welcome":      "false",
 	} {
 		if err = c.SetStorageItem(storageID, k, v); err != nil {
 			return
@@ -158,31 +159,25 @@ func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t t
 	}
 	ctx, cancel = context.WithTimeout(c, 5*time.Second)
 	defer cancel()
-	chromedp.Run(ctx,
-		chromedp.Click(".welcome .continue", chromedp.NodeVisible),
-		chromedp.Evaluate("$('.app-link.header').style.display='none'", nil),
-	)
+	chromedp.Run(ctx, chromedp.Click(".welcome .continue", chromedp.NodeVisible))
 	ctx, cancel = context.WithTimeout(c, time.Minute)
 	defer cancel()
 	var utcTime string
 	if err = chromedp.Run(
 		ctx,
 		chromedp.EvaluateAsDevTools(`
-$('.timeline .play').style.display='none'
-$('.timeline .latest').style.display='none'
+$$('nav.panel').forEach(i=>i.remove())
+$$('.group').forEach(i=>i.remove())
+$$('button').forEach(i=>i.remove())
+$$('.notifications').forEach(i=>i.remove())
+$$('.app-link').forEach(i=>i.remove())
 $('.scroll').style.display='none'
 $('.timeline').style.top='calc(6px + env(safe-area-inset-top))'
 $('.timeline').style.left='calc(50px + env(safe-area-inset-left))'
 $('.timeline').style.right='calc(50px + env(safe-area-inset-right))'
 $('.timeline').style.height='36px'
 $('.timeline').style.width='150px'
-$('.timeline').style.margin='0 auto'
-$('button.title').style.display='none'
-$('button.search').style.display='none'
-$('.geolocation').style.display='none'
-$('.group.overlays').style.display='none'
-$('button.layers').style.display='none'
-$('.notifications').style.display='none'`, nil),
+$('.timeline').style.margin='0 auto'`, nil),
 		chromedp.Text("div.time-tooltip", &utcTime),
 	); err != nil {
 		return
@@ -192,7 +187,7 @@ $('.notifications').style.display='none'`, nil),
 			return
 		}
 	}
-	t = t.In(o.timezone)
+	t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
 	var b []byte
 	if err = chromedp.Run(
 		ctx,
