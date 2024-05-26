@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sunshineplan/weather"
@@ -10,6 +11,28 @@ import (
 	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
+
+var coordsMap sync.Map
+
+func getCoords(query string, api coordinates.GeoLocator) (res coordinates.Coordinates, err error) {
+	if v, ok := coordsMap.Load(query); ok {
+		res = v.(coordinates.Coordinates)
+		return
+	}
+	if api != nil {
+		res, err = api.Coordinates(query)
+	} else {
+		res, err = forecast.Coordinates(query)
+		if err != nil {
+			res, err = realtime.Coordinates(query)
+		}
+	}
+	if err != nil {
+		return
+	}
+	coordsMap.Store(query, res)
+	return
+}
 
 func getAQIStandard() (standard int, err error) {
 	defer func() {
