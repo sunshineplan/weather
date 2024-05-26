@@ -16,6 +16,7 @@ type Storm interface {
 
 type Data struct {
 	ID          string
+	Season      string
 	Name        string
 	Title       string
 	Active      bool
