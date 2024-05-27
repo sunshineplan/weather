@@ -55,7 +55,8 @@ func mapOptions(zoom float64) *zoomearth.MapOptions {
 	return zoomearth.NewMapOptions().
 		SetSize(600, 800).
 		SetZoom(zoom).
-		SetOverlays([]string{"radar", "wind"})
+		SetOverlays([]string{"radar", "wind"}).
+		SetTimeZone(time.FixedZone("CST", 8*60*60))
 }
 
 func timestamp() string {

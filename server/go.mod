@@ -8,7 +8,7 @@ require (
 	github.com/sunshineplan/ai v1.0.11
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/metadata v1.1.1
-	github.com/sunshineplan/service v1.0.19
+	github.com/sunshineplan/service v1.0.20
 	github.com/sunshineplan/utils v0.1.66
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	golang.org/x/text v0.15.0

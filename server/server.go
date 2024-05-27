@@ -68,7 +68,7 @@ func runServer() error {
 		if q == *query {
 			c.File("daily/daily-24h.gif")
 		} else {
-			coords, err := getCoords(q, forecast)
+			coords, err := getCoords(q, nil)
 			if err != nil {
 				svc.Print(err)
 				c.String(400, "")

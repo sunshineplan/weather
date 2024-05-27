@@ -191,8 +191,8 @@ $('.timeline').style.margin='0 auto'`, nil),
 	var b []byte
 	if err = chromedp.Run(
 		ctx,
-		chromedp.EvaluateAsDevTools(fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil),
 		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
+		chromedp.EvaluateAsDevTools(fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil),
 		chromedp.Sleep(time.Second*2),
 		chromedp.FullScreenshot(&b, 100),
 	); err != nil {
