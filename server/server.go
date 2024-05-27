@@ -124,7 +124,7 @@ func runServer() error {
 		var image html.HTML
 		if q == *query {
 			coords = location
-			image = imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(z)), "/6h")
+			image = imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, location, mapOptions(z)), "/6h")
 		} else {
 			coords, err = getCoords(q, nil)
 			if err != nil {
@@ -132,7 +132,7 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			image = imageHTML(mapAPI.URL(weather.Satellite, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
+			image = imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
 		}
 		c.Data(200, "text/html", []byte(
 			html.NewHTML().AppendChild(

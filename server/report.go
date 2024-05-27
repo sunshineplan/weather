@@ -44,7 +44,7 @@ func report(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom)), "cid:attachment"),
+			imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -70,7 +70,7 @@ func daily(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(mapAPI.URL(weather.Satellite, location, mapOptions(*zoom)), "cid:attachment"),
+			imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
