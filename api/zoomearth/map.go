@@ -176,7 +176,8 @@ $$('.group').forEach(i=>i.remove())
 $$('button').forEach(i=>i.remove())
 $$('.notifications').forEach(i=>i.remove())
 $$('.app-link').forEach(i=>i.remove())
-$('.scroll').style.display='none'
+$$('.scroll').forEach(i=>i.remove())
+$$('.time-indicator').forEach(i=>i.remove())
 $('.timeline').style.top='calc(6px + env(safe-area-inset-top))'
 $('.timeline').style.left='calc(50px + env(safe-area-inset-left))'
 $('.timeline').style.right='calc(50px + env(safe-area-inset-right))'
@@ -198,7 +199,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 		ctx,
 		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
 		chromedp.EvaluateAsDevTools(fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil),
-		chromedp.Sleep(time.Second*2),
+		chromedp.Sleep(300*time.Millisecond),
 		chromedp.FullScreenshot(&b, 100),
 	); err != nil {
 		return
