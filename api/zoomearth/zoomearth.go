@@ -21,7 +21,7 @@ func (ZoomEarthAPI) GetStorms(t time.Time) ([]storm.Storm, error) {
 	return GetStorms(t)
 }
 
-func (ZoomEarthAPI) URL(t weather.MapType, coords coordinates.Coordinates, opt any) string {
+func (ZoomEarthAPI) URL(mt weather.MapType, t time.Time, coords coordinates.Coordinates, opt any) string {
 	zoom := defaultMapOptions.zoom
 	if opt, ok := opt.(option.Zoom); ok {
 		zoom = opt.Zoom()
@@ -30,12 +30,12 @@ func (ZoomEarthAPI) URL(t weather.MapType, coords coordinates.Coordinates, opt a
 	if opt, ok := opt.(option.Overlays); ok {
 		overlays = opt.Overlays()
 	}
-	return URL(mapPath[t], coords, zoom, overlays)
+	return URL(mapPath[mt], t, coords, zoom, overlays)
 }
 
-func (ZoomEarthAPI) Realtime(t weather.MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
+func (ZoomEarthAPI) Map(mt weather.MapType, t time.Time, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
 	if opt == nil {
-		return Realtime(mapPath[t], coords, nil)
+		return Map(mapPath[mt], t, coords, nil)
 	}
 	o := defaultMapOptions
 	if opt, ok := opt.(option.Size); ok {
@@ -50,5 +50,9 @@ func (ZoomEarthAPI) Realtime(t weather.MapType, coords coordinates.Coordinates, 
 	if opt, ok := opt.(option.TimeZone); ok {
 		o.timezone = opt.TimeZone()
 	}
-	return Realtime(mapPath[t], coords, &o)
+	return Map(mapPath[mt], t, coords, &o)
+}
+
+func (api ZoomEarthAPI) Realtime(mt weather.MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
+	return api.Map(mt, time.Time{}, coords, opt)
 }
