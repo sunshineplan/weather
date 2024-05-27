@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/httpsvr"
-	"github.com/sunshineplan/utils/log"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/unit/coordinates"
@@ -22,11 +21,6 @@ import (
 var server = httpsvr.New()
 
 func runServer() error {
-	if *logPath != "" {
-		svc.Logger = log.New(*logPath, "", log.LstdFlags)
-		gin.DefaultWriter = svc.Logger
-		gin.DefaultErrorWriter = svc.Logger
-	}
 	svc.Println("Location:", *query)
 	svc.Println("Coordinates:", location)
 	svc.Println("AQI Type:", aqiType)

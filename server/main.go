@@ -6,11 +6,13 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/ai"
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/utils/flags"
+	"github.com/sunshineplan/utils/log"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/weatherapi"
@@ -72,7 +74,8 @@ var (
 	days        = flag.Int("days", 15, "forecast days")
 	difference  = flag.Float64("difference", 5, "temperature difference")
 	aqiType     aqi.Type
-	zoom        = flag.Float64("zoom", 5, "daily screenshot zoom")
+	zoom        = flag.Float64("zoom", 6, "daily screenshot zoom")
+	stormZoom   = flag.Float64("storm", 4.4, "storm screenshot zoom")
 	quality     = flag.Int("quality", 95, "screenshot quality")
 	radius      = flag.Float64("radius", 700, "storm affect radius (unit: km)")
 	path        = flag.String("path", "storm", "storm screenshot save path")
@@ -98,6 +101,12 @@ func main() {
 	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/weather.pid", "PID file path")
 	flags.SetConfigFile(filepath.Join(filepath.Dir(self), "config.ini"))
 	flags.Parse()
+
+	if *logPath != "" {
+		svc.SetLogger(*logPath, "", log.LstdFlags)
+		gin.DefaultWriter = svc.Logger
+		gin.DefaultErrorWriter = svc.Logger
+	}
 
 	if err := svc.ParseAndRun(flag.Args()); err != nil {
 		svc.Fatal(err)
