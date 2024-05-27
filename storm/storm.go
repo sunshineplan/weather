@@ -1,6 +1,7 @@
 package storm
 
 import (
+	"cmp"
 	"time"
 
 	"github.com/sunshineplan/weather/unit/coordinates"
@@ -15,15 +16,14 @@ type Storm interface {
 }
 
 type Data struct {
-	ID          string
-	Season      string
-	Name        string
-	Title       string
-	Active      bool
-	Place       string
-	Track       []Track
-	Coordinates coordinates.Coordinates
-	URL         string
+	ID     string
+	Season string
+	Name   string
+	Title  string
+	Active bool
+	Place  string
+	Track  []Track
+	URL    string
 }
 
 type Track interface {
@@ -46,4 +46,34 @@ func (storm Data) Affect(coords coordinates.Coordinates, radius float64) (affect
 		}
 	}
 	return
+}
+
+func calcCoordinates(a, b Track, t time.Time) coordinates.Coordinates {
+	if a == nil || b == nil {
+		return nil
+	}
+	start, end, unix := a.Date().Unix(), b.Date().Unix(), t.Unix()
+	rate := float64(unix-start) / float64(end-start)
+	return coordinates.New(
+		float64(a.Coordinates().Latitude())+float64(b.Coordinates().Latitude()-a.Coordinates().Latitude())*rate,
+		float64(a.Coordinates().Longitude())+float64(b.Coordinates().Longitude()-a.Coordinates().Longitude())*rate,
+	)
+}
+
+func (storm Data) Coordinates(t time.Time) coordinates.Coordinates {
+	if len(storm.Track) == 0 {
+		return nil
+	}
+	var track Track
+	for _, i := range storm.Track {
+		switch cmp.Compare(i.Date().Unix(), t.Unix()) {
+		case 0:
+			return i.Coordinates()
+		case -1:
+			track = i
+		case 1:
+			return calcCoordinates(track, i, t)
+		}
+	}
+	return nil
 }

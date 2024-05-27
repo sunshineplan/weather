@@ -453,9 +453,9 @@ func zoomEarth(t time.Time, isReport bool) {
 			found = append(found, storm)
 			if future {
 				alert = append(alert, storm)
-				svc.Printf("Alerting storm %s(%s)", storm.ID, storm.Coordinates)
+				svc.Printf("Alerting storm %s(%s)", storm.ID, storm.Coordinates(t))
 			} else {
-				svc.Printf("Recording storm %s(%s)", storm.ID, storm.Coordinates)
+				svc.Printf("Recording storm %s(%s)", storm.ID, storm.Coordinates(t))
 			}
 		}
 	}
@@ -464,7 +464,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			_, img, err := mapAPI.Realtime(weather.Satellite, i.Coordinates, mapOptions(*stormZoom))
+			_, img, err := mapAPI.Realtime(weather.Satellite, i.Coordinates(t), mapOptions(*stormZoom))
 			if err != nil {
 				svc.Print(err)
 				return
