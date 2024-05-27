@@ -21,6 +21,7 @@ const (
 )
 
 type MapAPI interface {
-	URL(t MapType, coords coordinates.Coordinates, opt any) string
-	Realtime(t MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
+	URL(mt MapType, t time.Time, coords coordinates.Coordinates, opt any) string
+	Map(mt MapType, t time.Time, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
+	Realtime(mt MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
 }

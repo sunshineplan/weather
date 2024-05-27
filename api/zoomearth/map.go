@@ -74,15 +74,19 @@ func (o *MapOptions) SetTimeZone(timezone *time.Location) *MapOptions {
 	return o
 }
 
-func URL(path string, coords coordinates.Coordinates, zoom float64, overlays []string) string {
+func URL(path string, t time.Time, coords coordinates.Coordinates, zoom float64, overlays []string) string {
 	if path == "" {
 		path = mapPath[weather.Satellite]
+	}
+	var date string
+	if !t.IsZero() {
+		date = "/date=" + t.UTC().Format("2006-01-02,15:04")
 	}
 	if zoom == 0 {
 		zoom = defaultMapOptions.zoom
 	}
 	url := fmt.Sprintf(
-		"%s/maps/%s/#view=%g,%g,%sz", root, path, coords.Latitude(), coords.Longitude(), unit.FormatFloat64(zoom, 2),
+		"%s/maps/%s/#view=%g,%g,%sz%s", root, path, coords.Latitude(), coords.Longitude(), unit.FormatFloat64(zoom, 2), date,
 	)
 	if len(overlays) > 0 {
 		url += "/overlays=" + strings.Join(overlays, ",")
@@ -90,7 +94,7 @@ func URL(path string, coords coordinates.Coordinates, zoom float64, overlays []s
 	return url
 }
 
-func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
+func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
 	if path == "" {
 		path = mapPath[weather.Satellite]
 	}
@@ -127,6 +131,7 @@ func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t t
 	storageID := &domstorage.StorageID{StorageKey: domstorage.SerializedStorageKey(root + "/"), IsLocalStorage: true}
 	for k, v := range map[string]string{
 		"ze_distanceUnit": "metric",
+		"ze_introsLayer":  "satellite",
 		"ze_timeControl":  "timeline",
 		"ze_timeFormat":   "hour24",
 		"ze_timeZone":     "utc",
@@ -137,7 +142,7 @@ func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (t t
 		}
 	}
 	notify := chrome.ListenEvent(ctx, "https://tiles.zoom.earth/times/geocolor.json", "GET", false)
-	if err = chromedp.Run(ctx, chromedp.Navigate(URL(path, coords, o.zoom, o.overlays))); err != nil {
+	if err = chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays))); err != nil {
 		return
 	}
 	done := make(chan struct{})
@@ -200,4 +205,8 @@ $('.timeline').style.margin='0 auto'`, nil),
 	}
 	img, err = png.Decode(bytes.NewReader(b))
 	return
+}
+
+func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (time.Time, image.Image, error) {
+	return Map(path, time.Time{}, coords, opt)
 }
