@@ -23,7 +23,7 @@ var server = httpsvr.New()
 
 func runServer() error {
 	if *logPath != "" {
-		svc.Logger = log.New(*logPath, "", log.LstdFlags)
+		svc.SetLogger(*logPath, "", log.LstdFlags)
 		gin.DefaultWriter = svc.Logger
 		gin.DefaultErrorWriter = svc.Logger
 	}
