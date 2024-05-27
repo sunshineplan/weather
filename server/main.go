@@ -6,11 +6,13 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/ai"
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/utils/flags"
+	"github.com/sunshineplan/utils/log"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/weatherapi"
@@ -99,6 +101,12 @@ func main() {
 	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/weather.pid", "PID file path")
 	flags.SetConfigFile(filepath.Join(filepath.Dir(self), "config.ini"))
 	flags.Parse()
+
+	if *logPath != "" {
+		svc.SetLogger(*logPath, "", log.LstdFlags)
+		gin.DefaultWriter = svc.Logger
+		gin.DefaultErrorWriter = svc.Logger
+	}
 
 	if err := svc.ParseAndRun(flag.Args()); err != nil {
 		svc.Fatal(err)
