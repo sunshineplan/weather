@@ -464,7 +464,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			_, img, err := mapAPI.Realtime(weather.Satellite, i.Coordinates, mapOptions(4))
+			_, img, err := mapAPI.Realtime(weather.Satellite, i.Coordinates, mapOptions(*stormZoom))
 			if err != nil {
 				svc.Print(err)
 				return
