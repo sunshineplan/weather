@@ -426,13 +426,13 @@ func zoomEarth(t time.Time, isReport bool) {
 					return
 				}
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/daily-24h.gif", 48); err != nil {
+			if err := animation("daily/*.jpg", "daily/daily-24h", 48); err != nil {
 				svc.Print(err)
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/daily-12h.gif", 24); err != nil {
+			if err := animation("daily/*.jpg", "daily/daily-12h", 24); err != nil {
 				svc.Print(err)
 			}
-			if err := jpg2gif("daily/*.jpg", "daily/daily-6h.gif", 12); err != nil {
+			if err := animation("daily/*.jpg", "daily/daily-6h", 12); err != nil {
 				svc.Print(err)
 			}
 		}()
@@ -485,7 +485,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				continue
 			}
-			if err := jpg2gif(dir+"/*.jpg", fmt.Sprintf("%s/%s.gif", dir, i.ID), 0); err != nil {
+			if err := animation(dir+"/*.jpg", fmt.Sprintf("%s/%s", dir, i.ID), 0); err != nil {
 				svc.Print(err)
 			}
 		}
