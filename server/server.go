@@ -38,16 +38,16 @@ func runServer() error {
 	router.GET("/img/:image", icon)
 	router.GET("/storm/:storm", func(c *gin.Context) {
 		storm := strings.ToLower(c.Param("storm"))
-		c.File(filepath.Join(*path, storm, storm+".gif"))
+		c.File(filepath.Join(*path, storm, storm+".png"))
 	})
 	router.GET("/24h", func(c *gin.Context) {
-		c.File("daily/daily-24h.gif")
+		c.File("daily/daily-24h.png")
 	})
 	router.GET("/12h", func(c *gin.Context) {
-		c.File("daily/daily-12h.gif")
+		c.File("daily/daily-12h.png")
 	})
 	router.GET("/6h", func(c *gin.Context) {
-		c.File("daily/daily-6h.gif")
+		c.File("daily/daily-6h.png")
 	})
 	router.GET("/map", func(c *gin.Context) {
 		var q string
@@ -60,7 +60,7 @@ func runServer() error {
 			z = *zoom
 		}
 		if q == *query {
-			c.File("daily/daily-24h.gif")
+			c.File("daily/daily-24h.png")
 		} else {
 			coords, err := getCoords(q, nil)
 			if err != nil {

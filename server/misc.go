@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kettek/apng"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/scheduler"
 	"github.com/sunshineplan/weather/api/zoomearth"
@@ -63,7 +64,7 @@ func timestamp() string {
 	return time.Now().Format("(2006/01/02 15:04)")
 }
 
-func jpg2gif(jpgPath, output string, count int) error {
+func animation(jpgPath, output string, count int) error {
 	res, err := filepath.Glob(jpgPath)
 	if err != nil {
 		return err
@@ -94,7 +95,7 @@ func jpg2gif(jpgPath, output string, count int) error {
 			imgs = append(imgs, img)
 		}
 	}
-	gifImg, n := new(gif.GIF), len(imgs)
+	gifImg, apngImg, n := new(gif.GIF), apng.APNG{}, len(imgs)
 	var delay int
 	if count != 0 {
 		delay = 40
@@ -107,14 +108,24 @@ func jpg2gif(jpgPath, output string, count int) error {
 		gifImg.Image = append(gifImg.Image, p)
 		if i != n-1 {
 			gifImg.Delay = append(gifImg.Delay, delay)
+			apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
 		} else {
 			gifImg.Delay = append(gifImg.Delay, 300)
+			apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
 		}
 	}
-	f, err := os.Create(output)
+	f, err := os.Create(output + ".gif")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return gif.EncodeAll(f, gifImg)
+	if err := gif.EncodeAll(f, gifImg); err != nil {
+		return err
+	}
+	f, err = os.Create(output + ".png")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return apng.Encode(f, apngImg)
 }
