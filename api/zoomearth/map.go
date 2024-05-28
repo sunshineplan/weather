@@ -118,8 +118,10 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 	defer c.Close()
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
+	done, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
-		return !strings.Contains(ev.Request.URL, "adsbygoogle")
+		return !strings.Contains(ev.Request.URL, "adsbygoogle") && done.Err() == nil
 	}); err != nil {
 		return
 	}
@@ -145,19 +147,18 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 	if err = chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays))); err != nil {
 		return
 	}
-	done := make(chan struct{})
 	go func() {
 		var n int
 		for range notify {
 			n++
 			if n == 4 {
-				close(done)
+				cancel()
 				return
 			}
 		}
 	}()
 	select {
-	case <-done:
+	case <-done.Done():
 	case <-ctx.Done():
 		err = ctx.Err()
 		return

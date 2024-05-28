@@ -1,6 +1,8 @@
 package zoomearth
 
 import (
+	"image/png"
+	"os"
 	"testing"
 	"time"
 
@@ -13,7 +15,16 @@ func TestZoomEarth(t *testing.T) {
 	if _, err := api.GetStorms(time.Now()); err != nil {
 		t.Error(err)
 	}
-	if _, _, err := api.Realtime(weather.Satellite, coordinates.New(0, 0), nil); err != nil {
-		t.Error(err)
+	_, img, err := api.Realtime(weather.Satellite, coordinates.New(0, 0), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.Create("test.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	if err := png.Encode(f, img); err != nil {
+		t.Fatal(err)
 	}
 }
