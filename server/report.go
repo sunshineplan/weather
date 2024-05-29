@@ -449,6 +449,9 @@ func zoomEarth(t time.Time, isReport bool) {
 			svc.Print(err)
 			continue
 		}
+		if storm.Season == "" || storm.No == 0 {
+			continue
+		}
 		if affect, future := storm.Affect(location, *radius); affect {
 			found = append(found, storm)
 			if future {
@@ -469,7 +472,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				return
 			}
-			dir := fmt.Sprintf("%s/%s", *path, i.ID)
+			dir := fmt.Sprintf("%s/%s/%d-%s", *path, i.Season, i.No, i.ID)
 			file := fmt.Sprintf("%s/%s.jpg", dir, time.Now().Format("20060102-1504"))
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				svc.Print(err)
@@ -485,7 +488,7 @@ func zoomEarth(t time.Time, isReport bool) {
 				svc.Print(err)
 				continue
 			}
-			if err := animation(dir+"/*.jpg", fmt.Sprintf("%s/%s", dir, i.ID), 0); err != nil {
+			if err := animation(dir+"/*.jpg", dir, 0); err != nil {
 				svc.Print(err)
 			}
 		}
@@ -501,7 +504,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			Contentf("%s - %s", storm.Title, storm.Place).
 			AppendChild(html.A().Href(storm.URL).AppendChild(html.Img().Src("cid:map"+strconv.Itoa(i)))).String(),
 		)
-		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%[2]s.gif", *path, storm.ID))
+		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%d-%s.gif", *path, storm.Season, storm.No, storm.ID))
 		if err != nil {
 			svc.Print(err)
 			return

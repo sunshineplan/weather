@@ -38,7 +38,17 @@ func runServer() error {
 	router.GET("/img/:image", icon)
 	router.GET("/storm/:storm", func(c *gin.Context) {
 		storm := strings.ToLower(c.Param("storm"))
-		c.File(filepath.Join(*path, storm, storm+".png"))
+		res, err := filepath.Glob(filepath.Join(*path, time.Now().Format("2006"), "*"+storm+".png"))
+		if err != nil {
+			svc.Print(err)
+			c.String(500, "")
+			return
+		}
+		if l := len(res); l == 0 {
+			c.String(404, "404 page not found")
+			return
+		}
+		c.File(res[0])
 	})
 	router.GET("/24h", func(c *gin.Context) {
 		c.File("daily/daily-24h.png")
