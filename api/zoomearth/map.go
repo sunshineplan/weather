@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"image"
+	"image/color"
 	"image/png"
 	"net/http"
 	"net/url"
@@ -118,16 +119,17 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 	defer c.Close()
 	ctx, cancel := context.WithTimeout(c, time.Minute)
 	defer cancel()
-	done, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
-		return !strings.Contains(ev.Request.URL, "adsbygoogle") && done.Err() == nil
+		return !strings.Contains(ev.Request.URL, "adsbygoogle")
 	}); err != nil {
 		return
 	}
 	u, _ := url.Parse(root)
 	c.SetCookies(u, []*http.Cookie{{Name: "ze_language", Value: "en"}})
-	if err = chromedp.Run(ctx, chromedp.Navigate(root+"/assets/images/icon-100.jpg")); err != nil {
+	if err = chromedp.Run(ctx,
+		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
+		chromedp.Navigate(root+"/assets/images/icon-100.jpg"),
+	); err != nil {
 		return
 	}
 	storageID := &domstorage.StorageID{StorageKey: domstorage.SerializedStorageKey(root + "/"), IsLocalStorage: true}
@@ -143,24 +145,11 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 			return
 		}
 	}
-	notify := chrome.ListenEvent(ctx, "https://tiles.zoom.earth/times/geocolor.json", "GET", false)
-	if err = chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays))); err != nil {
-		return
-	}
-	go func() {
-		var n int
-		for range notify {
-			n++
-			if n == 4 {
-				cancel()
-				return
-			}
-		}
-	}()
-	select {
-	case <-done.Done():
-	case <-ctx.Done():
-		err = ctx.Err()
+	if err = chromedp.Run(
+		ctx,
+		chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)),
+		chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil),
+	); err != nil {
 		return
 	}
 	ctx, cancel = context.WithTimeout(c, 5*time.Second)
@@ -195,17 +184,39 @@ $('.timeline').style.margin='0 auto'`, nil),
 		}
 	}
 	t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
-	var b []byte
-	if err = chromedp.Run(
-		ctx,
-		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
-		chromedp.EvaluateAsDevTools(fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil),
-		chromedp.Sleep(300*time.Millisecond),
-		chromedp.FullScreenshot(&b, 100),
-	); err != nil {
+	if err = chromedp.Run(ctx, chromedp.EvaluateAsDevTools(
+		fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
 		return
 	}
-	img, err = png.Decode(bytes.NewReader(b))
+	colors := func(img image.Image) int {
+		m := make(map[color.Color]struct{})
+		for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+			for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+				c := img.At(x, y)
+				m[c] = struct{}{}
+			}
+		}
+		return len(m)
+	}
+	for i := 0; i < 5; i++ {
+		if i == 0 {
+			time.Sleep(300 * time.Millisecond)
+		} else {
+			time.Sleep(5 * time.Second)
+		}
+		var b []byte
+		if err = chromedp.Run(ctx, chromedp.FullScreenshot(&b, 100)); err != nil {
+			return
+		}
+		img, err = png.Decode(bytes.NewReader(b))
+		if err != nil {
+			return
+		}
+		if colors(img) > 5000 {
+			return
+		}
+	}
+	err = weather.ErrInsufficientColor
 	return
 }
 

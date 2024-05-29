@@ -1,6 +1,7 @@
 package weather
 
 import (
+	"errors"
 	"image"
 	"time"
 
@@ -25,3 +26,5 @@ type MapAPI interface {
 	Map(mt MapType, t time.Time, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
 	Realtime(mt MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
 }
+
+var ErrInsufficientColor = errors.New("image has insufficient color depth")
