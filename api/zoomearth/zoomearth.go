@@ -4,7 +4,7 @@ import (
 	"image"
 	"time"
 
-	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/option"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit/coordinates"
@@ -13,15 +13,15 @@ import (
 const root = "https://zoom.earth"
 
 var (
-	_ storm.API      = ZoomEarthAPI{}
-	_ weather.MapAPI = ZoomEarthAPI{}
+	_ storm.API   = ZoomEarthAPI{}
+	_ maps.MapAPI = ZoomEarthAPI{}
 )
 
 func (ZoomEarthAPI) GetStorms(t time.Time) ([]storm.Storm, error) {
 	return GetStorms(t)
 }
 
-func (ZoomEarthAPI) URL(mt weather.MapType, t time.Time, coords coordinates.Coordinates, opt any) string {
+func (ZoomEarthAPI) URL(mt maps.MapType, t time.Time, coords coordinates.Coordinates, opt any) string {
 	zoom := defaultMapOptions.zoom
 	if opt, ok := opt.(option.Zoom); ok {
 		zoom = opt.Zoom()
@@ -33,7 +33,7 @@ func (ZoomEarthAPI) URL(mt weather.MapType, t time.Time, coords coordinates.Coor
 	return URL(mapPath[mt], t, coords, zoom, overlays)
 }
 
-func (ZoomEarthAPI) Map(mt weather.MapType, t time.Time, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
+func (ZoomEarthAPI) Map(mt maps.MapType, t time.Time, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
 	if opt == nil {
 		return Map(mapPath[mt], t, coords, nil)
 	}
@@ -53,6 +53,6 @@ func (ZoomEarthAPI) Map(mt weather.MapType, t time.Time, coords coordinates.Coor
 	return Map(mapPath[mt], t, coords, &o)
 }
 
-func (api ZoomEarthAPI) Realtime(mt weather.MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
+func (api ZoomEarthAPI) Realtime(mt maps.MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error) {
 	return api.Map(mt, time.Time{}, coords, opt)
 }

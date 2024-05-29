@@ -16,21 +16,21 @@ import (
 	"github.com/chromedp/cdproto/fetch"
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/chrome"
-	"github.com/sunshineplan/weather"
+	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/option"
 	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
-var mapPath = map[weather.MapType]string{
-	weather.Satellite:     "satellite",
-	weather.Radar:         "radar",
-	weather.Precipitation: "precipitation",
-	weather.Wind:          "wind-speed",
-	weather.Temperature:   "temperature",
-	weather.Humidity:      "humidity",
-	weather.DewPoint:      "dew-point",
-	weather.Pressure:      "pressure",
+var mapPath = map[maps.MapType]string{
+	maps.Satellite:     "satellite",
+	maps.Radar:         "radar",
+	maps.Precipitation: "precipitation",
+	maps.Wind:          "wind-speed",
+	maps.Temperature:   "temperature",
+	maps.Humidity:      "humidity",
+	maps.DewPoint:      "dew-point",
+	maps.Pressure:      "pressure",
 }
 
 var defaultMapOptions = MapOptions{
@@ -77,7 +77,7 @@ func (o *MapOptions) SetTimeZone(timezone *time.Location) *MapOptions {
 
 func URL(path string, t time.Time, coords coordinates.Coordinates, zoom float64, overlays []string) string {
 	if path == "" {
-		path = mapPath[weather.Satellite]
+		path = mapPath[maps.Satellite]
 	}
 	var date string
 	if !t.IsZero() {
@@ -97,7 +97,7 @@ func URL(path string, t time.Time, coords coordinates.Coordinates, zoom float64,
 
 func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
 	if path == "" {
-		path = mapPath[weather.Satellite]
+		path = mapPath[maps.Satellite]
 	}
 	o := defaultMapOptions
 	if opt != nil {
@@ -216,7 +216,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 			return
 		}
 	}
-	err = weather.ErrInsufficientColor
+	err = maps.ErrInsufficientColor
 	return
 }
 

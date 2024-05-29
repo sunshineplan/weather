@@ -15,6 +15,7 @@ import (
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
+	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/unit/coordinates"
@@ -44,7 +45,7 @@ func report(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
+			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -70,7 +71,7 @@ func daily(t time.Time) {
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
 			html.Br().HTML()+
-			imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
+			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
 		attachment("daily/daily-12h.gif"),
 		true,
@@ -395,7 +396,7 @@ func zoomEarth(t time.Time, isReport bool) {
 			svc.Print("Start saving satellite map...")
 			zoomMutex.Lock()
 			defer zoomMutex.Unlock()
-			_, img, err := mapAPI.Realtime(weather.Satellite, location, mapOptions(*zoom))
+			_, img, err := mapAPI.Realtime(maps.Satellite, location, mapOptions(*zoom))
 			if err != nil {
 				svc.Print(err)
 				return
@@ -467,7 +468,7 @@ func zoomEarth(t time.Time, isReport bool) {
 	}
 	if !isReport {
 		for _, i := range found {
-			_, img, err := mapAPI.Realtime(weather.Satellite, i.Coordinates(t), mapOptions(*stormZoom))
+			_, img, err := mapAPI.Realtime(maps.Satellite, i.Coordinates(t), mapOptions(*stormZoom))
 			if err != nil {
 				svc.Print(err)
 				return

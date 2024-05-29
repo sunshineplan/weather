@@ -1,4 +1,4 @@
-package weather
+package maps
 
 import (
 	"errors"
