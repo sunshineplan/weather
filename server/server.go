@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/httpsvr"
-	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
+	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
@@ -78,7 +78,7 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			_, img, err := mapAPI.Realtime(weather.Satellite, coords, mapOptions(z))
+			_, img, err := mapAPI.Realtime(maps.Satellite, coords, mapOptions(z))
 			if err != nil {
 				svc.Print(err)
 				c.String(500, "")
@@ -134,7 +134,7 @@ func runServer() error {
 		var image html.HTML
 		if q == *query {
 			coords = location
-			image = imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, location, mapOptions(z)), "/6h")
+			image = imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(z)), "/6h")
 		} else {
 			coords, err = getCoords(q, nil)
 			if err != nil {
@@ -142,7 +142,7 @@ func runServer() error {
 				c.String(400, "")
 				return
 			}
-			image = imageHTML(mapAPI.URL(weather.Satellite, time.Time{}, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
+			image = imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
 		}
 		c.Data(200, "text/html", []byte(
 			html.NewHTML().AppendChild(

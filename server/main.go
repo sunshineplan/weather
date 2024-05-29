@@ -17,6 +17,7 @@ import (
 	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/api/weatherapi"
 	"github.com/sunshineplan/weather/aqi"
+	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
 )
 
@@ -29,7 +30,7 @@ var (
 	realtime *weatherapi.WeatherAPI
 	forecast weather.API
 	history  weather.API
-	mapAPI   weather.MapAPI
+	mapAPI   maps.MapAPI
 	stormAPI storm.API
 	aqiAPI   aqi.API
 
