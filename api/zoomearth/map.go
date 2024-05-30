@@ -22,6 +22,8 @@ import (
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
+var DefaultColorDepth = 5000
+
 var mapPath = map[maps.MapType]string{
 	maps.Satellite:     "satellite",
 	maps.Radar:         "radar",
@@ -202,7 +204,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 		if i == 0 {
 			time.Sleep(300 * time.Millisecond)
 		} else {
-			time.Sleep(5 * time.Second)
+			time.Sleep(10 * time.Second)
 		}
 		var b []byte
 		if err = chromedp.Run(ctx, chromedp.FullScreenshot(&b, 100)); err != nil {
@@ -212,11 +214,12 @@ $('.timeline').style.margin='0 auto'`, nil),
 		if err != nil {
 			return
 		}
-		if colors(img) > 5000 {
+		if depth := colors(img); depth >= DefaultColorDepth {
 			return
+		} else {
+			err = maps.InsufficientColor(depth)
 		}
 	}
-	err = maps.ErrInsufficientColor
 	return
 }
 
