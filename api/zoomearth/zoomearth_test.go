@@ -1,6 +1,7 @@
 package zoomearth
 
 import (
+	"errors"
 	"image/png"
 	"os"
 	"testing"
@@ -16,7 +17,7 @@ func TestZoomEarth(t *testing.T) {
 		t.Error(err)
 	}
 	_, img, err := api.Realtime(maps.Satellite, coordinates.New(0, 0), nil)
-	if err != nil && err != maps.ErrInsufficientColor {
+	if err != nil && !errors.Is(err, maps.ErrInsufficientColor) {
 		t.Fatal(err)
 	}
 	f, err := os.Create("test.png")
