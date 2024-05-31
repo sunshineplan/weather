@@ -9,6 +9,7 @@ import (
 	"image/png"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -147,11 +148,15 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 			return
 		}
 	}
-	if err = chromedp.Run(
-		ctx,
-		chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)),
-		chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil),
-	); err != nil {
+	notify := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
+	go chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
+	select {
+	case <-notify:
+	case <-ctx.Done():
+		err = ctx.Err()
+		return
+	}
+	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
 	ctx, cancel = context.WithTimeout(c, 5*time.Second)
@@ -202,7 +207,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 	}
 	for i := 0; i < 5; i++ {
 		if i == 0 {
-			time.Sleep(300 * time.Millisecond)
+			time.Sleep(time.Second)
 		} else {
 			time.Sleep(10 * time.Second)
 		}
