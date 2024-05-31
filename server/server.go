@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"image/jpeg"
+	"image/png"
 	"net/url"
 	"path/filepath"
 	"strconv"
@@ -50,14 +50,20 @@ func runServer() error {
 		}
 		c.File(res[0])
 	})
+	router.GET("/72h", func(c *gin.Context) {
+		c.File("daily-72h.png")
+	})
+	router.GET("/48h", func(c *gin.Context) {
+		c.File("daily-48h.png")
+	})
 	router.GET("/24h", func(c *gin.Context) {
-		c.File("daily/daily-24h.png")
+		c.File("daily-24h.png")
 	})
 	router.GET("/12h", func(c *gin.Context) {
-		c.File("daily/daily-12h.png")
+		c.File("daily-12h.png")
 	})
 	router.GET("/6h", func(c *gin.Context) {
-		c.File("daily/daily-6h.png")
+		c.File("daily-6h.png")
 	})
 	router.GET("/map", func(c *gin.Context) {
 		var q string
@@ -70,7 +76,7 @@ func runServer() error {
 			z = *zoom
 		}
 		if q == *query {
-			c.File("daily/daily-24h.png")
+			c.File("daily-24h.png")
 		} else {
 			coords, err := getCoords(q, nil)
 			if err != nil {
@@ -85,12 +91,12 @@ func runServer() error {
 				return
 			}
 			var buf bytes.Buffer
-			if err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: *quality}); err != nil {
+			if err := png.Encode(&buf, img); err != nil {
 				svc.Print(err)
 				c.String(500, "")
 				return
 			}
-			c.Data(200, "image/jpeg", buf.Bytes())
+			c.Data(200, "image/png", buf.Bytes())
 		}
 	})
 	router.GET("/status", func(c *gin.Context) {

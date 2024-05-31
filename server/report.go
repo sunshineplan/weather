@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"image/jpeg"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -47,7 +45,7 @@ func report(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment("daily/daily-12h.gif"),
+		attachment("daily-12h.gif"),
 		true,
 	)
 	if chatbot != nil {
@@ -73,7 +71,7 @@ func daily(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment("daily/daily-12h.gif"),
+		attachment("daily-12h.gif"),
 		true,
 	)
 	if chatbot != nil {
@@ -392,51 +390,7 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 
 func zoomEarth(t time.Time, isReport bool) {
 	if !isReport {
-		go func() {
-			svc.Print("Start saving satellite map...")
-			zoomMutex.Lock()
-			defer zoomMutex.Unlock()
-			_, img, err := mapAPI.Realtime(maps.Satellite, location, mapOptions(*zoom))
-			if err != nil {
-				svc.Print(err)
-				return
-			}
-			file := fmt.Sprintf("daily/%s.jpg", t.Format("200601021504"))
-			if err := os.MkdirAll("daily", 0755); err != nil {
-				svc.Print(err)
-				return
-			}
-			f, err := os.Create(file)
-			if err != nil {
-				svc.Print(err)
-				return
-			}
-			defer f.Close()
-			if err := jpeg.Encode(f, img, &jpeg.Options{Quality: *quality}); err != nil {
-				svc.Print(err)
-				return
-			}
-			res, err := filepath.Glob("daily/*.jpg")
-			if err != nil {
-				svc.Print(err)
-				return
-			}
-			for ; len(res) > 48; res = res[1:] {
-				if err := os.Remove(res[0]); err != nil {
-					svc.Print(err)
-					return
-				}
-			}
-			if err := animation("daily/*.jpg", "daily/daily-24h", 48); err != nil {
-				svc.Print(err)
-			}
-			if err := animation("daily/*.jpg", "daily/daily-12h", 24); err != nil {
-				svc.Print(err)
-			}
-			if err := animation("daily/*.jpg", "daily/daily-6h", 12); err != nil {
-				svc.Print(err)
-			}
-		}()
+		go updateDaily()
 	}
 	storms, err := stormAPI.GetStorms(t)
 	if err != nil {
@@ -467,32 +421,7 @@ func zoomEarth(t time.Time, isReport bool) {
 		return
 	}
 	if !isReport {
-		for _, i := range found {
-			_, img, err := mapAPI.Realtime(maps.Satellite, i.Coordinates(t), mapOptions(*stormZoom))
-			if err != nil {
-				svc.Print(err)
-				return
-			}
-			dir := fmt.Sprintf("%s/%s/%d-%s", *path, i.Season, i.No, i.ID)
-			file := fmt.Sprintf("%s/%s.jpg", dir, time.Now().Format("20060102-1504"))
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				svc.Print(err)
-				continue
-			}
-			f, err := os.Create(file)
-			if err != nil {
-				svc.Print(err)
-				continue
-			}
-			defer f.Close()
-			if err := jpeg.Encode(f, img, &jpeg.Options{Quality: *quality}); err != nil {
-				svc.Print(err)
-				continue
-			}
-			if err := animation(dir+"/*.jpg", dir, 0); err != nil {
-				svc.Print(err)
-			}
-		}
+		updateStorm(found)
 	}
 	if len(alert) == 0 {
 		return
