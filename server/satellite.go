@@ -175,17 +175,6 @@ func updateDaily() {
 		svc.Print(err)
 		return
 	}
-	res, err := filepath.Glob("daily/*.png")
-	if err != nil {
-		svc.Print(err)
-		return
-	}
-	for ; len(res) > 48; res = res[1:] {
-		if err := os.Remove(res[0]); err != nil {
-			svc.Print(err)
-			continue
-		}
-	}
 	for _, t := range getTimes("daily", format) {
 		if err := satellite(t, location, "daily", format, mapOptions(*zoom)); err != nil {
 			svc.Print(err)
