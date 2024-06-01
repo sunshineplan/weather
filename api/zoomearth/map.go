@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/chromedp/cdproto/domstorage"
@@ -148,10 +149,17 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 			return
 		}
 	}
-	notify := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	geocolor := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
+	rainviewer := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.png`), "GET", false)
+	done := make(chan struct{})
+	go func() { <-geocolor; wg.Done() }()
+	go func() { <-rainviewer; wg.Done() }()
+	go func() { wg.Wait(); close(done) }()
 	go chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
 	select {
-	case <-notify:
+	case <-done:
 	case <-ctx.Done():
 		err = ctx.Err()
 		return
@@ -185,7 +193,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 	); err != nil {
 		return
 	}
-	if t, err = time.Parse("Monday _2 Jan, 15:04MST", utcTime); err != nil {
+	if t, err = time.Parse("Monday _2 January, 15:04MST", utcTime); err != nil {
 		if t, err = time.Parse("Mon _2 Jan, 15:04MST", utcTime); err != nil {
 			return
 		}
@@ -205,9 +213,9 @@ $('.timeline').style.margin='0 auto'`, nil),
 		}
 		return len(m)
 	}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 3; i++ {
 		if i == 0 {
-			time.Sleep(time.Second)
+			time.Sleep(2 * time.Second)
 		} else {
 			time.Sleep(10 * time.Second)
 		}
