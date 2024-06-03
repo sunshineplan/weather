@@ -108,7 +108,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 				svc.Print(err)
 				return true
 			}
-			return now.Sub(t) > d
+			return now.Sub(t) >= d
 		})
 	}
 	var step int
@@ -183,7 +183,7 @@ func updateDaily() {
 	}
 	for _, d := range []time.Duration{72, 48, 24, 12, 6} {
 		d = d * time.Hour
-		if err := animation("daily/*", "daily-"+strings.TrimSuffix(d.String(), "0m0s"), d, format, true); err != nil {
+		if err := animation("daily/*", "animation/"+strings.TrimSuffix(d.String(), "0m0s"), d, format, true); err != nil {
 			svc.Print(err)
 		}
 	}
