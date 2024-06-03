@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/kettek/apng v0.0.0-20220823221153-ff692776a607
 	github.com/sunshineplan/ai v1.0.11
-	github.com/sunshineplan/database/mongodb v1.0.6
+	github.com/sunshineplan/database/mongodb v1.0.7
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.20
 	github.com/sunshineplan/utils v0.1.66
