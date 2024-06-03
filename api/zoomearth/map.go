@@ -145,7 +145,7 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 		"ze_timeZone":     "utc",
 		"ze_welcome":      "false",
 	} {
-		if err = c.SetStorageItem(storageID, k, v); err != nil {
+		if err = chrome.SetStorageItem(ctx, storageID, k, v); err != nil {
 			return
 		}
 	}

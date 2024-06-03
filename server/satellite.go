@@ -151,6 +151,9 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
 		}
 	}
+	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
+		return err
+	}
 	f, err := os.Create(output + ".gif")
 	if err != nil {
 		return err
