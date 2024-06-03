@@ -51,19 +51,19 @@ func runServer() error {
 		c.File(res[0])
 	})
 	router.GET("/72h", func(c *gin.Context) {
-		c.File("daily-72h.png")
+		c.File("animation/72h.png")
 	})
 	router.GET("/48h", func(c *gin.Context) {
-		c.File("daily-48h.png")
+		c.File("animation/48h.png")
 	})
 	router.GET("/24h", func(c *gin.Context) {
-		c.File("daily-24h.png")
+		c.File("animation/24h.png")
 	})
 	router.GET("/12h", func(c *gin.Context) {
-		c.File("daily-12h.png")
+		c.File("animation/12h.png")
 	})
 	router.GET("/6h", func(c *gin.Context) {
-		c.File("daily-6h.png")
+		c.File("animation/6h.png")
 	})
 	router.GET("/map", func(c *gin.Context) {
 		var q string
@@ -76,7 +76,7 @@ func runServer() error {
 			z = *zoom
 		}
 		if q == *query {
-			c.File("daily-24h.png")
+			c.File("animation/24h.png")
 		} else {
 			coords, err := getCoords(q, nil)
 			if err != nil {
