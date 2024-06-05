@@ -111,15 +111,16 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			return now.Sub(t) >= d
 		})
 	}
+	slices.Reverse(res)
 	var step int
 	if d != 0 {
-		step = int(d/time.Hour) / 3
+		step = int(math.Logb(float64(d / time.Hour)))
 	} else if step = int(math.Round(math.Log(1+float64(len(res))))) - 2; step <= 0 {
 		step = 1
 	}
 	var imgs []image.Image
 	for i, name := range res {
-		if i%step == 0 || i == len(res)-1 {
+		if i%step == 0 {
 			f, err := os.Open(name)
 			if err != nil {
 				return err
@@ -132,6 +133,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			imgs = append(imgs, img)
 		}
 	}
+	slices.Reverse(imgs)
 	gifImg, apngImg, n := new(gif.GIF), apng.APNG{}, len(imgs)
 	var delay int
 	if d != 0 {
