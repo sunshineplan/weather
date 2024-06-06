@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sunshineplan/weather/api/zoomearth"
@@ -24,7 +25,7 @@ import (
 )
 
 var (
-	keep        = 432
+	keep        = 288
 	format      = "200601021504"
 	shortFormat = "01021504"
 	width       = 600
@@ -40,7 +41,12 @@ func mapOptions(zoom float64) *zoomearth.MapOptions {
 		SetTimeZone(timezone)
 }
 
+var satelliteMutex sync.Mutex
+
 func satellite(t time.Time, coords coordinates.Coordinates, path, format string, opt any) (err error) {
+	satelliteMutex.Lock()
+	defer satelliteMutex.Unlock()
+	time.Sleep(time.Second)
 	t, img, err := mapAPI.Map(maps.Satellite, t, coords, opt)
 	if err != nil {
 		if errors.Is(err, maps.ErrInsufficientColor) {
@@ -58,9 +64,7 @@ func satellite(t time.Time, coords coordinates.Coordinates, path, format string,
 		return
 	}
 	defer f.Close()
-	if err = png.Encode(f, img); err != nil {
-		return
-	}
+	err = png.Encode(f, img)
 	return
 }
 
@@ -147,12 +151,14 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		if img, _, err := image.Decode(f); err != nil {
 			log.Print(err)
 		} else {
-			p := image.NewPaletted(img.Bounds(), palette.Plan9)
-			draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
-			gifImg.Image = append(gifImg.Image, p)
+			if d <= 12*time.Hour {
+				p := image.NewPaletted(img.Bounds(), palette.Plan9)
+				draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
+				gifImg.Image = append(gifImg.Image, p)
+			}
 			if i != n-1 {
 				gifImg.Delay = append(gifImg.Delay, delay)
-				webpImg.AddFrame(img, time.Duration(delay)*10*time.Microsecond)
+				webpImg.AddFrame(img, time.Duration(delay*10)*time.Millisecond)
 			} else {
 				gifImg.Delay = append(gifImg.Delay, 300)
 				webpImg.AddFrame(img, 3*time.Second)
@@ -163,13 +169,15 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
 		return err
 	}
-	f, err := os.Create(output + ".gif")
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if err := gif.EncodeAll(f, gifImg); err != nil {
-		return err
+	if d <= 12*time.Hour {
+		f, err := os.Create(output + ".gif")
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		if err := gif.EncodeAll(f, gifImg); err != nil {
+			return err
+		}
 	}
 	b, err := webpImg.Assemble()
 	if err != nil {
@@ -192,7 +200,7 @@ func updateDaily() {
 			continue
 		}
 	}
-	for _, d := range []time.Duration{72, 48, 24, 12, 6} {
+	for _, d := range []time.Duration{48, 24, 12, 6} {
 		d = d * time.Hour
 		if err := animation("daily/*", "animation/"+strings.TrimSuffix(d.String(), "0m0s"), d, format, true); err != nil {
 			svc.Print(err)
