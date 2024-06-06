@@ -31,6 +31,13 @@ var (
 	width       = 600
 	height      = 800
 	timezone    = time.FixedZone("CST", 8*60*60)
+
+	animationDuration = []time.Duration{
+		6 * time.Hour,
+		12 * time.Hour,
+		24 * time.Hour,
+		48 * time.Hour,
+	}
 )
 
 func mapOptions(zoom float64) *zoomearth.MapOptions {
@@ -200,8 +207,7 @@ func updateDaily() {
 			continue
 		}
 	}
-	for _, d := range []time.Duration{48, 24, 12, 6} {
-		d = d * time.Hour
+	for _, d := range animationDuration {
 		if err := animation("daily/*", "animation/"+strings.TrimSuffix(d.String(), "0m0s"), d, format, true); err != nil {
 			svc.Print(err)
 		}
