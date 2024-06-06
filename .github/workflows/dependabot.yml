@@ -25,6 +25,11 @@ jobs:
         run: |
           go build -v ./...
           go test -v -race ./...
+
+      - name: Test Server
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install libwebp-dev
           cd server
           go mod tidy
           go build -v ./...
