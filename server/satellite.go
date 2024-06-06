@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	keep        = 288
+	keep        = 144
 	format      = "200601021504"
 	shortFormat = "01021504"
 	width       = 600
@@ -36,7 +36,6 @@ var (
 		6 * time.Hour,
 		12 * time.Hour,
 		24 * time.Hour,
-		48 * time.Hour,
 	}
 )
 
