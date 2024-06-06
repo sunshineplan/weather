@@ -21,18 +21,21 @@ import (
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit/coordinates"
+	"github.com/tidbyt/go-libwebp/webp"
 )
 
 var (
 	keep        = 432
 	format      = "200601021504"
 	shortFormat = "01021504"
+	width       = 600
+	height      = 800
 	timezone    = time.FixedZone("CST", 8*60*60)
 )
 
 func mapOptions(zoom float64) *zoomearth.MapOptions {
 	return zoomearth.NewMapOptions().
-		SetSize(600, 800).
+		SetSize(width, height).
 		SetZoom(zoom).
 		SetOverlays([]string{"radar", "wind"}).
 		SetTimeZone(timezone)
@@ -111,30 +114,26 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			return now.Sub(t) >= d
 		})
 	}
-	slices.Reverse(res)
 	var step int
 	if d != 0 {
 		step = int(math.Logb(float64(d / time.Hour)))
 	} else if step = int(math.Round(math.Log(1+float64(len(res))))) - 2; step <= 0 {
 		step = 1
 	}
-	var imgs []image.Image
-	for i, name := range res {
+	slices.Reverse(res)
+	var imgs []string
+	for i, img := range res {
 		if i%step == 0 {
-			f, err := os.Open(name)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			img, _, err := image.Decode(f)
-			if err != nil {
-				return err
-			}
 			imgs = append(imgs, img)
 		}
 	}
 	slices.Reverse(imgs)
 	gifImg, apngImg, n := new(gif.GIF), apng.APNG{}, len(imgs)
+	webpImg, err := webp.NewAnimationEncoder(width, height, 0, 0)
+	if err != nil {
+		return err
+	}
+	defer webpImg.Close()
 	var delay int
 	if d != 0 {
 		delay = 40
@@ -142,16 +141,27 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		delay = 40
 	}
 	for i, img := range imgs {
-		p := image.NewPaletted(img.Bounds(), palette.Plan9)
-		draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
-		gifImg.Image = append(gifImg.Image, p)
-		if i != n-1 {
-			gifImg.Delay = append(gifImg.Delay, delay)
-			apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
-		} else {
-			gifImg.Delay = append(gifImg.Delay, 300)
-			apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
+		f, err := os.Open(img)
+		if err != nil {
+			return err
 		}
+		if img, _, err := image.Decode(f); err != nil {
+			log.Print(err)
+		} else {
+			p := image.NewPaletted(img.Bounds(), palette.Plan9)
+			draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
+			gifImg.Image = append(gifImg.Image, p)
+			if i != n-1 {
+				gifImg.Delay = append(gifImg.Delay, delay)
+				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
+				webpImg.AddFrame(img, time.Duration(delay)*10*time.Microsecond)
+			} else {
+				gifImg.Delay = append(gifImg.Delay, 300)
+				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
+				webpImg.AddFrame(img, 3*time.Second)
+			}
+		}
+		f.Close()
 	}
 	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
 		return err
@@ -169,7 +179,14 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		return err
 	}
 	defer f.Close()
-	return apng.Encode(f, apngImg)
+	if err := apng.Encode(f, apngImg); err != nil {
+		return err
+	}
+	b, err := webpImg.Assemble()
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(output+".webp", b, 0644)
 }
 
 func updateDaily() {

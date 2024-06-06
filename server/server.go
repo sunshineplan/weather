@@ -38,7 +38,7 @@ func runServer() error {
 	router.GET("/img/:image", icon)
 	router.GET("/storm/:storm", func(c *gin.Context) {
 		storm := strings.ToLower(c.Param("storm"))
-		res, err := filepath.Glob(filepath.Join(*path, time.Now().Format("2006"), "*"+storm+".png"))
+		res, err := filepath.Glob(filepath.Join(*path, time.Now().Format("2006"), "*"+storm+".webp"))
 		if err != nil {
 			svc.Print(err)
 			c.String(500, "")
@@ -51,19 +51,19 @@ func runServer() error {
 		c.File(res[0])
 	})
 	router.GET("/72h", func(c *gin.Context) {
-		c.File("animation/72h.png")
+		c.File("animation/72h.webp")
 	})
 	router.GET("/48h", func(c *gin.Context) {
-		c.File("animation/48h.png")
+		c.File("animation/48h.webp")
 	})
 	router.GET("/24h", func(c *gin.Context) {
-		c.File("animation/24h.png")
+		c.File("animation/24h.webp")
 	})
 	router.GET("/12h", func(c *gin.Context) {
-		c.File("animation/12h.png")
+		c.File("animation/12h.webp")
 	})
 	router.GET("/6h", func(c *gin.Context) {
-		c.File("animation/6h.png")
+		c.File("animation/6h.webp")
 	})
 	router.GET("/map", func(c *gin.Context) {
 		var q string
@@ -76,7 +76,7 @@ func runServer() error {
 			z = *zoom
 		}
 		if q == *query {
-			c.File("animation/24h.png")
+			c.File("animation/24h.webp")
 		} else {
 			coords, err := getCoords(q, nil)
 			if err != nil {
