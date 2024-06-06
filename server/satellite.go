@@ -16,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kettek/apng"
 	"github.com/sunshineplan/weather/api/zoomearth"
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
@@ -128,7 +127,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		}
 	}
 	slices.Reverse(imgs)
-	gifImg, apngImg, n := new(gif.GIF), apng.APNG{}, len(imgs)
+	gifImg, n := new(gif.GIF), len(imgs)
 	webpImg, err := webp.NewAnimationEncoder(width, height, 0, 0)
 	if err != nil {
 		return err
@@ -153,11 +152,9 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			gifImg.Image = append(gifImg.Image, p)
 			if i != n-1 {
 				gifImg.Delay = append(gifImg.Delay, delay)
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
 				webpImg.AddFrame(img, time.Duration(delay)*10*time.Microsecond)
 			} else {
 				gifImg.Delay = append(gifImg.Delay, 300)
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
 				webpImg.AddFrame(img, 3*time.Second)
 			}
 		}
@@ -172,14 +169,6 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 	}
 	defer f.Close()
 	if err := gif.EncodeAll(f, gifImg); err != nil {
-		return err
-	}
-	f, err = os.Create(output + ".png")
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if err := apng.Encode(f, apngImg); err != nil {
 		return err
 	}
 	b, err := webpImg.Assemble()
