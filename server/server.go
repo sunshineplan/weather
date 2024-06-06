@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image/png"
 	"net/url"
 	"path/filepath"
@@ -50,21 +51,12 @@ func runServer() error {
 		}
 		c.File(res[0])
 	})
-	router.GET("/72h", func(c *gin.Context) {
-		c.File("animation/72h.webp")
-	})
-	router.GET("/48h", func(c *gin.Context) {
-		c.File("animation/48h.webp")
-	})
-	router.GET("/24h", func(c *gin.Context) {
-		c.File("animation/24h.webp")
-	})
-	router.GET("/12h", func(c *gin.Context) {
-		c.File("animation/12h.webp")
-	})
-	router.GET("/6h", func(c *gin.Context) {
-		c.File("animation/6h.webp")
-	})
+	for _, i := range animationDuration {
+		d := strings.TrimSuffix(i.String(), "0m0s")
+		router.GET("/"+d, func(c *gin.Context) {
+			c.File(fmt.Sprintf("animation/%s.webp", d))
+		})
+	}
 	router.GET("/map", func(c *gin.Context) {
 		var q string
 		if q = c.Query("q"); q == "" {
