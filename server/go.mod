@@ -5,13 +5,13 @@ go 1.22
 require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
+	github.com/kettek/apng v0.0.0-20220823221153-ff692776a607
 	github.com/sunshineplan/ai v1.0.11
 	github.com/sunshineplan/database/mongodb v1.0.7
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.20
 	github.com/sunshineplan/utils v0.1.66
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
-	github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a
 	golang.org/x/text v0.16.0
 )
 

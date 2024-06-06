@@ -17,15 +17,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kettek/apng"
 	"github.com/sunshineplan/weather/api/zoomearth"
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit/coordinates"
-	"github.com/tidbyt/go-libwebp/webp"
 )
 
 var (
-	keep        = 144
+	keep        = 36 * 6
 	format      = "200601021504"
 	shortFormat = "01021504"
 	width       = 600
@@ -35,7 +35,10 @@ var (
 	animationDuration = []time.Duration{
 		6 * time.Hour,
 		12 * time.Hour,
+		18 * time.Hour,
 		24 * time.Hour,
+		30 * time.Hour,
+		36 * time.Hour,
 	}
 )
 
@@ -57,6 +60,7 @@ func satellite(t time.Time, coords coordinates.Coordinates, path, format string,
 	if err != nil {
 		if errors.Is(err, maps.ErrInsufficientColor) {
 			svc.Print(err)
+			return nil
 		} else {
 			return
 		}
@@ -137,12 +141,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		}
 	}
 	slices.Reverse(imgs)
-	gifImg, n := new(gif.GIF), len(imgs)
-	webpImg, err := webp.NewAnimationEncoder(width, height, 0, 0)
-	if err != nil {
-		return err
-	}
-	defer webpImg.Close()
+	gifImg, apngImg, n := new(gif.GIF), apng.APNG{}, len(imgs)
 	var delay int
 	if d != 0 {
 		delay = 40
@@ -164,10 +163,10 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			}
 			if i != n-1 {
 				gifImg.Delay = append(gifImg.Delay, delay)
-				webpImg.AddFrame(img, time.Duration(delay*10)*time.Millisecond)
+				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
 			} else {
 				gifImg.Delay = append(gifImg.Delay, 300)
-				webpImg.AddFrame(img, 3*time.Second)
+				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
 			}
 		}
 		f.Close()
@@ -185,11 +184,12 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 			return err
 		}
 	}
-	b, err := webpImg.Assemble()
+	f, err := os.Create(output + ".png")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(output+".webp", b, 0644)
+	defer f.Close()
+	return apng.Encode(f, apngImg)
 }
 
 func updateDaily() {
