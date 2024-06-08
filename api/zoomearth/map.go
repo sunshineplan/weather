@@ -215,7 +215,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 	}
 	for i := 0; i < 3; i++ {
 		if i == 0 {
-			time.Sleep(2 * time.Second)
+			time.Sleep(3 * time.Second)
 		} else {
 			time.Sleep(10 * time.Second)
 		}

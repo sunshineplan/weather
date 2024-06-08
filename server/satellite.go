@@ -35,8 +35,6 @@ var (
 		12 * time.Hour,
 		18 * time.Hour,
 		24 * time.Hour,
-		30 * time.Hour,
-		36 * time.Hour,
 	}
 	keep = int(slices.Max(animationDuration)/time.Hour) * 6
 )
