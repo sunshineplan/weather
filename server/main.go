@@ -109,6 +109,7 @@ func main() {
 	}
 
 	if err := svc.ParseAndRun(flag.Args()); err != nil {
-		svc.Fatal(err)
+		svc.Print(err)
+		log.Fatal("Failed")
 	}
 }
