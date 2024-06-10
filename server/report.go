@@ -45,7 +45,7 @@ func report(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment("animation/12h.gif"),
+		attachment("animation/6h.png"),
 		true,
 	)
 	if chatbot != nil {
@@ -71,7 +71,7 @@ func daily(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment("animation/12h.gif"),
+		attachment("animation/6h.png"),
 		true,
 	)
 	if chatbot != nil {
@@ -434,13 +434,13 @@ func zoomEarth(t time.Time, isReport bool) {
 			Contentf("%s - %s", storm.Title, storm.Place).
 			AppendChild(html.A().Href(storm.URL).AppendChild(html.Img().Src("cid:map"+strconv.Itoa(i)))).String(),
 		)
-		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%d-%s.gif", *path, storm.Season, storm.No, storm.ID))
+		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%d-%s.png", *path, storm.Season, storm.No, storm.ID))
 		if err != nil {
 			svc.Print(err)
 			return
 		}
 		attachments = append(attachments, &mail.Attachment{
-			Filename:  fmt.Sprintf("image%d.gif", i),
+			Filename:  fmt.Sprintf("image%d.png", i),
 			Bytes:     b,
 			ContentID: fmt.Sprintf("map%d", i),
 		})

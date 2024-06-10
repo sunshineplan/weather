@@ -4,9 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/color/palette"
-	"image/draw"
-	"image/gif"
 	"image/png"
 	"math"
 	"os"
@@ -96,6 +93,8 @@ func getTimes(path, format string) (ts []time.Time) {
 	return
 }
 
+var enc = apng.Encoder{CompressionLevel: apng.BestCompression}
+
 func animation(path, output string, d time.Duration, format string, remove bool) error {
 	res, err := filepath.Glob(path)
 	if err != nil {
@@ -137,7 +136,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		}
 	}
 	slices.Reverse(imgs)
-	gifImg, apngImg, n := new(gif.GIF), apng.APNG{}, len(imgs)
+	apngImg, n := apng.APNG{}, len(imgs)
 	var delay int
 	if d != 0 {
 		delay = 40
@@ -152,16 +151,9 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		if img, _, err := image.Decode(f); err != nil {
 			svc.Print(err)
 		} else {
-			if d <= 12*time.Hour {
-				p := image.NewPaletted(img.Bounds(), palette.Plan9)
-				draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
-				gifImg.Image = append(gifImg.Image, p)
-			}
 			if i != n-1 {
-				gifImg.Delay = append(gifImg.Delay, delay)
 				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
 			} else {
-				gifImg.Delay = append(gifImg.Delay, 300)
 				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
 			}
 		}
@@ -170,22 +162,12 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
 		return err
 	}
-	if d <= 12*time.Hour {
-		f, err := os.Create(output + ".gif")
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		if err := gif.EncodeAll(f, gifImg); err != nil {
-			return err
-		}
-	}
 	f, err := os.Create(output + ".png")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return apng.Encode(f, apngImg)
+	return enc.Encode(f, apngImg)
 }
 
 func updateDaily() {
