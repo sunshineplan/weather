@@ -150,12 +150,14 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 		}
 	}
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 	geocolor := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
 	rainviewer := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.png`), "GET", false)
+	windspeed := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false)
 	done := make(chan struct{})
 	go func() { <-geocolor; wg.Done() }()
 	go func() { <-rainviewer; wg.Done() }()
+	go func() { <-windspeed; wg.Done() }()
 	go func() { wg.Wait(); close(done) }()
 	go chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
 	select {
