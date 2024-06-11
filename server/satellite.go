@@ -93,12 +93,10 @@ func getTimes(path, format string) (ts []time.Time) {
 	return
 }
 
-var enc = apng.Encoder{CompressionLevel: apng.BestCompression}
-
-func animation(path, output string, d time.Duration, format string, remove bool) error {
+func getImages(path string, d time.Duration, format string, remove bool) (imgs []string, err error) {
 	res, err := filepath.Glob(path)
 	if err != nil {
-		return err
+		return
 	}
 	if remove {
 		for ; len(res) > keep; res = res[1:] {
@@ -129,13 +127,22 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		step = 1
 	}
 	slices.Reverse(res)
-	var imgs []string
 	for i, img := range res {
 		if i%step == 0 {
 			imgs = append(imgs, img)
 		}
 	}
 	slices.Reverse(imgs)
+	return
+}
+
+var enc = apng.Encoder{CompressionLevel: apng.BestCompression}
+
+func animation(path, output string, d time.Duration, format string, remove bool) error {
+	imgs, err := getImages(path, d, format, remove)
+	if err != nil {
+		return err
+	}
 	apngImg, n := apng.APNG{}, len(imgs)
 	var delay int
 	if d != 0 {

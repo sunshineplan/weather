@@ -45,7 +45,7 @@ func report(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment("animation/6h.png"),
+		attachment6h(),
 		true,
 	)
 	if chatbot != nil {
@@ -71,7 +71,7 @@ func daily(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment("animation/6h.png"),
+		attachment6h(),
 		true,
 	)
 	if chatbot != nil {
