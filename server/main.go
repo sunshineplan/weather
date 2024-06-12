@@ -26,6 +26,7 @@ var (
 	meta   metadata.Server
 	db     mongodb.Client
 	dialer mail.Dialer
+	to     mail.Receipts
 
 	realtime *weatherapi.WeatherAPI
 	forecast weather.API

@@ -113,7 +113,8 @@ func run() error {
 	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
 	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -3)) })
 	run().At(scheduler.MinuteSchedule(0)).Do(alert)
-	run().At(scheduler.MinuteSchedule(10, 30, 50)).Do(func(t time.Time) { zoomEarth(t, false) })
+	run().At(scheduler.MinuteSchedule(15, 45)).Do(alertStorm)
+	run().At(scheduler.MinuteSchedule(10, 30, 50)).Do(updateSatellite)
 
 	go alert(time.Now())
 

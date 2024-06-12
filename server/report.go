@@ -28,9 +28,12 @@ var (
 
 	alertMutex sync.Mutex
 	zoomMutex  sync.Mutex
+
+	isReport bool
 )
 
 func report(t time.Time) {
+	isReport = true
 	_, days, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
 	if err != nil {
 		svc.Print(err)
@@ -38,7 +41,7 @@ func report(t time.Time) {
 	}
 	runAlert(days[1:], alertRainSnow)
 	runAlert(days, alertTempRiseFall)
-	zoomEarth(t, true)
+	alertStorm(t)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
 		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
@@ -388,10 +391,22 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 	return div.AppendChild(table.AppendChild(tbody)).HTML()
 }
 
-func zoomEarth(t time.Time, isReport bool) {
-	if !isReport {
-		go updateDaily()
+var aqiStandard int
+
+func alertAQI(_ []weather.Day) (subject string, body *html.Element) {
+	current, err := aqiAPI.Realtime(aqiType, *query)
+	if err != nil {
+		svc.Print(err)
+		return
 	}
+	if index := current.AQI(); index.Value() >= aqiStandard {
+		subject = "[Weather]Air Quality Alert - " + index.Level().String() + timestamp()
+		body = html.Background().Content(aqi.CurrentHTML(current))
+	}
+	return
+}
+
+func alertStorm(t time.Time) {
 	storms, err := stormAPI.GetStorms(t)
 	if err != nil {
 		svc.Print(err)
@@ -454,19 +469,4 @@ func zoomEarth(t time.Time, isReport bool) {
 			true,
 		)
 	}
-}
-
-var aqiStandard int
-
-func alertAQI(_ []weather.Day) (subject string, body *html.Element) {
-	current, err := aqiAPI.Realtime(aqiType, *query)
-	if err != nil {
-		svc.Print(err)
-		return
-	}
-	if index := current.AQI(); index.Value() >= aqiStandard {
-		subject = "[Weather]Air Quality Alert - " + index.Level().String() + timestamp()
-		body = html.Background().Content(aqi.CurrentHTML(current))
-	}
-	return
 }

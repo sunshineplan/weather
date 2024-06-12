@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"image"
 	"image/png"
 	"math"
 	"os"
@@ -13,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kettek/apng"
 	"github.com/sunshineplan/weather/api/zoomearth"
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
@@ -136,35 +134,16 @@ func getImages(path string, d time.Duration, format string, remove bool) (imgs [
 	return
 }
 
-var enc = apng.Encoder{CompressionLevel: apng.BestCompression}
-
 func animation(path, output string, d time.Duration, format string, remove bool) error {
 	imgs, err := getImages(path, d, format, remove)
 	if err != nil {
 		return err
 	}
-	apngImg, n := apng.APNG{}, len(imgs)
 	var delay int
 	if d != 0 {
 		delay = 40
-	} else if delay = 6000 / n; delay > 40 {
+	} else if delay = 6000 / len(imgs); delay > 40 {
 		delay = 40
-	}
-	for i, img := range imgs {
-		f, err := os.Open(img)
-		if err != nil {
-			return err
-		}
-		if img, _, err := image.Decode(f); err != nil {
-			svc.Print(err)
-		} else {
-			if i != n-1 {
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
-			} else {
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
-			}
-		}
-		f.Close()
 	}
 	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
 		return err
@@ -174,10 +153,10 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		return err
 	}
 	defer f.Close()
-	return enc.Encode(f, apngImg)
+	return encodeAPNG(f, imgs, delay)
 }
 
-func updateDaily() {
+func updateSatellite(_ time.Time) {
 	svc.Print("Start saving satellite map...")
 	zoomMutex.Lock()
 	defer zoomMutex.Unlock()
