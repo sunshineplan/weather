@@ -1,8 +1,6 @@
 package maps
 
 import (
-	"errors"
-	"fmt"
 	"image"
 	"time"
 
@@ -27,15 +25,3 @@ type MapAPI interface {
 	Map(mt MapType, t time.Time, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
 	Realtime(mt MapType, coords coordinates.Coordinates, opt any) (time.Time, image.Image, error)
 }
-
-var ErrInsufficientColor = errors.New("image has insufficient color depth")
-
-var _ error = InsufficientColor(0)
-
-type InsufficientColor int
-
-func (i InsufficientColor) Error() string {
-	return fmt.Sprintf("image has insufficient color depth: %d", i)
-}
-func (i InsufficientColor) Is(target error) bool { return target == ErrInsufficientColor }
-func (i InsufficientColor) Unwrap() error        { return ErrInsufficientColor }

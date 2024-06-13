@@ -3,6 +3,7 @@ package zoomearth
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -195,25 +196,16 @@ $('.timeline').style.margin='0 auto'`, nil),
 	); err != nil {
 		return
 	}
-	if t, err = time.Parse("Monday _2 January, 15:04MST", utcTime); err != nil {
-		if t, err = time.Parse("Mon _2 Jan, 15:04MST", utcTime); err != nil {
+	var parseErr error
+	if t, parseErr = time.Parse("Monday _2 January, 15:04MST", utcTime); parseErr != nil {
+		t, parseErr = time.Parse("Mon _2 Jan, 15:04MST", utcTime)
+	}
+	if parseErr, _ = maps.ParseTimeError(parseErr); parseErr == nil {
+		t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
+		if err = chromedp.Run(ctx, chromedp.EvaluateAsDevTools(
+			fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
 			return
 		}
-	}
-	t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
-	if err = chromedp.Run(ctx, chromedp.EvaluateAsDevTools(
-		fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
-		return
-	}
-	colors := func(img image.Image) int {
-		m := make(map[color.Color]struct{})
-		for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
-			for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
-				c := img.At(x, y)
-				m[c] = struct{}{}
-			}
-		}
-		return len(m)
 	}
 	for i := 0; i < 3; i++ {
 		if i == 0 {
@@ -230,14 +222,27 @@ $('.timeline').style.margin='0 auto'`, nil),
 			return
 		}
 		if depth := colors(img); depth >= DefaultColorDepth {
+			err = parseErr
 			return
 		} else {
 			err = maps.InsufficientColor(depth)
 		}
 	}
+	err = errors.Join(parseErr, err)
 	return
 }
 
 func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (time.Time, image.Image, error) {
 	return Map(path, time.Time{}, coords, opt)
+}
+
+func colors(img image.Image) int {
+	m := make(map[color.Color]struct{})
+	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+			c := img.At(x, y)
+			m[c] = struct{}{}
+		}
+	}
+	return len(m)
 }
