@@ -25,7 +25,10 @@ import (
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
-var DefaultColorDepth = 5000
+var (
+	DefaultTimeout    = 2 * time.Minute
+	DefaultColorDepth = 5000
+)
 
 var mapPath = map[maps.MapType]string{
 	maps.Satellite:     "satellite",
@@ -122,7 +125,7 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 	}
 	c := chrome.Headless()
 	defer c.Close()
-	ctx, cancel := context.WithTimeout(c, time.Minute)
+	ctx, cancel := context.WithTimeout(c, DefaultTimeout)
 	defer cancel()
 	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
 		return !strings.Contains(ev.Request.URL, "adsbygoogle")
@@ -170,11 +173,9 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
-	ctx, cancel = context.WithTimeout(c, 5*time.Second)
+	click, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
-	chromedp.Run(ctx, chromedp.Click(".welcome .continue", chromedp.NodeVisible))
-	ctx, cancel = context.WithTimeout(c, time.Minute)
-	defer cancel()
+	chromedp.Run(click, chromedp.Click(".welcome .continue", chromedp.NodeVisible))
 	var utcTime string
 	if err = chromedp.Run(
 		ctx,
