@@ -20,10 +20,13 @@ import (
 )
 
 var (
-	iconCache  sync.Map
-	gifPool    = pool.New[gif.GIF]()
-	apngPool   = pool.New[apng.APNG]()
-	pngEncoder = apng.Encoder{CompressionLevel: apng.BestCompression}
+	iconCache   sync.Map
+	gifPool     = pool.New[gif.GIF]()
+	apngPool    = pool.New[apng.APNG]()
+	apngEncoder = apng.Encoder{
+		CompressionLevel: apng.BestCompression,
+		BufferPool:       pool.New[apng.EncoderBuffer](),
+	}
 )
 
 func icon(c *gin.Context) {
@@ -131,5 +134,5 @@ func encodeAPNG(w io.Writer, imgs []string, delay int) error {
 		}
 		f.Close()
 	}
-	return pngEncoder.Encode(w, *apngImg)
+	return apngEncoder.Encode(w, *apngImg)
 }

@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sunshineplan/utils/pool"
 	"github.com/sunshineplan/weather/api/zoomearth"
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
@@ -19,6 +20,12 @@ import (
 )
 
 var (
+	satelliteMutex sync.Mutex
+	pngEncoder     = png.Encoder{
+		CompressionLevel: png.BestSpeed,
+		BufferPool:       pool.New[png.EncoderBuffer](),
+	}
+
 	format      = "200601021504"
 	shortFormat = "01021504"
 	width       = 600
@@ -42,15 +49,13 @@ func mapOptions(zoom float64) *zoomearth.MapOptions {
 		SetTimeZone(timezone)
 }
 
-var satelliteMutex sync.Mutex
-
 func satellite(t time.Time, coords coordinates.Coordinates, path, format string, opt any) error {
 	satelliteMutex.Lock()
 	defer satelliteMutex.Unlock()
 	time.Sleep(time.Second)
 	t, img, err := mapAPI.Map(maps.Satellite, t, coords, opt)
 	if err != nil {
-		if errors.Is(err, maps.ErrInsufficientColor) {
+		if errors.Is(err, maps.ErrInsufficientColor) || errors.Is(err, maps.ErrTimeParse) {
 			svc.Print(err)
 			return nil
 		} else {
@@ -66,7 +71,7 @@ func satellite(t time.Time, coords coordinates.Coordinates, path, format string,
 		return err
 	}
 	defer f.Close()
-	return png.Encode(f, img)
+	return pngEncoder.Encode(f, img)
 }
 
 func getTimes(path, format string) (ts []time.Time) {
