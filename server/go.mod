@@ -5,8 +5,8 @@ go 1.22
 require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
-	github.com/kettek/apng v0.0.0-20220823221153-ff692776a607
 	github.com/sunshineplan/ai v1.0.11
+	github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b
 	github.com/sunshineplan/database/mongodb v1.0.7
 	github.com/sunshineplan/metadata v1.1.1
 	github.com/sunshineplan/service v1.0.20
@@ -50,6 +50,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kettek/apng v0.0.0-20220823221153-ff692776a607 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kettek/apng"
+	"github.com/sunshineplan/apng"
 	"github.com/sunshineplan/utils/executor"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/pool"
@@ -83,11 +83,11 @@ func imageHTML(href, src string) html.HTML {
 	return html.A().Href(href).AppendChild(html.Img().Src(src)).HTML()
 }
 
-func encodeGIF(w io.Writer, imgs []string, delay int) error {
+func encodeGIF(w io.Writer, imgs []string) error {
 	gifImg := gifPool.Get()
 	defer func() {
-		gifImg.Image = nil
-		gifImg.Delay = nil
+		gifImg.Image = gifImg.Image[:0]
+		gifImg.Delay = gifImg.Delay[:0]
 		gifPool.Put(gifImg)
 	}()
 	for i, img := range imgs {
@@ -102,7 +102,7 @@ func encodeGIF(w io.Writer, imgs []string, delay int) error {
 			draw.Draw(p, p.Rect, img, image.Point{}, draw.Over)
 			gifImg.Image = append(gifImg.Image, p)
 			if i != len(imgs)-1 {
-				gifImg.Delay = append(gifImg.Delay, delay)
+				gifImg.Delay = append(gifImg.Delay, 40)
 			} else {
 				gifImg.Delay = append(gifImg.Delay, 300)
 			}
@@ -112,10 +112,10 @@ func encodeGIF(w io.Writer, imgs []string, delay int) error {
 	return gif.EncodeAll(w, gifImg)
 }
 
-func encodeAPNG(w io.Writer, imgs []string, delay int) error {
+func encodeAPNG(w io.Writer, imgs []string) error {
 	apngImg := apngPool.Get()
 	defer func() {
-		apngImg.Frames = nil
+		apngImg.Frames = apngImg.Frames[:0]
 		apngPool.Put(apngImg)
 	}()
 	for i, img := range imgs {
@@ -127,7 +127,7 @@ func encodeAPNG(w io.Writer, imgs []string, delay int) error {
 			svc.Print(err)
 		} else {
 			if i != len(imgs)-1 {
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: uint16(delay)})
+				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 40})
 			} else {
 				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
 			}

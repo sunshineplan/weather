@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -48,7 +47,7 @@ func report(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment6h(),
+		attach6hGIF(),
 		true,
 	)
 	if chatbot != nil {
@@ -74,7 +73,7 @@ func daily(t time.Time) {
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
-		attachment6h(),
+		attach6hGIF(),
 		true,
 	)
 	if chatbot != nil {
@@ -449,16 +448,9 @@ func alertStorm(t time.Time) {
 			Contentf("%s - %s", storm.Title, storm.Place).
 			AppendChild(html.A().Href(storm.URL).AppendChild(html.Img().Src("cid:map"+strconv.Itoa(i)))).String(),
 		)
-		b, err := os.ReadFile(fmt.Sprintf("%s/%s/%d-%s.png", *path, storm.Season, storm.No, storm.ID))
-		if err != nil {
-			svc.Print(err)
-			return
+		if attachment := attachStorm(i, storm); attachment != nil {
+			attachments = append(attachments, attachment)
 		}
-		attachments = append(attachments, &mail.Attachment{
-			Filename:  fmt.Sprintf("image%d.png", i),
-			Bytes:     b,
-			ContentID: fmt.Sprintf("map%d", i),
-		})
 	}
 	if hour := t.Hour(); isReport || ((hour == 6 || hour == 12 || hour == 21) && t.Minute() < 30) {
 		sendMail(

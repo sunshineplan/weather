@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -85,13 +83,7 @@ var (
 )
 
 func main() {
-	self, err := os.Executable()
-	if err != nil {
-		svc.Fatalln("Failed to get self path:", err)
-	}
-
 	flag.TextVar(&aqiType, "aqi", aqi.US, "AQI Type")
-
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
 	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")
@@ -100,7 +92,7 @@ func main() {
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
 	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/weather.pid", "PID file path")
-	flags.SetConfigFile(filepath.Join(filepath.Dir(self), "config.ini"))
+	flags.SetConfigFile("config.ini")
 	flags.Parse()
 
 	if *logPath != "" {
