@@ -57,7 +57,13 @@ func satellite(t time.Time, coords coordinates.Coordinates, path, format string,
 	if err != nil {
 		if errors.Is(err, maps.ErrInsufficientColor) || errors.Is(err, maps.ErrTimeParse) {
 			svc.Print(err)
-			return nil
+			file := filepath.Join("bad", time.Now().Format(format)+".png")
+			f, err := os.Create(file)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			return pngEncoder.Encode(f, img)
 		} else {
 			return err
 		}
@@ -120,13 +126,13 @@ func getImages(path string, d time.Duration, format string, remove bool) (imgs [
 				svc.Print(err)
 				return true
 			}
-			return now.Sub(t) >= d
+			return now.Sub(t) > d
 		})
 	}
 	var step int
 	if d != 0 {
 		step = int(math.Logb(float64(d / time.Hour)))
-	} else if step = int(math.Round(math.Log(1+float64(len(res))))) - 2; step <= 0 {
+	} else if step = int(math.Round(float64(len(res)) / 30)); step == 0 {
 		step = 1
 	}
 	slices.Reverse(res)
@@ -144,12 +150,6 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 	if err != nil {
 		return err
 	}
-	var delay int
-	if d != 0 {
-		delay = 40
-	} else if delay = 6000 / len(imgs); delay > 40 {
-		delay = 40
-	}
 	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 		return err
 	}
 	defer f.Close()
-	return encodeAPNG(f, imgs, delay)
+	return encodeAPNG(f, imgs)
 }
 
 func updateSatellite(_ time.Time) {
