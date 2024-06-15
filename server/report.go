@@ -251,10 +251,22 @@ func alert(t time.Time) {
 	wg.Wait()
 }
 
-func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element)) {
-	if subject, body := fn(days); subject != "" {
+func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element, []*mail.Attachment)) {
+	if subject, body, attach := fn(days); subject != "" {
 		svc.Print(subject)
-		sendMail(subject, html.Div().Style("font-family:system-ui;margin:0").AppendChild(body).HTML(), mail.TextHTML, nil, false)
+		body := html.Div().Style("font-family:system-ui;margin:0").AppendChild(body).HTML()
+		if attach != nil {
+			body = body +
+				html.Br().HTML() +
+				imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment")
+		}
+		sendMail(
+			subject,
+			body,
+			mail.TextHTML,
+			attach,
+			false,
+		)
 	}
 }
 
@@ -267,7 +279,7 @@ func isRainSnow(now int, hours []weather.Hour) bool {
 	return false
 }
 
-func alertRainSnow(days []weather.Day) (subject string, body *html.Element) {
+func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attch []*mail.Attachment) {
 	if len(rainSnow) > 0 {
 		if rainSnow[0].IsExpired() {
 			rainSnow = rainSnow[1:]
@@ -294,6 +306,7 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element) {
 							i.Days()[index].PrecipitationHTML(),
 						)
 					}
+					attch = attach6hGIF()
 					return
 				}
 			}
@@ -311,7 +324,7 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element) {
 	return
 }
 
-func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element) {
+func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element, _ []*mail.Attachment) {
 	if len(tempRiseFall) > 0 {
 		if tempRiseFall[0].IsExpired() {
 			tempRiseFall = tempRiseFall[1:]
@@ -392,7 +405,7 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 
 var aqiStandard int
 
-func alertAQI(_ []weather.Day) (subject string, body *html.Element) {
+func alertAQI(_ []weather.Day) (subject string, body *html.Element, _ []*mail.Attachment) {
 	current, err := aqiAPI.Realtime(aqiType, *query)
 	if err != nil {
 		svc.Print(err)
