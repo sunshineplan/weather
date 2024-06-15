@@ -115,7 +115,7 @@ func getImages(path string, d time.Duration, format string, remove bool) (imgs [
 		}
 	}
 	if d != 0 {
-		now := time.Now().In(timezone)
+		now := time.Now().Truncate(10 * time.Minute).In(timezone)
 		res = slices.DeleteFunc(res, func(i string) bool {
 			file := filepath.Base(i)
 			if index := strings.LastIndex(file, "."); index != -1 {
