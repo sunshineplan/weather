@@ -13,20 +13,14 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/apng"
 	"github.com/sunshineplan/utils/executor"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/pool"
 )
 
 var (
-	iconCache   sync.Map
-	gifPool     = pool.New[gif.GIF]()
-	apngPool    = pool.New[apng.APNG]()
-	apngEncoder = apng.Encoder{
-		CompressionLevel: apng.BestCompression,
-		BufferPool:       pool.New[apng.EncoderBuffer](),
-	}
+	iconCache sync.Map
+	gifPool   = pool.New[gif.GIF]()
 )
 
 func icon(c *gin.Context) {
@@ -110,29 +104,4 @@ func encodeGIF(w io.Writer, imgs []string) error {
 		f.Close()
 	}
 	return gif.EncodeAll(w, gifImg)
-}
-
-func encodeAPNG(w io.Writer, imgs []string) error {
-	apngImg := apngPool.Get()
-	defer func() {
-		apngImg.Frames = apngImg.Frames[:0]
-		apngPool.Put(apngImg)
-	}()
-	for i, img := range imgs {
-		f, err := os.Open(img)
-		if err != nil {
-			return err
-		}
-		if img, _, err := image.Decode(f); err != nil {
-			svc.Print(err)
-		} else {
-			if i != len(imgs)-1 {
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 40})
-			} else {
-				apngImg.Frames = append(apngImg.Frames, apng.Frame{Image: img, DelayNumerator: 300})
-			}
-		}
-		f.Close()
-	}
-	return apngEncoder.Encode(w, *apngImg)
 }

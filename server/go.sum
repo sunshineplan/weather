@@ -171,8 +171,8 @@ github.com/sunshineplan/ai v1.0.11 h1:ry6gO7jafTs3KMEYRCYVLFPKFmWapTZXwVHuDYA8ha
 github.com/sunshineplan/ai v1.0.11/go.mod h1:OwxUhBTXTndbjQ2pzDdNLK005BDdyVFBTHKjj6bkrQM=
 github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b h1:XM8muvQoN5Kt7XamD22MDiAJ8CMw545yNT4hKy51eFs=
 github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b/go.mod h1:rVeVToQ0Wtce/V89c3Qax587Mh9RGBdUMhnuK3LMTUI=
-github.com/sunshineplan/chrome v1.1.16 h1:Ivy6Z+tswJZdDmP6evXXHWwCYYzqt2fKueOjyQPRwb0=
-github.com/sunshineplan/chrome v1.1.16/go.mod h1:T6BhKe32SqLd2/i4DdBTbmM+2UKn17l4F2r17nltxSg=
+github.com/sunshineplan/chrome v1.1.17 h1:bG29dVOaWhkiouM+OV9VcfpulLG/RzeEuAuppF03M2w=
+github.com/sunshineplan/chrome v1.1.17/go.mod h1:T6BhKe32SqLd2/i4DdBTbmM+2UKn17l4F2r17nltxSg=
 github.com/sunshineplan/cipher v1.0.5 h1:opCKCTVjkdcoIJSCi2yoI0ndmwiyDbcm+5MpyavmnJ0=
 github.com/sunshineplan/cipher v1.0.5/go.mod h1:JMP+4CCZT1D7qjZyuiyTe8ZPYaaBMxU9MWrCBKC/QhQ=
 github.com/sunshineplan/database/mongodb v1.0.7 h1:uuj4OYePOJ8iVn1dwVLKdF+w07XLBYQHL2aLvSQVWFo=
@@ -183,6 +183,8 @@ github.com/sunshineplan/service v1.0.20 h1:fmNR9yN8SW/ySES42Tg6B7wnMQwzzSOp01/wT
 github.com/sunshineplan/service v1.0.20/go.mod h1:85r/lTsL++K4PnGpMrg3P9gfwrgGsTeTTPByR/J3g1Y=
 github.com/sunshineplan/utils v0.1.68 h1:EIfR8M88k2BU5Jk92tVLtlDxSrC76S2pIZYdvX5gJEI=
 github.com/sunshineplan/utils v0.1.68/go.mod h1:QMe2vCEFq9VliPac8WfXndi5jP0ZrPHus8wvJlgBy5M=
+github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a h1:zvAhEO3ZB7m1Lc3BwJXLTDrLrHVAbcDByJ7XkL4WR+s=
+github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a/go.mod h1:JU6yp7mldR7lmftjHPtaDs+Q8xn7l2tMR1XYx5iJELg=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=

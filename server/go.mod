@@ -12,6 +12,7 @@ require (
 	github.com/sunshineplan/service v1.0.20
 	github.com/sunshineplan/utils v0.1.68
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
+	github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a
 	golang.org/x/text v0.16.0
 )
 
@@ -63,7 +64,7 @@ require (
 	github.com/pschlump/MiscLib v1.0.3 // indirect
 	github.com/pschlump/json v1.12.0 // indirect
 	github.com/sashabaranov/go-openai v1.23.1 // indirect
-	github.com/sunshineplan/chrome v1.1.16 // indirect
+	github.com/sunshineplan/chrome v1.1.17 // indirect
 	github.com/sunshineplan/cipher v1.0.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
