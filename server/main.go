@@ -80,6 +80,7 @@ var (
 	path        = flag.String("path", "storm", "storm screenshot save path")
 	provider    = flag.String("provider", "visualcrossing", "weather provider")
 	logPath     = flag.String("log", "", "Log file path")
+	debug       = flag.Bool("debug", false, "Debug pprof")
 )
 
 func main() {
