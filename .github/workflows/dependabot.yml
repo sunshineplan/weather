@@ -28,6 +28,12 @@ jobs:
           cd server
           go mod tidy
           go build -v ./...
+
+      - name: Test webp
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install libwebp-dev
+          go build -v -tags webp ./...
           go clean
           cd ..
 

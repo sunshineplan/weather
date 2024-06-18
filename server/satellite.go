@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"image/png"
 	"math"
@@ -35,8 +34,8 @@ var (
 	animationDuration = []time.Duration{
 		6 * time.Hour,
 		12 * time.Hour,
-		18 * time.Hour,
 		24 * time.Hour,
+		48 * time.Hour,
 	}
 	keep = int(slices.Max(animationDuration)/time.Hour) * 6
 )
@@ -55,18 +54,7 @@ func satellite(t time.Time, coords coordinates.Coordinates, path, format string,
 	time.Sleep(time.Second)
 	t, img, err := mapAPI.Map(maps.Satellite, t, coords, opt)
 	if err != nil {
-		if errors.Is(err, maps.ErrInsufficientColor) || errors.Is(err, maps.ErrTimeParse) {
-			svc.Print(err)
-			file := filepath.Join("bad", time.Now().Format(format)+".png")
-			f, err := os.Create(file)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			return pngEncoder.Encode(f, img)
-		} else {
-			return err
-		}
+		return err
 	}
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return err
@@ -153,12 +141,7 @@ func animation(path, output string, d time.Duration, format string, remove bool)
 	if err := os.MkdirAll(filepath.Dir(output), 0755); err != nil {
 		return err
 	}
-	f, err := os.Create(output + ".png")
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return encodeAPNG(f, imgs)
+	return encodeAnimation(output, imgs)
 }
 
 func updateSatellite(_ time.Time) {
