@@ -181,8 +181,8 @@ github.com/sunshineplan/metadata v1.1.1 h1:nlufF4CnAgwenW/Esi4iK6uGVxval/PdtV6Wr
 github.com/sunshineplan/metadata v1.1.1/go.mod h1:ENxneH9PDpQuw3IVJMu38rkfS1p+KVG4pddySkEEDSU=
 github.com/sunshineplan/service v1.0.20 h1:fmNR9yN8SW/ySES42Tg6B7wnMQwzzSOp01/wT3JyzAA=
 github.com/sunshineplan/service v1.0.20/go.mod h1:85r/lTsL++K4PnGpMrg3P9gfwrgGsTeTTPByR/J3g1Y=
-github.com/sunshineplan/utils v0.1.68 h1:EIfR8M88k2BU5Jk92tVLtlDxSrC76S2pIZYdvX5gJEI=
-github.com/sunshineplan/utils v0.1.68/go.mod h1:QMe2vCEFq9VliPac8WfXndi5jP0ZrPHus8wvJlgBy5M=
+github.com/sunshineplan/utils v0.1.69 h1:sV6Y6xmBkT5aCn9EjAPAcFuCqMhXVPDD3k+NE+rEMDI=
+github.com/sunshineplan/utils v0.1.69/go.mod h1:QMe2vCEFq9VliPac8WfXndi5jP0ZrPHus8wvJlgBy5M=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a h1:zvAhEO3ZB7m1Lc3BwJXLTDrLrHVAbcDByJ7XkL4WR+s=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a/go.mod h1:JU6yp7mldR7lmftjHPtaDs+Q8xn7l2tMR1XYx5iJELg=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
