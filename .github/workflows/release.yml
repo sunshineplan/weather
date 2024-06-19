@@ -19,9 +19,10 @@ jobs:
 
       - name: Build
         run: |
-          sudo apt install libwebp-dev
           cd server
-          go build -tags webp -ldflags "-s -w"
+          #sudo apt install libwebp-dev
+          #go build -tags webp -ldflags "-s -w"
+          go build -ldflags "-s -w"
           tar cvzf ../release.tar.gz scripts weather config.ini.default
 
       - name: Upload Release Asset

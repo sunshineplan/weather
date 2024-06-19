@@ -3,6 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"image/jpeg"
+	"image/png"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/sunshineplan/utils/mail"
@@ -33,6 +37,39 @@ func sendMail[T ~string](subject string, body T, contentType mail.ContentType, a
 			svc.Print(err)
 		}
 	}
+}
+
+func attachLast() []*mail.Attachment {
+	imgs, err := filepath.Glob("daily/*")
+	if err != nil {
+		svc.Print(err)
+		return nil
+	}
+	if len(imgs) == 0 {
+		svc.Print("no images in daily folder")
+		return nil
+	}
+	f, err := os.Open(imgs[len(imgs)-1])
+	if err != nil {
+		svc.Print(err)
+		return nil
+	}
+	defer f.Close()
+	img, err := png.Decode(f)
+	if err != nil {
+		svc.Print(err)
+		return nil
+	}
+	buf := bufPool.Get()
+	defer func() {
+		buf.Reset()
+		bufPool.Put(buf)
+	}()
+	if err := jpeg.Encode(buf, img, &jpeg.Options{Quality: 90}); err != nil {
+		svc.Print(err)
+		return nil
+	}
+	return []*mail.Attachment{{Filename: "last.jpg", Bytes: buf.Bytes(), ContentID: "attachment"}}
 }
 
 func attach6hGIF() []*mail.Attachment {
