@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -270,13 +271,10 @@ func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element,
 	}
 }
 
-func isRainSnow(now int, hours []weather.Hour) bool {
-	for _, i := range hours {
-		if hour := i.TimeEpoch.Time().Hour(); hour == now && i.Precip > 0 {
-			return true
-		}
-	}
-	return false
+func isRainSnow(hour int, hours []weather.Hour) bool {
+	return slices.IndexFunc(hours, func(h weather.Hour) bool {
+		return h.TimeEpoch.Time().Hour() == hour && h.Precip > 0
+	}) >= 0
 }
 
 func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attch []*mail.Attachment) {
@@ -288,15 +286,23 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 
 	body = html.Background()
 	if res := weather.WillRainSnow(days); len(res) > 0 {
+		now := time.Now()
+		hour := now.Hour()
 		for index, i := range res {
-			now := time.Now()
-			hour := now.Hour()
 			if index == 0 {
-				if start := i.Start(); len(rainSnow) == 0 ||
+				start := i.Start()
+				var isRainNow bool
+				if start.Date == now.Format("2006-01-02") && isRainSnow(hour, start.Hours) {
+					isRainNow = true
+				}
+				if len(rainSnow) == 0 ||
 					rainSnow[0].Start().Date != start.Date ||
 					rainSnow[0].Duration() != i.Duration() {
 					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
-				} else if start.Date == now.Format("2006-01-02") && isRainSnow(hour, start.Hours) {
+					if isRainNow {
+						attch = attachLast()
+					}
+				} else if isRainNow {
 					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
 					body.AppendContent(start.DateInfoHTML(), start.PrecipitationHTML(hour))
 					for index, n := 1, len(i.Days()); index < n && index < 3; index++ {
@@ -306,7 +312,7 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 							i.Days()[index].PrecipitationHTML(),
 						)
 					}
-					attch = attach6hGIF()
+					attch = attachLast()
 					return
 				}
 			}
