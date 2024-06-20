@@ -165,7 +165,7 @@ func runServer() error {
 					html.Meta().Name("viewport").Attribute("content", "width=device-width"),
 				),
 				html.Body().Style("margin:0").
-					Content(fullHTML(q, coords, current, days, avg, aqi, now, diff, "8px")+image),
+					Content(fullHTML(q, coords, current, days, avg, aqi, now, true, diff, "8px")+image),
 			).HTML()),
 		)
 	})

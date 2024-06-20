@@ -44,7 +44,7 @@ func report(t time.Time) {
 	alertStorm(t)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
+		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, true, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
@@ -70,7 +70,7 @@ func daily(t time.Time) {
 	}
 	go sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, *difference, "0")+
+		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, false, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
@@ -91,7 +91,7 @@ func daily(t time.Time) {
 func fullHTML(
 	q string, location coordinates.Coordinates,
 	current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current,
-	t time.Time, diff float64, margin string,
+	t time.Time, highlight bool, diff float64, margin string,
 ) html.HTML {
 	div := html.Div().Style("font-family:system-ui;margin:" + margin)
 	div.AppendChild(
@@ -152,7 +152,11 @@ func fullHTML(
 	if rainSnow := weather.WillRainSnow(days[1:]); len(rainSnow) > 0 {
 		res := html.Div()
 		for index, i := range rainSnow {
-			res.AppendContent(i.HTML(t))
+			if highlight {
+				res.AppendContent(i.HTML(t, t.Hour()))
+			} else {
+				res.AppendContent(i.HTML(t))
+			}
 			if index < len(rainSnow)-1 {
 				res.AppendChild(html.Br())
 			}
