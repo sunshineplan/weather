@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"image/png"
+	"image/jpeg"
 	"net/http/pprof"
 	"net/url"
 	"path/filepath"
@@ -74,6 +73,25 @@ func runServer() error {
 			c.File(fmt.Sprintf("animation/%s", d) + ext)
 		})
 	}
+	router.GET("/last", func(c *gin.Context) {
+		img, err := lastImage("daily/*")
+		if err != nil {
+			svc.Print(err)
+			c.String(500, "")
+			return
+		}
+		buf := bufPool.Get()
+		defer func() {
+			buf.Reset()
+			bufPool.Put(buf)
+		}()
+		if err := jpeg.Encode(buf, img, &jpeg.Options{Quality: 90}); err != nil {
+			svc.Print(err)
+			c.String(500, "")
+			return
+		}
+		c.Data(200, "image/jpeg", buf.Bytes())
+	})
 	router.GET("/map", func(c *gin.Context) {
 		var q string
 		if q = c.Query("q"); q == "" {
@@ -99,13 +117,17 @@ func runServer() error {
 				c.String(500, "")
 				return
 			}
-			var buf bytes.Buffer
-			if err := png.Encode(&buf, img); err != nil {
+			buf := bufPool.Get()
+			defer func() {
+				buf.Reset()
+				bufPool.Put(buf)
+			}()
+			if err := jpeg.Encode(buf, img, &jpeg.Options{Quality: 90}); err != nil {
 				svc.Print(err)
 				c.String(500, "")
 				return
 			}
-			c.Data(200, "image/png", buf.Bytes())
+			c.Data(200, "image/jpeg", buf.Bytes())
 		}
 	})
 	router.GET("/status", func(c *gin.Context) {
