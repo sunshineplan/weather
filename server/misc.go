@@ -2,9 +2,10 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"image"
 	"image/jpeg"
-	"image/png"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,23 +40,25 @@ func sendMail[T ~string](subject string, body T, contentType mail.ContentType, a
 	}
 }
 
-func attachLast() []*mail.Attachment {
-	imgs, err := filepath.Glob("daily/*")
+func lastImage(path string) (img image.Image, err error) {
+	files, err := filepath.Glob(path)
 	if err != nil {
-		svc.Print(err)
-		return nil
+		return
 	}
-	if len(imgs) == 0 {
-		svc.Print("no images in daily folder")
-		return nil
+	if len(files) == 0 {
+		return nil, errors.New("no files in this path: " + path)
 	}
-	f, err := os.Open(imgs[len(imgs)-1])
+	f, err := os.Open(files[len(files)-1])
 	if err != nil {
-		svc.Print(err)
-		return nil
+		return
 	}
 	defer f.Close()
-	img, err := png.Decode(f)
+	img, _, err = image.Decode(f)
+	return
+}
+
+func attachLast() []*mail.Attachment {
+	img, err := lastImage("daily/*")
 	if err != nil {
 		svc.Print(err)
 		return nil
