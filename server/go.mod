@@ -9,7 +9,7 @@ require (
 	github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b
 	github.com/sunshineplan/database/mongodb v1.0.7
 	github.com/sunshineplan/metadata v1.1.1
-	github.com/sunshineplan/service v1.0.20
+	github.com/sunshineplan/service v1.0.21
 	github.com/sunshineplan/utils v0.1.70
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a
@@ -79,7 +79,7 @@ require (
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/api v0.178.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be // indirect
