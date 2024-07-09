@@ -13,9 +13,9 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/utils/executor"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/pool"
+	"github.com/sunshineplan/workers/executor"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 func icon(c *gin.Context) {
 	file := strings.ToLower(c.Param("image"))
 	if !strings.HasSuffix(file, ".png") {
-		c.AbortWithStatus(404)
+		c.Status(404)
 		return
 	}
 	icon := strings.TrimSuffix(file, ".png")
@@ -34,13 +34,13 @@ func icon(c *gin.Context) {
 		c.Data(200, "image/png", b.([]byte))
 		return
 	}
-	v, err := executor.ExecuteSerial(
+	resp, err := executor.New[string, *http.Response](0).ExecuteSerial(
 		[]string{
 			"https://cdn.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd Set - Color/%s.png",
 			"https://fastly.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd Set - Color/%s.png",
 			"https://raw.githubusercontent.com/visualcrossing/WeatherIcons/main/PNG/2nd Set - Color/%s.png",
 		},
-		func(url string) (any, error) {
+		func(url string) (*http.Response, error) {
 			resp, err := http.Get(fmt.Sprintf(url, icon))
 			if err != nil {
 				return nil, err
@@ -53,20 +53,18 @@ func icon(c *gin.Context) {
 	)
 	if err != nil {
 		svc.Print(err)
-		c.AbortWithStatus(500)
+		c.Status(500)
 		return
 	}
-
-	resp := v.(*http.Response)
 	defer resp.Body.Close()
 	if resp.StatusCode == 404 {
-		c.AbortWithStatus(404)
+		c.Status(404)
 		return
 	}
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		c.AbortWithStatus(500)
+		c.Status(500)
 	} else {
 		iconCache.Store(icon, b)
 		c.Data(200, "image/png", b)

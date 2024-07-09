@@ -183,6 +183,8 @@ github.com/sunshineplan/service v1.0.21 h1:UXYaWwLVMeG5cZ40vlxVQLpymuSesCZK8ADn7
 github.com/sunshineplan/service v1.0.21/go.mod h1:dZtX1ktoLwftAH+p7Pve4xbaQyRuzFq1j8m1HStMsso=
 github.com/sunshineplan/utils v0.1.71 h1:FTe6qAdevePih+hLil1KvKhMAU2Bp+qHTtlO0wxoAYI=
 github.com/sunshineplan/utils v0.1.71/go.mod h1:QMe2vCEFq9VliPac8WfXndi5jP0ZrPHus8wvJlgBy5M=
+github.com/sunshineplan/workers v1.0.1 h1:vhDo4ZaerVu0QM1udRmWpvHY2U61/vTLRVwmKcYOxNw=
+github.com/sunshineplan/workers v1.0.1/go.mod h1:EjLgk5vd/2ig6vdWDAZy/fpkzdSm8IVDsARPQVSyQy0=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a h1:zvAhEO3ZB7m1Lc3BwJXLTDrLrHVAbcDByJ7XkL4WR+s=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a/go.mod h1:JU6yp7mldR7lmftjHPtaDs+Q8xn7l2tMR1XYx5iJELg=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
