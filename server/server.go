@@ -58,7 +58,7 @@ func runServer() error {
 		res, err := filepath.Glob(filepath.Join(*path, time.Now().Format("2006"), "*"+storm+ext))
 		if err != nil {
 			svc.Print(err)
-			c.String(500, "")
+			c.Status(500)
 			return
 		}
 		if l := len(res); l == 0 {
@@ -77,7 +77,7 @@ func runServer() error {
 		img, err := lastImage("daily/*")
 		if err != nil {
 			svc.Print(err)
-			c.String(500, "")
+			c.Status(500)
 			return
 		}
 		buf := bufPool.Get()
@@ -87,7 +87,7 @@ func runServer() error {
 		}()
 		if err := jpeg.Encode(buf, img, &jpeg.Options{Quality: 90}); err != nil {
 			svc.Print(err)
-			c.String(500, "")
+			c.Status(500)
 			return
 		}
 		c.Data(200, "image/jpeg", buf.Bytes())
@@ -108,13 +108,13 @@ func runServer() error {
 			coords, err := getCoords(q, nil)
 			if err != nil {
 				svc.Print(err)
-				c.String(400, "")
+				c.Status(400)
 				return
 			}
 			_, img, err := mapAPI.Realtime(maps.Satellite, coords, mapOptions(z))
 			if err != nil {
 				svc.Print(err)
-				c.String(500, "")
+				c.Status(500)
 				return
 			}
 			buf := bufPool.Get()
@@ -124,7 +124,7 @@ func runServer() error {
 			}()
 			if err := jpeg.Encode(buf, img, &jpeg.Options{Quality: 90}); err != nil {
 				svc.Print(err)
-				c.String(500, "")
+				c.Status(500)
 				return
 			}
 			c.Data(200, "image/jpeg", buf.Bytes())
@@ -157,13 +157,13 @@ func runServer() error {
 			coords, err := getCoords(q, nil)
 			if err != nil {
 				svc.Print(err)
-				c.String(400, "")
+				c.Status(400)
 				return
 			}
 			current, days, avg, aqi, err = getAllByCoordinates(coords, n, t, now, true)
 			if err != nil {
 				svc.Print(err)
-				c.String(500, "")
+				c.Status(500)
 				return
 			}
 		}
@@ -176,7 +176,7 @@ func runServer() error {
 			coords, err = getCoords(q, nil)
 			if err != nil {
 				svc.Print(err)
-				c.String(400, "")
+				c.Status(400)
 				return
 			}
 			image = imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
@@ -199,7 +199,7 @@ func runServer() error {
 		resp, err := realtime.Request("current.json", url.Values{"q": {q}})
 		if err != nil {
 			svc.Print(err)
-			c.String(500, "")
+			c.Status(500)
 			return
 		}
 		c.JSON(200, resp)
@@ -211,7 +211,7 @@ func runServer() error {
 		}
 		if _, err := time.Parse("2006-01", month); err != nil {
 			svc.Print(err)
-			c.String(400, "")
+			c.Status(400)
 			return
 		}
 
@@ -220,7 +220,7 @@ func runServer() error {
 		res, err := export(month, delete)
 		if err != nil {
 			svc.Print(err)
-			c.String(500, "")
+			c.Status(500)
 			return
 		}
 		c.String(200, res)
