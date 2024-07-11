@@ -167,8 +167,8 @@ github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/sunshineplan/ai v1.0.14 h1:XLLDLeQqj6RW92gn3ZZsnCODIzlFmHEkIhgfsgV2K5E=
-github.com/sunshineplan/ai v1.0.14/go.mod h1:5VoOq3mSKsIYrfvIxV9oMCTB2kAirYg6jdXWtALqq/E=
+github.com/sunshineplan/ai v1.0.16 h1:MOd8CN3084+F3ZC8zzOKIwPDjlUTjxggHK4meRIup9g=
+github.com/sunshineplan/ai v1.0.16/go.mod h1:5VoOq3mSKsIYrfvIxV9oMCTB2kAirYg6jdXWtALqq/E=
 github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b h1:XM8muvQoN5Kt7XamD22MDiAJ8CMw545yNT4hKy51eFs=
 github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b/go.mod h1:rVeVToQ0Wtce/V89c3Qax587Mh9RGBdUMhnuK3LMTUI=
 github.com/sunshineplan/chrome v1.1.17 h1:bG29dVOaWhkiouM+OV9VcfpulLG/RzeEuAuppF03M2w=
