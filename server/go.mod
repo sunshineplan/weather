@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
-	github.com/sunshineplan/ai v1.0.16
+	github.com/sunshineplan/ai v1.0.17
 	github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b
 	github.com/sunshineplan/database/mongodb v1.0.7
 	github.com/sunshineplan/metadata v1.1.1
