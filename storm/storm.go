@@ -18,7 +18,7 @@ type Storm interface {
 type Data struct {
 	ID     string
 	Season string
-	No     int `json:"ja"`
+	No     int
 	Name   string
 	Title  string
 	Active bool
