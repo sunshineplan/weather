@@ -6,6 +6,7 @@ func (data stormData) Convert() storm.Data {
 	return storm.Data{
 		ID:     string(data.ID),
 		Season: data.Season,
+		No:     data.JA,
 		Name:   data.Name,
 		Title:  data.Title,
 		Active: data.Active,
