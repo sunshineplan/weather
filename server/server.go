@@ -53,9 +53,11 @@ func runServer() error {
 	}
 
 	router.GET("/img/:image", icon)
-	router.GET("/storm/:storm", func(c *gin.Context) {
+	router.GET("/storm/:year/:storm", func(c *gin.Context) {
+		year := c.Param("year")
 		storm := strings.ToLower(c.Param("storm"))
-		res, err := filepath.Glob(filepath.Join(*path, time.Now().Format("2006"), "*"+storm+ext))
+		storm = strings.TrimSuffix(storm, ext)
+		res, err := filepath.Glob(filepath.Join(*path, year, storm+ext))
 		if err != nil {
 			svc.Print(err)
 			c.Status(500)

@@ -76,7 +76,7 @@ func attachLast() []*mail.Attachment {
 }
 
 func attach6hGIF() []*mail.Attachment {
-	imgs, err := getImages("daily/*", 6*time.Hour, format, false)
+	imgs, err := getImages("daily/*", 6*time.Hour, false)
 	if err != nil {
 		svc.Print(err)
 		return nil
@@ -94,7 +94,7 @@ func attach6hGIF() []*mail.Attachment {
 }
 
 func attachStorm(i int, storm storm.Data) *mail.Attachment {
-	imgs, err := getImages(fmt.Sprintf("%s/%s/%d-%s/*", *path, storm.Season, storm.No, storm.ID), 0, shortFormat, false)
+	imgs, err := getImages(fmt.Sprintf("%s/%s/%d-%s/*", *path, storm.Season, storm.No, storm.ID), 0, false)
 	if err != nil {
 		svc.Print(err)
 		return nil

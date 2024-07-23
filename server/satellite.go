@@ -18,19 +18,19 @@ import (
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
+const (
+	format = "200601021504"
+	width  = 600
+	height = 800
+)
+
 var (
 	satelliteMutex sync.Mutex
 	pngEncoder     = png.Encoder{
 		CompressionLevel: png.BestSpeed,
 		BufferPool:       pool.New[png.EncoderBuffer](),
 	}
-
-	format      = "200601021504"
-	shortFormat = "01021504"
-	width       = 600
-	height      = 800
-	timezone    = time.FixedZone("CST", 8*60*60)
-
+	timezone          = time.FixedZone("CST", 8*60*60)
 	animationDuration = []time.Duration{
 		6 * time.Hour,
 		12 * time.Hour,
@@ -48,7 +48,7 @@ func mapOptions(zoom float64) *zoomearth.MapOptions {
 		SetTimeZone(timezone)
 }
 
-func satellite(t time.Time, coords coordinates.Coordinates, path, format string, opt any) error {
+func satellite(t time.Time, coords coordinates.Coordinates, path string, opt any) error {
 	satelliteMutex.Lock()
 	defer satelliteMutex.Unlock()
 	time.Sleep(time.Second)
@@ -68,7 +68,7 @@ func satellite(t time.Time, coords coordinates.Coordinates, path, format string,
 	return pngEncoder.Encode(f, img)
 }
 
-func getTimes(path, format string) (ts []time.Time) {
+func getTimes(path string) (ts []time.Time) {
 	res, err := filepath.Glob(path + "/*.png")
 	if err != nil {
 		panic(err)
@@ -80,7 +80,7 @@ func getTimes(path, format string) (ts []time.Time) {
 	if err != nil {
 		panic(err)
 	}
-	for i := time.Duration(1); i <= time.Hour/(10*time.Minute); i++ {
+	for i := time.Duration(1); i <= 2*time.Hour/(10*time.Minute); i++ {
 		if t := last.Add(-i * 10 * time.Minute); slices.IndexFunc(res, func(s string) bool {
 			return strings.HasSuffix(s, t.Format(format)+".png")
 		}) == -1 {
@@ -90,7 +90,7 @@ func getTimes(path, format string) (ts []time.Time) {
 	return
 }
 
-func getImages(path string, d time.Duration, format string, remove bool) (imgs []string, err error) {
+func getImages(path string, d time.Duration, remove bool) (imgs []string, err error) {
 	res, err := filepath.Glob(path)
 	if err != nil {
 		return
@@ -133,8 +133,8 @@ func getImages(path string, d time.Duration, format string, remove bool) (imgs [
 	return
 }
 
-func animation(path, output string, d time.Duration, format string, remove bool) error {
-	imgs, err := getImages(path, d, format, remove)
+func animation(path, output string, d time.Duration, remove bool) error {
+	imgs, err := getImages(path, d, remove)
 	if err != nil {
 		return err
 	}
@@ -148,17 +148,17 @@ func updateSatellite(_ time.Time) {
 	svc.Print("Start saving satellite map...")
 	zoomMutex.Lock()
 	defer zoomMutex.Unlock()
-	if err := satellite(time.Time{}, location, "daily", format, mapOptions(*zoom)); err != nil {
+	if err := satellite(time.Time{}, location, "daily", mapOptions(*zoom)); err != nil {
 		svc.Print(err)
 		return
 	}
-	for _, t := range getTimes("daily", format) {
-		if err := satellite(t, location, "daily", format, mapOptions(*zoom)); err != nil {
+	for _, t := range getTimes("daily") {
+		if err := satellite(t, location, "daily", mapOptions(*zoom)); err != nil {
 			svc.Print(err)
 		}
 	}
 	for _, d := range animationDuration {
-		if err := animation("daily/*", "animation/"+strings.TrimSuffix(d.String(), "0m0s"), d, format, true); err != nil {
+		if err := animation("daily/*", "animation/"+strings.TrimSuffix(d.String(), "0m0s"), d, true); err != nil {
 			svc.Print(err)
 		}
 	}
@@ -167,18 +167,18 @@ func updateSatellite(_ time.Time) {
 func updateStorm(storms []storm.Data) {
 	for _, i := range storms {
 		dir := filepath.Join(*path, i.Season, fmt.Sprintf("%d-%s", i.No, i.ID))
-		if err := satellite(time.Time{}, i.Coordinates(time.Now()), dir, shortFormat, mapOptions(*stormZoom)); err != nil {
+		if err := satellite(time.Time{}, i.Coordinates(time.Now()), dir, mapOptions(*stormZoom)); err != nil {
 			svc.Print(err)
 			continue
 		}
-		for _, t := range getTimes(dir, shortFormat) {
+		for _, t := range getTimes(dir) {
 			if coords := i.Coordinates(t); coords != nil {
-				if err := satellite(t, coords, dir, shortFormat, mapOptions(*stormZoom)); err != nil {
+				if err := satellite(t, coords, dir, mapOptions(*stormZoom)); err != nil {
 					svc.Print(err)
 				}
 			}
 		}
-		if err := animation(dir+"/*", dir, 0, shortFormat, false); err != nil {
+		if err := animation(dir+"/*", dir, 0, false); err != nil {
 			svc.Print(err)
 		}
 	}
