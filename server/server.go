@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"image/jpeg"
+	"net/http"
 	"net/http/pprof"
 	"net/url"
 	"path/filepath"
@@ -53,22 +55,6 @@ func runServer() error {
 	}
 
 	router.GET("/img/:image", icon)
-	router.GET("/storm/:year/:storm", func(c *gin.Context) {
-		year := c.Param("year")
-		storm := strings.ToLower(c.Param("storm"))
-		storm = strings.TrimSuffix(storm, ext)
-		res, err := filepath.Glob(filepath.Join(*path, year, storm+ext))
-		if err != nil {
-			svc.Print(err)
-			c.Status(500)
-			return
-		}
-		if l := len(res); l == 0 {
-			c.String(404, "404 page not found")
-			return
-		}
-		c.File(res[0])
-	})
 	for _, i := range animationDuration {
 		d := strings.TrimSuffix(i.String(), "0m0s")
 		router.GET("/"+d, func(c *gin.Context) {
@@ -226,6 +212,82 @@ func runServer() error {
 			return
 		}
 		c.String(200, res)
+	})
+
+	t := template.Must(template.New("").Parse(`<html>
+<head><title>{{.Title}}</title></head>
+<body><h1>{{.Title}}</h1>
+<pre>{{if not .Root}}<a href="..">..</a>
+{{end}}{{range .Dirs}}
+<a href="{{.}}">{{.}}</a>{{end}}</pre>
+</body></html>`))
+	storm := router.Group("storm")
+	storm.GET("/", func(c *gin.Context) {
+		root, err := http.Dir("storm").Open(".")
+		if err != nil {
+			svc.Print(err)
+			c.Status(500)
+			return
+		}
+		years, err := root.Readdir(-1)
+		if err != nil {
+			svc.Print(err)
+			c.Status(500)
+			return
+		}
+		var data = struct {
+			Title string
+			Root  bool
+			Dirs  []string
+		}{"Storm", true, nil}
+		for _, i := range years {
+			data.Dirs = append(data.Dirs, i.Name())
+		}
+		if err := t.Execute(c.Writer, data); err != nil {
+			svc.Print(err)
+			c.Status(500)
+		}
+	})
+	storm.GET("/:year/", func(c *gin.Context) {
+		year, err := http.Dir("storm").Open(c.Param("year"))
+		if err != nil {
+			svc.Print(err)
+			c.Status(500)
+			return
+		}
+		files, err := year.Readdir(-1)
+		if err != nil {
+			svc.Print(err)
+			c.Status(500)
+			return
+		}
+		var data = struct {
+			Title string
+			Root  bool
+			Dirs  []string
+		}{"Storm - " + c.Param("year"), false, nil}
+		for _, i := range files {
+			if i.IsDir() {
+				data.Dirs = append(data.Dirs, i.Name())
+			}
+		}
+		if err := t.Execute(c.Writer, data); err != nil {
+			svc.Print(err)
+			c.Status(500)
+		}
+	})
+	storm.GET("/:year/:id/", func(c *gin.Context) {
+		res, err := filepath.Glob(filepath.Join("storm", c.Param("year"), c.Param("id")+ext))
+		if err != nil {
+			svc.Print(err)
+			c.Status(500)
+			return
+		}
+		if l := len(res); l == 0 {
+			c.String(404, "404 page not found")
+			return
+		}
+		c.File(res[0])
 	})
 
 	return server.Run()
