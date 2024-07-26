@@ -37,7 +37,8 @@ var (
 		24 * time.Hour,
 		36 * time.Hour,
 	}
-	keep = int(slices.Max(animationDuration)/time.Hour) * 6
+	keep        = int(slices.Max(animationDuration)/time.Hour) * 6
+	stormMinute = []int{0, 30}
 )
 
 func mapOptions(zoom float64) *zoomearth.MapOptions {
@@ -90,19 +91,38 @@ func getTimes(path string) (ts []time.Time) {
 	return
 }
 
-func getImages(path string, d time.Duration, remove bool) (imgs []string, err error) {
+func getImages(path string, d time.Duration, daily bool) (imgs []string, err error) {
 	res, err := filepath.Glob(path)
 	if err != nil {
 		return
 	}
-	if remove {
+	if daily {
 		for ; len(res) > keep; res = res[1:] {
 			if err := os.Remove(res[0]); err != nil {
 				svc.Print(err)
 			}
 		}
+	} else {
+		res = slices.DeleteFunc(res, func(i string) bool {
+			file := filepath.Base(i)
+			if index := strings.LastIndex(file, "."); index != -1 {
+				file = file[:index]
+			}
+			t, err := time.ParseInLocation(format, file, timezone)
+			if err != nil {
+				svc.Print(err)
+				return false
+			}
+			if !slices.Contains(stormMinute, t.Minute()) {
+				if err := os.Remove(i); err != nil {
+					svc.Print(err)
+				}
+				return true
+			}
+			return false
+		})
 	}
-	if d != 0 {
+	if daily {
 		now := time.Now().Truncate(10 * time.Minute).In(timezone)
 		res = slices.DeleteFunc(res, func(i string) bool {
 			file := filepath.Base(i)
@@ -118,7 +138,7 @@ func getImages(path string, d time.Duration, remove bool) (imgs []string, err er
 		})
 	}
 	var step int
-	if d != 0 {
+	if daily {
 		step = int(math.Logb(float64(d / time.Hour)))
 	} else if step = int(math.Round(float64(len(res)) / 30)); step == 0 {
 		step = 1
@@ -133,8 +153,8 @@ func getImages(path string, d time.Duration, remove bool) (imgs []string, err er
 	return
 }
 
-func animation(path, output string, d time.Duration, remove bool) error {
-	imgs, err := getImages(path, d, remove)
+func animation(path, output string, d time.Duration, daily bool) error {
+	imgs, err := getImages(path, d, daily)
 	if err != nil {
 		return err
 	}
@@ -172,7 +192,7 @@ func updateStorm(storms []storm.Data) {
 			continue
 		}
 		for _, t := range getTimes(dir) {
-			if coords := i.Coordinates(t); coords != nil {
+			if coords := i.Coordinates(t); coords != nil && slices.Contains(stormMinute, t.Minute()) {
 				if err := satellite(t, coords, dir, mapOptions(*stormZoom)); err != nil {
 					svc.Print(err)
 				}
