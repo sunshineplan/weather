@@ -49,40 +49,30 @@ func mapOptions(zoom float64) *zoomearth.MapOptions {
 		SetTimeZone(timezone)
 }
 
-func satellite(t time.Time, coords coordinates.Coordinates, path string, opt any) error {
+func satellite(t time.Time, coords coordinates.Coordinates, path string, opt any) (satelliteTime time.Time, err error) {
 	satelliteMutex.Lock()
 	defer satelliteMutex.Unlock()
 	time.Sleep(time.Second)
-	t, img, err := mapAPI.Map(maps.Satellite, t, coords, opt)
+	satelliteTime, img, err := mapAPI.Map(maps.Satellite, t, coords, opt)
 	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(path, 0755); err != nil {
-		return err
-	}
-	file := filepath.Join(path, t.Format(format)+".png")
-	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return pngEncoder.Encode(f, img)
-}
-
-func getTimes(path string) (ts []time.Time) {
-	res, err := filepath.Glob(path + "/*.png")
-	if err != nil {
-		panic(err)
-	}
-	if len(res) == 0 {
 		return
 	}
-	last, err := time.ParseInLocation(format, strings.TrimSuffix(filepath.Base(res[len(res)-1]), ".png"), timezone)
-	if err != nil {
-		panic(err)
+	if err = os.MkdirAll(path, 0755); err != nil {
+		return
 	}
+	file := filepath.Join(path, satelliteTime.Format(format)+".png")
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	err = pngEncoder.Encode(f, img)
+	return
+}
+
+func getTimes(t time.Time, s []string) (ts []time.Time) {
 	for i := time.Duration(1); i <= 2*time.Hour/(10*time.Minute); i++ {
-		if t := last.Add(-i * 10 * time.Minute); slices.IndexFunc(res, func(s string) bool {
+		if t := t.Add(-i * 10 * time.Minute); slices.IndexFunc(s, func(s string) bool {
 			return strings.HasSuffix(s, t.Format(format)+".png")
 		}) == -1 {
 			ts = append(ts, t)
@@ -168,12 +158,18 @@ func updateSatellite(_ time.Time) {
 	svc.Print("Start saving satellite map...")
 	zoomMutex.Lock()
 	defer zoomMutex.Unlock()
-	if err := satellite(time.Time{}, location, "daily", mapOptions(*zoom)); err != nil {
+	last, err := satellite(time.Time{}, location, "daily", mapOptions(*zoom))
+	if err != nil {
 		svc.Print(err)
 		return
 	}
-	for _, t := range getTimes("daily") {
-		if err := satellite(t, location, "daily", mapOptions(*zoom)); err != nil {
+	res, err := filepath.Glob("daily/*.png")
+	if err != nil {
+		svc.Print(err)
+		return
+	}
+	for _, t := range getTimes(last, res) {
+		if _, err := satellite(t, location, "daily", mapOptions(*zoom)); err != nil {
 			svc.Print(err)
 		}
 	}
@@ -185,15 +181,28 @@ func updateSatellite(_ time.Time) {
 }
 
 func updateStorm(storms []storm.Data) {
+	now := time.Now().In(timezone)
 	for _, i := range storms {
+		var last time.Time
+		var err error
 		dir := filepath.Join(*path, i.Season, fmt.Sprintf("%d-%s", i.No, i.ID))
-		if err := satellite(time.Time{}, i.Coordinates(time.Now()), dir, mapOptions(*stormZoom)); err != nil {
+		if coords := i.Coordinates(now); coords != nil {
+			if last, err = satellite(time.Time{}, coords, dir, mapOptions(*stormZoom)); err != nil {
+				svc.Print(err)
+				continue
+			}
+		}
+		res, err := filepath.Glob(dir + "/*.png")
+		if err != nil {
 			svc.Print(err)
 			continue
 		}
-		for _, t := range getTimes(dir) {
+		if last.IsZero() {
+			last = now.Truncate(10 * time.Minute).Add(-time.Hour)
+		}
+		for _, t := range getTimes(last, res) {
 			if coords := i.Coordinates(t); coords != nil && slices.Contains(stormMinute, t.Minute()) {
-				if err := satellite(t, coords, dir, mapOptions(*stormZoom)); err != nil {
+				if _, err := satellite(t, coords, dir, mapOptions(*stormZoom)); err != nil {
 					svc.Print(err)
 				}
 			}

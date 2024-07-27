@@ -446,11 +446,15 @@ func alertStorm(t time.Time) {
 		}
 		if affect, future := storm.Affect(location, *radius); affect {
 			found = append(found, storm)
+			coords := storm.Coordinates(t)
+			if coords == nil {
+				coords = storm.Track[len(storm.Track)-1].Coordinates()
+			}
 			if future {
 				alert = append(alert, storm)
-				svc.Printf("Alerting storm %s(%s)", storm.ID, storm.Coordinates(t))
+				svc.Printf("Alerting storm %s(%s)", storm.ID, coords)
 			} else {
-				svc.Printf("Recording storm %s(%s)", storm.ID, storm.Coordinates(t))
+				svc.Printf("Recording storm %s(%s)", storm.ID, coords)
 			}
 		}
 	}
