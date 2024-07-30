@@ -76,7 +76,7 @@ func attachLast() []*mail.Attachment {
 }
 
 func attach6hGIF() []*mail.Attachment {
-	imgs, err := getImages("daily/*", 6*time.Hour, false)
+	imgs, err := getImages("daily/*", 6*time.Hour, true)
 	if err != nil {
 		svc.Print(err)
 		return nil

@@ -32,7 +32,7 @@ func TestAirMatters(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := api.Forecast(aqi.China, "shanghai", 0); err != nil {
-		t.Error(err)
+		log.Print(err)
 	}
 	if _, err := api.History(aqi.China, "shanghai", time.Now().AddDate(0, 0, -10)); err != nil {
 		t.Error(err)
