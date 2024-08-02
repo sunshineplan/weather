@@ -26,8 +26,8 @@ require (
 	cloud.google.com/go/longrunning v0.5.9 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
-	github.com/chromedp/cdproto v0.0.0-20240519224452-66462be74baa // indirect
-	github.com/chromedp/chromedp v0.9.5 // indirect
+	github.com/chromedp/cdproto v0.0.0-20240801214329-3f85d328b335 // indirect
+	github.com/chromedp/chromedp v0.10.0 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
@@ -41,7 +41,7 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.3.2 // indirect
+	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -65,7 +65,7 @@ require (
 	github.com/pschlump/MiscLib v1.0.3 // indirect
 	github.com/pschlump/json v1.12.0 // indirect
 	github.com/sashabaranov/go-openai v1.26.2 // indirect
-	github.com/sunshineplan/chrome v1.1.17 // indirect
+	github.com/sunshineplan/chrome v1.1.18 // indirect
 	github.com/sunshineplan/cipher v1.0.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
