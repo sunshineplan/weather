@@ -156,8 +156,6 @@ func animation(path, output string, d time.Duration, daily bool) error {
 
 func updateSatellite(_ time.Time) {
 	svc.Print("Start saving satellite map...")
-	zoomMutex.Lock()
-	defer zoomMutex.Unlock()
 	last, err := satellite(time.Time{}, location, "daily", mapOptions(*zoom))
 	if err != nil {
 		svc.Print(err)

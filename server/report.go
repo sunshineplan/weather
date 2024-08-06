@@ -17,6 +17,7 @@ import (
 	"github.com/sunshineplan/weather/storm"
 	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/unit/coordinates"
+	"golang.org/x/sync/singleflight"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -25,9 +26,6 @@ var (
 	location     coordinates.Coordinates
 	rainSnow     []weather.RainSnow
 	tempRiseFall []weather.TempRiseFall
-
-	alertMutex sync.Mutex
-	zoomMutex  sync.Mutex
 
 	isReport bool
 )
@@ -229,31 +227,34 @@ The output result language is required to be the location language.`, t.Format("
 	return res.Result[0], nil
 }
 
-func alert(t time.Time) {
-	svc.Print("Start alerting...")
-	_, days, err := getWeather(*query, *days, t, false)
-	if err != nil {
-		svc.Print(err)
-		return
-	}
+var alertGroup = new(singleflight.Group)
 
-	alertMutex.Lock()
-	defer alertMutex.Unlock()
-	var wg sync.WaitGroup
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
-		runAlert(days[1:], alertRainSnow)
-	}()
-	go func() {
-		defer wg.Done()
-		runAlert(days, alertTempRiseFall)
-	}()
-	go func() {
-		defer wg.Done()
-		runAlert(nil, alertAQI)
-	}()
-	wg.Wait()
+func alert(t time.Time) {
+	alertGroup.Do(t.Truncate(time.Hour).String(), func() (_ any, _ error) {
+		svc.Print("Start alerting...")
+		_, days, err := getWeather(*query, *days, t, false)
+		if err != nil {
+			svc.Print(err)
+			return
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(3)
+		go func() {
+			defer wg.Done()
+			runAlert(days[1:], alertRainSnow)
+		}()
+		go func() {
+			defer wg.Done()
+			runAlert(days, alertTempRiseFall)
+		}()
+		go func() {
+			defer wg.Done()
+			runAlert(nil, alertAQI)
+		}()
+		wg.Wait()
+		return
+	})
 }
 
 func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element, []*mail.Attachment)) {
