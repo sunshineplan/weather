@@ -74,8 +74,9 @@ var (
 	days        = flag.Int("days", 15, "forecast days")
 	difference  = flag.Float64("difference", 5, "temperature difference")
 	aqiType     aqi.Type
-	zoom        = flag.Float64("zoom", 6, "daily screenshot zoom")
-	stormZoom   = flag.Float64("storm", 4.8, "storm screenshot zoom")
+	zoom        = flag.Float64("zoom", 7, "daily screenshot zoom")
+	lastZoom    = flag.Float64("last", 9, "last screenshot zoom")
+	stormZoom   = flag.Float64("storm", 5, "storm screenshot zoom")
 	radius      = flag.Float64("radius", 700, "storm affect radius (unit: km)")
 	path        = flag.String("path", "storm", "storm screenshot save path")
 	provider    = flag.String("provider", "visualcrossing", "weather provider")
