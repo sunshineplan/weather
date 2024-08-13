@@ -49,6 +49,22 @@ func mapOptions(zoom float64) *zoomearth.MapOptions {
 		SetTimeZone(timezone)
 }
 
+func last() error {
+	satelliteMutex.Lock()
+	defer satelliteMutex.Unlock()
+	time.Sleep(time.Second)
+	_, img, err := mapAPI.Map(maps.Satellite, time.Time{}, location, mapOptions(*lastZoom))
+	if err != nil {
+		return err
+	}
+	f, err := os.Create("last.png")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return pngEncoder.Encode(f, img)
+}
+
 func satellite(t time.Time, coords coordinates.Coordinates, path string, opt any) (satelliteTime time.Time, err error) {
 	satelliteMutex.Lock()
 	defer satelliteMutex.Unlock()
@@ -156,7 +172,7 @@ func animation(path, output string, d time.Duration, daily bool) error {
 
 func updateSatellite(_ time.Time) {
 	svc.Print("Start saving satellite map...")
-	last, err := satellite(time.Time{}, location, "daily", mapOptions(*zoom))
+	t, err := satellite(time.Time{}, location, "daily", mapOptions(*zoom))
 	if err != nil {
 		svc.Print(err)
 		return
@@ -166,7 +182,7 @@ func updateSatellite(_ time.Time) {
 		svc.Print(err)
 		return
 	}
-	for _, t := range getTimes(last, res) {
+	for _, t := range getTimes(t, res) {
 		if _, err := satellite(t, location, "daily", mapOptions(*zoom)); err != nil {
 			svc.Print(err)
 		}
@@ -175,6 +191,9 @@ func updateSatellite(_ time.Time) {
 		if err := animation("daily/*", "animation/"+strings.TrimSuffix(d.String(), "0m0s"), d, true); err != nil {
 			svc.Print(err)
 		}
+	}
+	if err := last(); err != nil {
+		svc.Print(err)
 	}
 }
 

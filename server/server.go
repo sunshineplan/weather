@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"html/template"
 	"image/jpeg"
+	"image/png"
 	"net/http"
 	"net/http/pprof"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -62,7 +64,14 @@ func runServer() error {
 		})
 	}
 	router.GET("/last", func(c *gin.Context) {
-		img, err := lastImage("daily/*")
+		f, err := os.Open("last.png")
+		if err != nil {
+			svc.Print(err)
+			c.Status(500)
+			return
+		}
+		defer f.Close()
+		img, err := png.Decode(f)
 		if err != nil {
 			svc.Print(err)
 			c.Status(500)
