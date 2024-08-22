@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"image/jpeg"
 	"image/png"
-	"net/http"
 	"net/http/pprof"
 	"net/url"
 	"os"
@@ -232,13 +231,7 @@ func runServer() error {
 </body></html>`))
 	storm := router.Group("storm")
 	storm.GET("/", func(c *gin.Context) {
-		root, err := http.Dir("storm").Open(".")
-		if err != nil {
-			svc.Print(err)
-			c.Status(500)
-			return
-		}
-		years, err := root.Readdir(-1)
+		years, err := os.ReadDir("storm")
 		if err != nil {
 			svc.Print(err)
 			c.Status(500)
@@ -258,13 +251,8 @@ func runServer() error {
 		}
 	})
 	storm.GET("/:year/", func(c *gin.Context) {
-		year, err := http.Dir("storm").Open(c.Param("year"))
-		if err != nil {
-			svc.Print(err)
-			c.Status(500)
-			return
-		}
-		files, err := year.Readdir(-1)
+		year := c.Param("year")
+		files, err := os.ReadDir("storm/" + year)
 		if err != nil {
 			svc.Print(err)
 			c.Status(500)
@@ -274,7 +262,7 @@ func runServer() error {
 			Title string
 			Root  bool
 			Dirs  []string
-		}{"Storm - " + c.Param("year"), false, nil}
+		}{"Storm - " + year, false, nil}
 		for _, i := range files {
 			if i.IsDir() {
 				data.Dirs = append(data.Dirs, i.Name())

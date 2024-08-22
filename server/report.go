@@ -276,10 +276,20 @@ func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element,
 	}
 }
 
-func isRainSnow(hour int, hours []weather.Hour) bool {
-	return slices.IndexFunc(hours, func(h weather.Hour) bool {
-		return h.TimeEpoch.Time().Hour() == hour && h.Precip > 0
-	}) >= 0
+func isRainSnow(t time.Time, day weather.Day) (now, next bool) {
+	if day.Date == t.Format("2006-01-02") {
+		if now = slices.IndexFunc(day.Hours, func(h weather.Hour) bool {
+			return h.TimeEpoch.Time().Hour() == t.Hour() && h.Precip > 0
+		}) >= 0; now {
+			return
+		}
+	}
+	if t = t.Add(time.Hour); day.Date == t.Format("2006-01-02") {
+		next = slices.IndexFunc(day.Hours, func(h weather.Hour) bool {
+			return h.TimeEpoch.Time().Hour() == t.Hour() && h.Precip > 0
+		}) >= 0
+	}
+	return
 }
 
 func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attch []*mail.Attachment) {
@@ -292,23 +302,27 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 	body = html.Background()
 	if res := weather.WillRainSnow(days); len(res) > 0 {
 		now := time.Now()
-		hour := now.Hour()
 		for index, i := range res {
 			if index == 0 {
 				start := i.Start()
-				var isRainNow bool
-				if start.Date == now.Format("2006-01-02") && isRainSnow(hour, start.Hours) {
-					isRainNow = true
-				}
-				if len(rainSnow) == 0 ||
+				if isRainNow, isRainNext := isRainSnow(now, start); len(rainSnow) == 0 ||
 					rainSnow[0].Start().Date != start.Date ||
 					rainSnow[0].Duration() != i.Duration() {
 					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
-					if isRainNow {
+					if isRainNow || isRainNext {
 						attch = attachLast()
 					}
-				} else if isRainNow {
-					subject = "[Weather]Rain Snow Alert - Today" + timestamp()
+				} else if isRainNow || isRainNext {
+					var s string
+					var hour int
+					if isRainNow {
+						s = "Today"
+						hour = now.Hour()
+					} else {
+						s = "Next Hour"
+						hour = now.Add(time.Hour).Hour()
+					}
+					subject = "[Weather]Rain Snow Alert - " + s + timestamp()
 					body.AppendContent(start.DateInfoHTML(), start.PrecipitationHTML(hour))
 					for index, n := 1, len(i.Days()); index < n && index < 3; index++ {
 						body.AppendContent(
@@ -321,7 +335,7 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 					return
 				}
 			}
-			body.AppendContent(i.HTML(now, hour))
+			body.AppendContent(i.HTML(now, now.Hour()))
 			if index < len(res)-1 {
 				body.AppendChild(html.Br())
 			}
