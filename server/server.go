@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"html/template"
 	"image/jpeg"
@@ -9,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -268,6 +270,14 @@ func runServer() error {
 				data.Dirs = append(data.Dirs, i.Name())
 			}
 		}
+		slices.SortStableFunc(data.Dirs, func(a, b string) int {
+			id := func(s string) int {
+				s, _, _ = strings.Cut(s, "-")
+				id, _ := strconv.Atoi(s)
+				return id
+			}
+			return cmp.Compare(id(a), id(b))
+		})
 		if err := t.Execute(c.Writer, data); err != nil {
 			svc.Print(err)
 			c.Status(500)
