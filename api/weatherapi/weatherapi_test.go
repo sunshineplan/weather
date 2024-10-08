@@ -18,7 +18,7 @@ func TestWeatherAPI(t *testing.T) {
 	var api weather.API = New(key)
 	coords, err := api.Coordinates("shanghai")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if _, err := api.Realtime("shanghai"); err != nil {
 		t.Error(err)
