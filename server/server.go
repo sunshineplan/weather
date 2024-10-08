@@ -225,7 +225,7 @@ func runServer() error {
 	})
 
 	t := template.Must(template.New("").Parse(`<html>
-<head><title>{{.Title}}</title></head>
+<head><meta name="viewport" content="width=device-width,initial-scale=1.5"><title>{{.Title}}</title></head>
 <body><h1>{{.Title}}</h1>
 <pre>{{if not .Root}}<a href="..">..</a>
 {{end}}{{range .Dirs}}
