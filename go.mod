@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/chromedp/cdproto v0.0.0-20241003230502-a4a8f7c660df
 	github.com/chromedp/chromedp v0.11.0
-	github.com/sunshineplan/chrome v1.1.18
+	github.com/sunshineplan/chrome v1.1.19
 	github.com/sunshineplan/utils v0.1.73
 )
 
