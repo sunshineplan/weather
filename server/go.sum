@@ -170,8 +170,8 @@ github.com/sunshineplan/ai v1.0.17 h1:JwskNX4G159Q/KLwOATqzwlCTz8+CTvipeDvmj3Uy8
 github.com/sunshineplan/ai v1.0.17/go.mod h1:5VoOq3mSKsIYrfvIxV9oMCTB2kAirYg6jdXWtALqq/E=
 github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b h1:XM8muvQoN5Kt7XamD22MDiAJ8CMw545yNT4hKy51eFs=
 github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b/go.mod h1:rVeVToQ0Wtce/V89c3Qax587Mh9RGBdUMhnuK3LMTUI=
-github.com/sunshineplan/chrome v1.1.18 h1:pYdo3drsnCB6BZpHGNSLoleuAKM3JNK3WQcrVsyLQb8=
-github.com/sunshineplan/chrome v1.1.18/go.mod h1:KCV09C/x6vVLrYtnEMNgW/drf9i2q7BuyorIkD3RAw0=
+github.com/sunshineplan/chrome v1.1.19 h1:BC6WfqqXj9+vC+B9jQ6rk5nihTXe55srl5v54c2oDjo=
+github.com/sunshineplan/chrome v1.1.19/go.mod h1:TDtqocQEsNCRUhPAYGmFupLpT8eX2hacf8GjA6UMNSE=
 github.com/sunshineplan/cipher v1.0.5 h1:opCKCTVjkdcoIJSCi2yoI0ndmwiyDbcm+5MpyavmnJ0=
 github.com/sunshineplan/cipher v1.0.5/go.mod h1:JMP+4CCZT1D7qjZyuiyTe8ZPYaaBMxU9MWrCBKC/QhQ=
 github.com/sunshineplan/database/mongodb v1.0.7 h1:uuj4OYePOJ8iVn1dwVLKdF+w07XLBYQHL2aLvSQVWFo=
