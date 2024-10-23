@@ -34,7 +34,7 @@ func icon(c *gin.Context) {
 		c.Data(200, "image/png", b.([]byte))
 		return
 	}
-	resp, err := executor.New[string, *http.Response](0).ExecuteSerial(
+	resp, err := executor.Executor[string, *http.Response](0).ExecuteSerial(
 		[]string{
 			"https://cdn.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd Set - Color/%s.png",
 			"https://fastly.jsdelivr.net/gh/visualcrossing/WeatherIcons@main/PNG/2nd Set - Color/%s.png",
