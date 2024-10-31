@@ -8,7 +8,7 @@ require (
 	github.com/sunshineplan/ai v1.0.18
 	github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b
 	github.com/sunshineplan/database/mongodb v1.0.7
-	github.com/sunshineplan/metadata v1.1.1
+	github.com/sunshineplan/metadata v1.1.2
 	github.com/sunshineplan/service v1.0.21
 	github.com/sunshineplan/utils v0.1.73
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
@@ -57,16 +57,16 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/openai/openai-go v0.1.0-alpha.29 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pschlump/AesCCM v0.0.0-20160925022350-c5df73b5834e // indirect
-	github.com/pschlump/MiscLib v1.0.3 // indirect
-	github.com/pschlump/json v1.12.0 // indirect
+	github.com/pschlump/ansi v1.0.0 // indirect
 	github.com/sunshineplan/chrome v1.1.19 // indirect
-	github.com/sunshineplan/cipher v1.0.5 // indirect
+	github.com/sunshineplan/cipher v1.0.7 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
