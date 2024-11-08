@@ -183,8 +183,8 @@ github.com/sunshineplan/service v1.0.21 h1:UXYaWwLVMeG5cZ40vlxVQLpymuSesCZK8ADn7
 github.com/sunshineplan/service v1.0.21/go.mod h1:dZtX1ktoLwftAH+p7Pve4xbaQyRuzFq1j8m1HStMsso=
 github.com/sunshineplan/utils v0.1.73 h1:Kvi45QYzdvNqQKON5Q67M7U/35+RrOnX7K8sbZtHsgI=
 github.com/sunshineplan/utils v0.1.73/go.mod h1:61jHA9jn2CVlZzt9LbPz+MpOEiR6Jy5SNHHEcc/KQNk=
-github.com/sunshineplan/workers v1.0.3 h1:9NSB3nm9yxZFT/ZU4DaOXdWJ56Y2WXh238apdZUdA44=
-github.com/sunshineplan/workers v1.0.3/go.mod h1:wUlVWxvfwTiuULOw4atF17bgeL30gIMI6gE050reEVw=
+github.com/sunshineplan/workers v1.0.4 h1:S44VfWA7WEIfqpe3fzTvw1ir1VJ6vAI7ZqxDHxFpREQ=
+github.com/sunshineplan/workers v1.0.4/go.mod h1:BOqgiv5aLr9gruFCQOJgyk/94LOWjbuFNI7L7Pvnr70=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a h1:zvAhEO3ZB7m1Lc3BwJXLTDrLrHVAbcDByJ7XkL4WR+s=
 github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a/go.mod h1:JU6yp7mldR7lmftjHPtaDs+Q8xn7l2tMR1XYx5iJELg=
 github.com/tidwall/gjson v1.14.2/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
