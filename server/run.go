@@ -8,7 +8,7 @@ import (
 
 	"github.com/sunshineplan/ai"
 	"github.com/sunshineplan/ai/client"
-	"github.com/sunshineplan/database/mongodb/api"
+	"github.com/sunshineplan/database/mongodb/driver"
 	"github.com/sunshineplan/utils/mail"
 	"github.com/sunshineplan/utils/retry"
 	"github.com/sunshineplan/utils/scheduler"
@@ -26,7 +26,7 @@ func initWeather() (err error) {
 		WeatherAPI     string
 		VisualCrossing string
 		AirMatters     string
-		Mongo          api.Client
+		Mongo          driver.Client
 		Dialer         mail.Dialer
 		Subscriber     mail.Receipts
 		AI             ai.ClientConfig
