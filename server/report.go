@@ -102,7 +102,9 @@ func fullHTML(
 				),
 		),
 	)
+	var hours []int
 	if current.Datetime != "" {
+		hours = append(hours, t.Hour())
 		now := html.Div().AppendContent(
 			html.Span().Style("display:list-item;margin-left:15px").
 				Contentf("Current(%s %s)", t.Format("2006-01-02"), t.Weekday().String()[:3]),
@@ -117,6 +119,7 @@ func fullHTML(
 		html.Div().AppendContent(
 			html.Span().Style("display:list-item;margin-left:15px").Content("Today"),
 			days[1],
+			days[1].Hourly(current.Datetime != "", hours...),
 		),
 		html.Br(),
 		html.Div().AppendChild(

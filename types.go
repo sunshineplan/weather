@@ -124,6 +124,18 @@ func (day Day) TemperatureHTML() html.HTML {
 	).HTML()
 }
 
+func (day Day) HourlyTemperature() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, "Hourly Temperature:")
+	for i, hour := range day.Hours {
+		if i != 0 {
+			fmt.Fprint(&b, ", ")
+		}
+		fmt.Fprintf(&b, "%02d(%s/%s)", hour.TimeEpoch.Time().Hour(), hour.Temp, hour.FeelsLike)
+	}
+	return b.String()
+}
+
 func (day Day) Precipitation() string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "Precip: %gmm, PrecipProb: %s, PrecipCover: %s\n", day.Precip, day.PrecipProb, day.PrecipCover)
@@ -215,6 +227,46 @@ func (day Day) HTML() html.HTML {
 					html.Td("UVIndex:"), html.Td(day.UVIndex),
 				))),
 	).HTML()
+}
+
+func (day Day) Hourly(dir bool, highlight ...int) html.HTML {
+	table := html.Table().Attribute("border", "1").Attribute("cellspacing", "0")
+	th := []*html.TableCell{
+		html.Th("Hour").Colspan(2),
+		html.Th("Temp./FL"),
+		html.Th("RH"),
+		html.Th("Pressure"),
+		html.Th("Precip."),
+		html.Th("Wind"),
+	}
+	if dir {
+		th = append(th, html.Th("Dir"))
+	}
+	table.AppendChild(html.Thead().AppendChild(html.Tr(th...)))
+	tbody := html.Tbody()
+	for _, hour := range day.Hours {
+		t := hour.TimeEpoch.Time()
+		var hourContent any
+		if hour := t.Format("15"); slices.Contains(highlight, t.Hour()) {
+			hourContent = html.Span().Style("color:red").Content(hour)
+		} else {
+			hourContent = hour
+		}
+		td := []*html.TableCell{
+			html.Td(hourContent).Style("text-align:center;padding:0 5px"),
+			html.Td(hour.Condition.Img(day.Icon)),
+			html.Td(hour.Temp.HTML() + " / " + hour.FeelsLike.HTML()).Style("text-align:center;padding:0 5px"),
+			html.Td(hour.Humidity).Style("text-align:center;padding:0 5px"),
+			html.Td(fmt.Sprintf("%ghPa", hour.Pressure)).Style("text-align:center;padding:0 5px"),
+			html.Td(fmt.Sprintf("%gmm(%s)", hour.Precip, hour.PrecipProb)).Style("text-align:center;padding:0 5px"),
+			html.Td(html.Span().Style("color:"+hour.WindSpeed.ForceColor()).Contentf("%sm/s", unit.FormatFloat64(hour.WindSpeed.MPS(), 1))),
+		}
+		if dir {
+			td = append(td, html.Td(html.Div().Style("display:flex;justify-content:center").Content(hour.WindDir)))
+		}
+		tbody.AppendChild(html.Tr(td...))
+	}
+	return table.AppendChild(tbody).HTML()
 }
 
 type Hour struct {
