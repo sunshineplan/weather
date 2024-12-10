@@ -254,7 +254,7 @@ func (day Day) Hourly(dir bool, highlight ...int) html.HTML {
 		}
 		td := []*html.TableCell{
 			html.Td(hourContent).Style("text-align:center;padding:0 5px"),
-			html.Td(hour.Condition.Img(day.Icon)),
+			html.Td(hour.Condition.Img(hour.Icon)),
 			html.Td(hour.Temp.HTML() + " / " + hour.FeelsLike.HTML()).Style("text-align:center;padding:0 5px"),
 			html.Td(hour.Humidity).Style("text-align:center;padding:0 5px"),
 			html.Td(fmt.Sprintf("%ghPa", hour.Pressure)).Style("text-align:center;padding:0 5px"),
