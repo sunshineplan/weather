@@ -19,8 +19,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/utils/html"
 	"github.com/sunshineplan/utils/httpsvr"
+	"github.com/sunshineplan/weather"
 	"github.com/sunshineplan/weather/aqi"
 	"github.com/sunshineplan/weather/maps"
+	"github.com/sunshineplan/weather/unit"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
@@ -188,6 +190,72 @@ func runServer() error {
 					Content(fullHTML(q, coords, current, days, avg, aqi, now, true, diff, "8px")+image),
 			).HTML()),
 		)
+	})
+	router.GET("/hourly", func(c *gin.Context) {
+		var q string
+		if q = c.Query("q"); q == "" {
+			q = *query
+		}
+		forecasts, err := forecast.Forecast(q, 2)
+		if err != nil {
+			coords, err := getCoords(q, nil)
+			if err != nil {
+				svc.Print(err)
+				c.Status(400)
+				return
+			}
+			forecasts, err = forecast.ForecastByCoordinates(coords, 2)
+			if err != nil {
+				svc.Print(err)
+				c.Status(500)
+				return
+			}
+		}
+		now := time.Now()
+		var hours []weather.Hour
+	Loop:
+		for _, i := range forecasts {
+			for _, i := range i.Hours {
+				if d := i.TimeEpoch.Time().Sub(now); d > -2*time.Hour {
+					if hours = append(hours, i); len(hours) == 48 {
+						break Loop
+					}
+				}
+			}
+		}
+		table := html.Table().Attribute("border", "1").Attribute("cellspacing", "0")
+		th := []*html.TableCell{
+			html.Th("Time").Colspan(2),
+			html.Th("Temp./FL"),
+			html.Th("RH"),
+			html.Th("Pressure"),
+			html.Th("Precip."),
+			html.Th("Wind"),
+			html.Th("Dir"),
+		}
+		table.AppendChild(html.Thead().AppendChild(html.Tr(th...)))
+		tbody := html.Tbody()
+		for _, hour := range hours {
+			t := hour.TimeEpoch.Time()
+			var dateContent any
+			if date := t.Format("2006-01-02 15:04"); now.Truncate(time.Hour).Equal(t) {
+				dateContent = html.Span().Style("color:red").Content(date)
+			} else {
+				dateContent = date
+			}
+			td := []*html.TableCell{
+				html.Td(dateContent).Style("text-align:center;padding:0 5px"),
+				html.Td(hour.Condition.Img(hour.Icon)),
+				html.Td(hour.Temp.HTML() + " / " + hour.FeelsLike.HTML()).Style("text-align:center;padding:0 5px"),
+				html.Td(hour.Humidity).Style("text-align:center;padding:0 5px"),
+				html.Td(fmt.Sprintf("%ghPa", hour.Pressure)).Style("text-align:center;padding:0 5px"),
+				html.Td(fmt.Sprintf("%gmm(%s)", hour.Precip, hour.PrecipProb)).Style("text-align:center;padding:0 5px"),
+				html.Td(html.Span().Style("color:"+hour.WindSpeed.ForceColor()).Contentf("%sm/s", unit.FormatFloat64(hour.WindSpeed.MPS(), 1))),
+				html.Td(html.Div().Style("display:flex;justify-content:center").Content(hour.WindDir)),
+			}
+			tbody.AppendChild(html.Tr(td...))
+		}
+		c.Data(200, "text/html", []byte(html.Div().Style("font-family:system-ui").AppendChild(table.AppendChild(tbody)).HTML()))
 	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")
