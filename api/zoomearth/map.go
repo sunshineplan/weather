@@ -103,7 +103,7 @@ func URL(path string, t time.Time, coords coordinates.Coordinates, zoom float64,
 	return url
 }
 
-func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
+func MapWithContext(ctx context.Context, path string, dt time.Time, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
 	if path == "" {
 		path = mapPath[maps.Satellite]
 	}
@@ -123,18 +123,16 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 			o.timezone = opt.timezone
 		}
 	}
-	c := chrome.Headless()
-	defer c.Close()
-	ctx, cancel := context.WithTimeout(c, DefaultTimeout)
+	nav, cancel := context.WithTimeout(ctx, DefaultTimeout)
 	defer cancel()
-	if err = chrome.EnableFetch(ctx, func(ev *fetch.EventRequestPaused) bool {
+	if err = chrome.EnableFetch(nav, func(ev *fetch.EventRequestPaused) bool {
 		return !strings.Contains(ev.Request.URL, "adsbygoogle")
 	}); err != nil {
 		return
 	}
 	u, _ := url.Parse(root)
-	c.SetCookies(u, []*http.Cookie{{Name: "ze_language", Value: "en"}})
-	if err = chromedp.Run(ctx,
+	chrome.SetCookies(nav, u, []*http.Cookie{{Name: "ze_language", Value: "en"}})
+	if err = chromedp.Run(nav,
 		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
 		chromedp.Navigate(root+"/assets/images/icon-100.jpg"),
 	); err != nil {
@@ -149,36 +147,36 @@ func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOpti
 		"ze_timeZone":     "utc",
 		"ze_welcome":      "false",
 	} {
-		if err = chrome.SetStorageItem(ctx, storageID, k, v); err != nil {
+		if err = chrome.SetStorageItem(nav, storageID, k, v); err != nil {
 			return
 		}
 	}
 	var wg sync.WaitGroup
 	wg.Add(3)
-	geocolor := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
-	rainviewer := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.png`), "GET", false)
-	windspeed := chrome.ListenEvent(ctx, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false)
+	geocolor := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
+	rainviewer := chrome.ListenEvent(nav, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.png`), "GET", false)
+	windspeed := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false)
 	done := make(chan struct{})
 	go func() { <-geocolor; wg.Done() }()
 	go func() { <-rainviewer; wg.Done() }()
 	go func() { <-windspeed; wg.Done() }()
 	go func() { wg.Wait(); close(done) }()
-	go chromedp.Run(ctx, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
+	go chromedp.Run(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
 	select {
 	case <-done:
-	case <-ctx.Done():
-		err = ctx.Err()
+	case <-nav.Done():
+		err = nav.Err()
 		return
 	}
-	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
+	if err = chromedp.Run(nav, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
-	click, cancel := context.WithTimeout(c, 5*time.Second)
+	click, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	chromedp.Run(click, chromedp.Click(".welcome .continue", chromedp.NodeVisible))
 	var utcTime string
 	if err = chromedp.Run(
-		ctx,
+		nav,
 		chromedp.EvaluateAsDevTools(`
 $$('nav.panel').forEach(i=>i.remove())
 $$('.group').forEach(i=>i.remove())
@@ -203,7 +201,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 	}
 	if parseErr, _ = maps.ParseTimeError(parseErr); parseErr == nil {
 		t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
-		if err = chromedp.Run(ctx, chromedp.EvaluateAsDevTools(
+		if err = chromedp.Run(nav, chromedp.EvaluateAsDevTools(
 			fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
 			return
 		}
@@ -215,7 +213,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 			time.Sleep(10 * time.Second)
 		}
 		var b []byte
-		if err = chromedp.Run(ctx, chromedp.FullScreenshot(&b, 100)); err != nil {
+		if err = chromedp.Run(nav, chromedp.FullScreenshot(&b, 100)); err != nil {
 			return
 		}
 		img, err = png.Decode(bytes.NewReader(b))
@@ -231,6 +229,12 @@ $('.timeline').style.margin='0 auto'`, nil),
 	}
 	err = errors.Join(parseErr, err)
 	return
+}
+
+func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
+	c := chrome.Headless()
+	defer c.Close()
+	return MapWithContext(c, path, dt, coords, opt)
 }
 
 func Realtime(path string, coords coordinates.Coordinates, opt *MapOptions) (time.Time, image.Image, error) {

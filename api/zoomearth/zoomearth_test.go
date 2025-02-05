@@ -7,16 +7,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/unit/coordinates"
 )
 
 func TestZoomEarth(t *testing.T) {
-	api := ZoomEarthAPI{}
-	if _, err := api.GetStorms(time.Now()); err != nil {
+	if _, err := GetStorms(time.Now()); err != nil {
 		t.Error(err)
 	}
-	_, img, err := api.Realtime(maps.Satellite, coordinates.New(0, 0), nil)
+	c := chrome.Headless().NoSandbox()
+	defer c.Close()
+	_, img, err := MapWithContext(c, "satellite", time.Time{}, coordinates.New(0, 0), nil)
 	if err != nil && !errors.Is(err, maps.ErrInsufficientColor) {
 		t.Fatal(err)
 	}
