@@ -234,6 +234,11 @@ $('.timeline').style.margin='0 auto'`, nil),
 func Map(path string, dt time.Time, coords coordinates.Coordinates, opt *MapOptions) (t time.Time, img image.Image, err error) {
 	c := chrome.Headless()
 	defer c.Close()
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("failed to get map: %v", e)
+		}
+	}()
 	return MapWithContext(c, path, dt, coords, opt)
 }
 
