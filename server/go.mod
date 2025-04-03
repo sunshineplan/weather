@@ -29,8 +29,8 @@ require (
 	cloud.google.com/go/longrunning v0.6.2 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
-	github.com/chromedp/cdproto v0.0.0-20250401205909-91afd104e2b8 // indirect
-	github.com/chromedp/chromedp v0.13.5 // indirect
+	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b // indirect
+	github.com/chromedp/chromedp v0.13.6 // indirect
 	github.com/chromedp/sysutil v1.1.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
