@@ -16,7 +16,7 @@ require (
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.4
 	github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a
-	golang.org/x/sync v0.12.0
+	golang.org/x/sync v0.13.0
 	golang.org/x/text v0.23.0
 )
 
