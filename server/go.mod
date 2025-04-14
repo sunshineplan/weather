@@ -1,8 +1,7 @@
 module weather
 
 go 1.23.0
-
-toolchain go1.24.0
+toolchain go1.24.1
 
 require (
 	github.com/gin-contrib/cors v1.7.4
@@ -11,7 +10,7 @@ require (
 	github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b
 	github.com/sunshineplan/database/mongodb v1.0.13
 	github.com/sunshineplan/metadata v1.1.2
-	github.com/sunshineplan/service v1.0.21
+	github.com/sunshineplan/service v1.0.22
 	github.com/sunshineplan/utils v0.1.74
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.4
@@ -89,7 +88,7 @@ require (
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/time v0.10.0 // indirect
 	google.golang.org/api v0.220.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241209162323-e6fa225c2576 // indirect
