@@ -2,20 +2,17 @@ module weather
 
 go 1.24
 
-toolchain go1.24.2
-
 require (
+	github.com/HugoSmits86/nativewebp v1.2.0
 	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sunshineplan/ai v1.0.21
-	github.com/sunshineplan/apng v0.0.0-20240614074628-d4b11806741b
 	github.com/sunshineplan/database/mongodb v1.0.13
 	github.com/sunshineplan/metadata v1.1.2
 	github.com/sunshineplan/service v1.0.22
 	github.com/sunshineplan/utils v0.1.74
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.4
-	github.com/tidbyt/go-libwebp v0.0.0-20230922075150-fb11063b2a6a
 	golang.org/x/sync v0.13.0
 	golang.org/x/text v0.24.0
 )
@@ -53,7 +50,6 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kettek/apng v0.0.0-20220823221153-ff692776a607 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -86,6 +82,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
