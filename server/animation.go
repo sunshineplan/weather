@@ -10,15 +10,15 @@ import (
 
 const ext = ".webp"
 
-var webpPool = pool.New[nativewebp.Animation]()
+var animationPool = pool.New[nativewebp.Animation]()
 
 func encodeAnimation(file string, imgs []string) error {
-	webp := webpPool.Get()
+	webp := animationPool.Get()
 	defer func() {
 		webp.Images = webp.Images[:0]
 		webp.Disposals = webp.Disposals[:0]
 		webp.Durations = webp.Durations[:0]
-		webpPool.Put(webp)
+		animationPool.Put(webp)
 	}()
 	for i, img := range imgs {
 		f, err := os.Open(img)

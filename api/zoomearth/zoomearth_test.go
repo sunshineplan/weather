@@ -2,7 +2,7 @@ package zoomearth
 
 import (
 	"errors"
-	"image/png"
+	"image/jpeg"
 	"os"
 	"testing"
 	"time"
@@ -22,12 +22,12 @@ func TestZoomEarth(t *testing.T) {
 	if err != nil && !errors.Is(err, maps.ErrInsufficientColor) {
 		t.Fatal(err)
 	}
-	f, err := os.Create("test.png")
+	f, err := os.Create("test.jpg")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	if err := png.Encode(f, img); err != nil {
+	if err := jpeg.Encode(f, img, nil); err != nil {
 		t.Fatal(err)
 	}
 }

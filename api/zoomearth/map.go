@@ -206,7 +206,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 			return
 		}
 	}
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if i == 0 {
 			time.Sleep(3 * time.Second)
 		} else {
