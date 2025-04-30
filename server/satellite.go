@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image/png"
 	"math"
 	"os"
 	"path/filepath"
@@ -11,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sunshineplan/utils/pool"
+	"github.com/HugoSmits86/nativewebp"
 	"github.com/sunshineplan/weather/api/zoomearth"
 	"github.com/sunshineplan/weather/maps"
 	"github.com/sunshineplan/weather/storm"
@@ -25,11 +24,7 @@ const (
 )
 
 var (
-	satelliteMutex sync.Mutex
-	pngEncoder     = png.Encoder{
-		CompressionLevel: png.BestSpeed,
-		BufferPool:       pool.New[png.EncoderBuffer](),
-	}
+	satelliteMutex    sync.Mutex
 	timezone          = time.FixedZone("CST", 8*60*60)
 	animationDuration = []time.Duration{
 		6 * time.Hour,
@@ -57,12 +52,12 @@ func last() error {
 	if err != nil {
 		return err
 	}
-	f, err := os.Create("last.png")
+	f, err := os.Create("last.webp")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return pngEncoder.Encode(f, img)
+	return nativewebp.Encode(f, img, nil)
 }
 
 func satellite(t time.Time, coords coordinates.Coordinates, path string, opt any) (satelliteTime time.Time, err error) {
@@ -76,20 +71,20 @@ func satellite(t time.Time, coords coordinates.Coordinates, path string, opt any
 	if err = os.MkdirAll(path, 0755); err != nil {
 		return
 	}
-	file := filepath.Join(path, satelliteTime.Format(format)+".png")
+	file := filepath.Join(path, satelliteTime.Format(format)+".webp")
 	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
 	if err != nil {
 		return
 	}
 	defer f.Close()
-	err = pngEncoder.Encode(f, img)
+	err = nativewebp.Encode(f, img, nil)
 	return
 }
 
 func getTimes(t time.Time, s []string) (ts []time.Time) {
 	for i := time.Duration(1); i <= 2*time.Hour/(10*time.Minute); i++ {
 		if t := t.Add(-i * 10 * time.Minute); slices.IndexFunc(s, func(s string) bool {
-			return strings.HasSuffix(s, t.Format(format)+".png")
+			return strings.HasSuffix(s, t.Format(format)+".webp")
 		}) == -1 {
 			ts = append(ts, t)
 		}
@@ -177,7 +172,7 @@ func updateSatellite(_ time.Time) {
 		svc.Print(err)
 		return
 	}
-	res, err := filepath.Glob("daily/*.png")
+	res, err := filepath.Glob("daily/*.webp")
 	if err != nil {
 		svc.Print(err)
 		return
@@ -209,7 +204,7 @@ func updateStorm(storms []storm.Data) {
 				continue
 			}
 		}
-		res, err := filepath.Glob(dir + "/*.png")
+		res, err := filepath.Glob(dir + "/*.webp")
 		if err != nil {
 			svc.Print(err)
 			continue

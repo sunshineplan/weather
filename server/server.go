@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"image/jpeg"
-	"image/png"
 	"net/http/pprof"
 	"net/url"
 	"os"
@@ -67,30 +66,13 @@ func runServer() error {
 		})
 	}
 	router.GET("/last", func(c *gin.Context) {
-		f, err := os.Open("last.png")
+		b, err := os.ReadFile("last.webp")
 		if err != nil {
 			svc.Print(err)
 			c.Status(500)
 			return
 		}
-		defer f.Close()
-		img, err := png.Decode(f)
-		if err != nil {
-			svc.Print(err)
-			c.Status(500)
-			return
-		}
-		buf := bufPool.Get()
-		defer func() {
-			buf.Reset()
-			bufPool.Put(buf)
-		}()
-		if err := jpeg.Encode(buf, img, &jpeg.Options{Quality: 90}); err != nil {
-			svc.Print(err)
-			c.Status(500)
-			return
-		}
-		c.Data(200, "image/jpeg", buf.Bytes())
+		c.Data(200, "image/webp", b)
 	})
 	router.GET("/map", func(c *gin.Context) {
 		var q string

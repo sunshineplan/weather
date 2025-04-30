@@ -1,6 +1,6 @@
 module github.com/sunshineplan/weather
 
-go 1.23
+go 1.24
 
 require (
 	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b
