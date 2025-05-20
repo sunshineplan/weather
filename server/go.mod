@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/HugoSmits86/nativewebp v1.2.0
 	github.com/gin-contrib/cors v1.7.5
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/sunshineplan/ai v1.0.21
 	github.com/sunshineplan/database/mongodb v1.0.13
 	github.com/sunshineplan/metadata v1.1.2
