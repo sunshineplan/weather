@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"image/jpeg"
-	"net/http/pprof"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -42,21 +41,21 @@ func runServer() error {
 	router.TrustedPlatform = "X-Real-IP"
 	server.Handler = router
 
-	if *debug {
-		debug := router.Group("debug")
-		debug.GET("/", gin.WrapF(pprof.Index))
-		//debug.GET("/cmdline", gin.WrapF(pprof.Cmdline))
-		debug.GET("/profile", gin.WrapF(pprof.Profile))
-		debug.GET("/symbol", gin.WrapF(pprof.Symbol))
-		debug.POST("/symbol", gin.WrapF(pprof.Symbol))
-		debug.GET("/trace", gin.WrapF(pprof.Trace))
-		debug.GET("/allocs", gin.WrapH(pprof.Handler("allocs")))
-		debug.GET("/block", gin.WrapH(pprof.Handler("block")))
-		debug.GET("/goroutine", gin.WrapH(pprof.Handler("goroutine")))
-		debug.GET("/heap", gin.WrapH(pprof.Handler("heap")))
-		debug.GET("/mutex", gin.WrapH(pprof.Handler("mutex")))
-		debug.GET("/threadcreate", gin.WrapH(pprof.Handler("threadcreate")))
-	}
+	//if *debug {
+	//	debug := router.Group("debug")
+	//	debug.GET("/", gin.WrapF(pprof.Index))
+	//	//debug.GET("/cmdline", gin.WrapF(pprof.Cmdline))
+	//	debug.GET("/profile", gin.WrapF(pprof.Profile))
+	//	debug.GET("/symbol", gin.WrapF(pprof.Symbol))
+	//	debug.POST("/symbol", gin.WrapF(pprof.Symbol))
+	//	debug.GET("/trace", gin.WrapF(pprof.Trace))
+	//	debug.GET("/allocs", gin.WrapH(pprof.Handler("allocs")))
+	//	debug.GET("/block", gin.WrapH(pprof.Handler("block")))
+	//	debug.GET("/goroutine", gin.WrapH(pprof.Handler("goroutine")))
+	//	debug.GET("/heap", gin.WrapH(pprof.Handler("heap")))
+	//	debug.GET("/mutex", gin.WrapH(pprof.Handler("mutex")))
+	//	debug.GET("/threadcreate", gin.WrapH(pprof.Handler("threadcreate")))
+	//}
 
 	router.GET("/img/:image", icon)
 	for _, i := range animationDuration {

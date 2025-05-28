@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/sunshineplan/ai"
@@ -109,7 +110,13 @@ func run() error {
 		return err
 	}
 
-	run := scheduler.NewScheduler
+	run := func() *scheduler.Scheduler {
+		if *debug {
+			svc.SetLevel(slog.LevelDebug)
+			return scheduler.NewScheduler().WithDebug(slog.New(svc.Logger.LoggerHandler()))
+		}
+		return scheduler.NewScheduler()
+	}
 	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
 	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -3)) })
 	run().At(scheduler.MinuteSchedule(0)).Do(alert)
