@@ -32,9 +32,4 @@ jobs:
           go test -v -race ./...
           cd server
           go build -v ./...
-
-      - name: Test webp
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt install libwebp-dev
           go build -v -tags webp ./...
