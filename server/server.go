@@ -162,7 +162,7 @@ func runServer() error {
 			}
 			image = imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, coords, mapOptions(z)), "/map?q="+url.QueryEscape(q))
 		}
-		c.Data(200, "text/html", []byte(
+		c.Data(200, "text/html; charset=utf-8", []byte(
 			html.NewHTML().AppendChild(
 				html.Head().AppendChild(
 					html.Meta().Name("viewport").Attribute("content", "width=device-width"),
@@ -236,7 +236,7 @@ func runServer() error {
 			}
 			tbody.AppendChild(html.Tr(td...))
 		}
-		c.Data(200, "text/html", []byte(html.Div().Style("font-family:system-ui").AppendChild(table.AppendChild(tbody)).HTML()))
+		c.Data(200, "text/html; charset=utf-8", []byte(html.Div().Style("font-family:system-ui").AppendChild(table.AppendChild(tbody)).HTML()))
 	})
 	router.POST("/current", func(c *gin.Context) {
 		q := c.Query("q")
