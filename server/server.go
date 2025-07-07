@@ -57,6 +57,9 @@ func runServer() error {
 	//	debug.GET("/threadcreate", gin.WrapH(pprof.Handler("threadcreate")))
 	//}
 
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(301, "/status")
+	})
 	router.GET("/img/:image", icon)
 	for _, i := range animationDuration {
 		d := strings.TrimSuffix(i.String(), "0m0s")
