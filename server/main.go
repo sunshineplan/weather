@@ -46,6 +46,7 @@ func init() {
 		Dependencies: []string{"Wants=network-online.target", "After=network.target"},
 		Environment:  map[string]string{"GIN_MODE": "release"},
 		ExcludeFiles: []string{"scripts/weather.conf"},
+		Others:       []string{"Restart=always", "RestartSec=60"},
 	}
 	svc.RegisterCommand("report", "report", func(_ ...string) error {
 		if err := initWeather(); err != nil {
