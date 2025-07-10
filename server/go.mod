@@ -14,7 +14,7 @@ require (
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.5
 	golang.org/x/sync v0.16.0
-	golang.org/x/text v0.26.0
+	golang.org/x/text v0.27.0
 )
 
 require (
