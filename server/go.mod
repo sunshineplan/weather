@@ -10,7 +10,7 @@ require (
 	github.com/sunshineplan/database/mongodb v1.0.13
 	github.com/sunshineplan/metadata v1.1.2
 	github.com/sunshineplan/service v1.0.22
-	github.com/sunshineplan/utils v0.1.77
+	github.com/sunshineplan/utils v0.1.78
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.5
 	golang.org/x/sync v0.16.0
