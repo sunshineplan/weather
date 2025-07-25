@@ -153,12 +153,13 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	}
 	var wg sync.WaitGroup
 	wg.Add(3)
-	geocolor := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)
-	rainviewer := chrome.ListenEvent(nav, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
-	windspeed := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false)
+	geocolor := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)             // satellite
+	icon := chrome.ListenEvent(nav, "https://tiles.zoom.earth/times/icon.json", "GET", false)                                      // wind
+	windspeed := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false) // wind
+	//rainviewer := chrome.ListenEvent(nav, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
 	done := make(chan struct{})
 	go func() { <-geocolor; wg.Done() }()
-	go func() { <-rainviewer; wg.Done() }()
+	go func() { <-icon; wg.Done() }()
 	go func() { <-windspeed; wg.Done() }()
 	go func() { wg.Wait(); close(done) }()
 	go chromedp.Run(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))

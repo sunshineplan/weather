@@ -117,11 +117,11 @@ func run() error {
 		}
 		return scheduler.NewScheduler()
 	}
-	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(daily)
-	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(t time.Time) { record(t.AddDate(0, 0, -3)) })
-	run().At(scheduler.MinuteSchedule(0)).Do(alert)
-	run().At(scheduler.MinuteSchedule(15, 45)).Do(alertStorm)
-	run().At(scheduler.MinuteSchedule(10, 30, 50)).Do(updateSatellite)
+	run().At(scheduler.ScheduleFromString(*dailyReport)).Do(func(e scheduler.Event) { daily(e.Time) })
+	run().At(scheduler.HourSchedule(9, 16, 23)).Do(func(e scheduler.Event) { record(e.Time.AddDate(0, 0, -3)) })
+	run().At(scheduler.MinuteSchedule(0)).Do(func(e scheduler.Event) { alert(e.Time) })
+	run().At(scheduler.MinuteSchedule(15, 45)).Do(func(e scheduler.Event) { alertStorm(e.Time) })
+	run().At(scheduler.MinuteSchedule(10, 30, 50)).Do(func(e scheduler.Event) { updateSatellite(e.Time) })
 
 	go alert(time.Now())
 
