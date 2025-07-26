@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -63,13 +62,9 @@ func initWeather() (err error) {
 	if res.AI.LLMs != "" {
 		chatbot, err = client.New(res.AI)
 		if err != nil {
-			svc.Error("Failed to connenct AI chatbot", "error", err)
+			svc.Error("Failed to connect AI chatbot", "error", err)
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		if model, err = chatbot.Model(ctx); err != nil {
-			svc.Error("Failed to get AI model", "error", err)
-		}
+		model = chatbot.Model()
 	}
 
 	return db.Connect()
