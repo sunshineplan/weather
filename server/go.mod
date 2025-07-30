@@ -58,7 +58,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pschlump/AesCCM v0.0.0-20160925022350-c5df73b5834e // indirect
 	github.com/pschlump/ansi v1.0.0 // indirect
-	github.com/sunshineplan/chrome v1.1.24 // indirect
+	github.com/sunshineplan/chrome v1.1.25 // indirect
 	github.com/sunshineplan/cipher v1.0.7 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
