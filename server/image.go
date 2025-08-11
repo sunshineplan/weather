@@ -72,7 +72,7 @@ func icon(c *gin.Context) {
 }
 
 func imageHTML(href, src string) html.HTML {
-	return html.A().Href(href).AppendChild(html.Img().Src(src)).HTML()
+	return html.A().Href(href).Attribute("target", "_blank").AppendChild(html.Img().Src(src)).HTML()
 }
 
 func encodeGIF(w io.Writer, imgs []string) error {
