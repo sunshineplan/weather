@@ -17,6 +17,7 @@ import (
 
 	"github.com/chromedp/cdproto/domstorage"
 	"github.com/chromedp/cdproto/fetch"
+	"github.com/chromedp/cdproto/input"
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/weather/maps"
@@ -156,7 +157,6 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	geocolor := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)             // satellite
 	icon := chrome.ListenEvent(nav, "https://tiles.zoom.earth/times/icon.json", "GET", false)                                      // wind
 	windspeed := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false) // wind
-	//rainviewer := chrome.ListenEvent(nav, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
 	done := make(chan struct{})
 	go func() { <-geocolor; wg.Done() }()
 	go func() { <-icon; wg.Done() }()
@@ -165,6 +165,20 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	go chromedp.Run(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
 	select {
 	case <-done:
+	case <-nav.Done():
+		err = nav.Err()
+		return
+	}
+	rainviewer := chrome.ListenEvent(nav, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
+	go chromedp.Run(nav, chromedp.ActionFunc(func(ctx context.Context) error {
+		return input.DispatchKeyEvent(input.KeyDown).
+			WithKey("r").
+			WithCode("KeyR").
+			WithWindowsVirtualKeyCode(82).
+			Do(ctx)
+	}))
+	select {
+	case <-rainviewer:
 	case <-nav.Done():
 		err = nav.Err()
 		return
@@ -186,6 +200,7 @@ $$('.notifications').forEach(i=>i.remove())
 $$('.app-link').forEach(i=>i.remove())
 $$('.scroll').forEach(i=>i.remove())
 $$('.time-indicator').forEach(i=>i.remove())
+$$('.hud').forEach(i=>i.remove())
 $('.timeline').style.top='calc(6px + env(safe-area-inset-top))'
 $('.timeline').style.left='calc(50px + env(safe-area-inset-left))'
 $('.timeline').style.right='calc(50px + env(safe-area-inset-right))'
