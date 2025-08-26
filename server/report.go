@@ -32,7 +32,7 @@ var (
 
 func report(t time.Time) {
 	isReport = true
-	_, days, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
+	_, days, lastYear, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
 	if err != nil {
 		svc.Print(err)
 		return
@@ -42,7 +42,7 @@ func report(t time.Time) {
 	alertStorm(t)
 	sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, true, *difference, "0")+
+		fullHTML(*query, location, weather.Current{}, days, lastYear, avg, aqi, t, true, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
@@ -61,14 +61,14 @@ func report(t time.Time) {
 
 func daily(t time.Time) {
 	svc.Print("Start sending daily report...")
-	_, days, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
+	_, days, lastYear, avg, aqi, err := getAll(*query, *days, aqiType, t, false)
 	if err != nil {
 		svc.Print(err)
 		return
 	}
 	go sendMail(
 		"[Weather]Daily Report"+timestamp(),
-		fullHTML(*query, location, weather.Current{}, days, avg, aqi, t, false, *difference, "0")+
+		fullHTML(*query, location, weather.Current{}, days, lastYear, avg, aqi, t, false, *difference, "0")+
 			html.Br().HTML()+
 			imageHTML(mapAPI.URL(maps.Satellite, time.Time{}, location, mapOptions(*zoom)), "cid:attachment"),
 		mail.TextHTML,
@@ -88,7 +88,7 @@ func daily(t time.Time) {
 
 func fullHTML(
 	q string, location coordinates.Coordinates,
-	current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current,
+	current weather.Current, days []weather.Day, lastYear, avg weather.Day, currentAQI aqi.Current,
 	t time.Time, highlight bool, diff float64, margin string,
 ) html.HTML {
 	div := html.Div().Style("font-family:system-ui;margin:" + margin)
@@ -133,6 +133,21 @@ func fullHTML(
 		),
 		html.Br(),
 	)
+	if lastYear.Date != "" {
+		div.AppendChild(
+			html.Div().AppendChild(
+				html.Span().Style("display:list-item;margin-left:15px").
+					Contentf("Temperature of %s last year", t.Format("01-02")),
+				html.Table().AppendChild(
+					html.Tbody().Content(
+						lastYear.TemperatureHTML(),
+						weather.NewTempRiseFall(days[1], lastYear, 0).DiffInfoHTML(),
+					),
+				),
+			),
+			html.Br(),
+		)
+	}
 	if avg.Date != "" {
 		div.AppendChild(
 			html.Div().AppendChild(

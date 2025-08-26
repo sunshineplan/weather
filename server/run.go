@@ -101,7 +101,7 @@ func run() error {
 	}
 	defer db.Close()
 
-	if _, _, _, _, err := getAll(*query, *days, aqiType, time.Now(), false); err != nil {
+	if _, _, _, _, _, err := getAll(*query, *days, aqiType, time.Now(), false); err != nil {
 		return err
 	}
 

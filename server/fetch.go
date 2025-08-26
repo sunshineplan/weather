@@ -150,7 +150,7 @@ func getAQIByCoordinates(aqiType aqi.Type, coords coordinates.Coordinates) (aqi.
 }
 
 func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool,
-) (current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current, err error) {
+) (current weather.Current, days []weather.Day, lastYear, avg weather.Day, currentAQI aqi.Current, err error) {
 	c := make(chan error, 3)
 	go func() {
 		var err error
@@ -160,7 +160,7 @@ func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool,
 	go func() {
 		var err error
 		if q == *query {
-			avg, err = average(t.Format("01-02"), 2)
+			lastYear, avg, err = historyRecord(t, 2)
 		}
 		c <- err
 	}()
@@ -171,7 +171,7 @@ func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool,
 		}
 		c <- err
 	}()
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		if err = <-c; err != nil {
 			return
 		}
@@ -180,7 +180,7 @@ func getAll(q string, n int, aqiType aqi.Type, t time.Time, realtime bool,
 }
 
 func getAllByCoordinates(coords coordinates.Coordinates, n int, aqiType aqi.Type, t time.Time, realtime bool,
-) (current weather.Current, days []weather.Day, avg weather.Day, currentAQI aqi.Current, err error) {
+) (current weather.Current, days []weather.Day, lastYear, avg weather.Day, currentAQI aqi.Current, err error) {
 	c := make(chan error, 2)
 	go func() {
 		var err error
