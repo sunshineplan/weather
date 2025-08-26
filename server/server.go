@@ -136,7 +136,7 @@ func runServer() error {
 		if z, err = strconv.ParseFloat(c.Query("z"), 64); err != nil {
 			z = *zoom
 		}
-		current, days, avg, aqi, err := getAll(q, n, t, now, true)
+		current, days, lastYear, avg, aqi, err := getAll(q, n, t, now, true)
 		if err != nil {
 			coords, err := getCoords(q, nil)
 			if err != nil {
@@ -144,7 +144,7 @@ func runServer() error {
 				c.Status(400)
 				return
 			}
-			current, days, avg, aqi, err = getAllByCoordinates(coords, n, t, now, true)
+			current, days, lastYear, avg, aqi, err = getAllByCoordinates(coords, n, t, now, true)
 			if err != nil {
 				svc.Print(err)
 				c.Status(500)
@@ -171,7 +171,7 @@ func runServer() error {
 					html.Meta().Name("viewport").Attribute("content", "width=device-width"),
 				),
 				html.Body().Style("margin:0").
-					Content(fullHTML(q, coords, current, days, avg, aqi, now, true, diff, "8px")+image),
+					Content(fullHTML(q, coords, current, days, lastYear, avg, aqi, now, true, diff, "8px")+image),
 			).HTML()),
 		)
 	})

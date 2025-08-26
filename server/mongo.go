@@ -33,11 +33,31 @@ func record(date time.Time) (err error) {
 	return
 }
 
-func average(date string, round int) (weather.Day, error) {
-	var res []visualcrossing.Day
+func historyRecord(t time.Time, round int) (weather.Day, weather.Day, error) {
+	var lastYear, avg []visualcrossing.Day
 	if err := db.Aggregate(
 		[]mongodb.M{
-			{"$match": mongodb.M{"date": mongodb.M{"$regex": date + "$"}}},
+			{"$match": mongodb.M{"date": t.AddDate(-1, 0, 0).Format("2006-01-02")}},
+			{"$project": mongodb.M{
+				"datetime":     "$date",
+				"tempmax":      1,
+				"tempmin":      1,
+				"temp":         1,
+				"feelslikemax": 1,
+				"feelslikemin": 1,
+				"feelslike":    1,
+			}},
+		},
+		&lastYear,
+	); err != nil {
+		return weather.Day{}, weather.Day{}, err
+	}
+	if n := len(lastYear); n != 1 {
+		return weather.Day{}, weather.Day{}, fmt.Errorf("incorrect quantity of last year results: %d", n)
+	}
+	if err := db.Aggregate(
+		[]mongodb.M{
+			{"$match": mongodb.M{"date": mongodb.M{"$regex": t.Format("01-02") + "$"}}},
 			{"$group": mongodb.M{
 				"_id":          mongodb.M{"$substr": []any{"$date", 5, -1}},
 				"tempmax":      mongodb.M{"$avg": "$tempmax"},
@@ -57,14 +77,14 @@ func average(date string, round int) (weather.Day, error) {
 				"feelslike":    mongodb.M{"$round": []any{"$feelslike", round}},
 			}},
 		},
-		&res,
+		&avg,
 	); err != nil {
-		return weather.Day{}, err
+		return weather.Day{}, weather.Day{}, err
 	}
-	if n := len(res); n != 1 {
-		return weather.Day{}, fmt.Errorf("incorrect quantity of average results: %d", n)
+	if n := len(avg); n != 1 {
+		return weather.Day{}, weather.Day{}, fmt.Errorf("incorrect quantity of average results: %d", n)
 	}
-	return visualcrossing.ConvertDays(res)[0], nil
+	return visualcrossing.ConvertDays(lastYear)[0], visualcrossing.ConvertDays(avg)[0], nil
 }
 
 func export(month string, delete bool) (string, error) {
