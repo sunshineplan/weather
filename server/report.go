@@ -257,19 +257,9 @@ func alert(t time.Time) {
 		}
 
 		var wg sync.WaitGroup
-		wg.Add(3)
-		go func() {
-			defer wg.Done()
-			runAlert(days[1:], alertRainSnow)
-		}()
-		go func() {
-			defer wg.Done()
-			runAlert(days, alertTempRiseFall)
-		}()
-		go func() {
-			defer wg.Done()
-			runAlert(nil, alertAQI)
-		}()
+		wg.Go(func() { runAlert(days[1:], alertRainSnow) })
+		wg.Go(func() { runAlert(days, alertTempRiseFall) })
+		wg.Go(func() { runAlert(nil, alertAQI) })
 		wg.Wait()
 		return
 	})

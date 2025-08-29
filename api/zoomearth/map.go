@@ -152,15 +152,14 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 			return
 		}
 	}
-	var wg sync.WaitGroup
-	wg.Add(3)
 	geocolor := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)             // satellite
 	icon := chrome.ListenEvent(nav, "https://tiles.zoom.earth/times/icon.json", "GET", false)                                      // wind
 	windspeed := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false) // wind
+	var wg sync.WaitGroup
+	wg.Go(func() { <-geocolor })
+	wg.Go(func() { <-icon })
+	wg.Go(func() { <-windspeed })
 	done := make(chan struct{})
-	go func() { <-geocolor; wg.Done() }()
-	go func() { <-icon; wg.Done() }()
-	go func() { <-windspeed; wg.Done() }()
 	go func() { wg.Wait(); close(done) }()
 	go chromedp.Run(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
 	select {
@@ -169,8 +168,10 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 		err = nav.Err()
 		return
 	}
-	rainviewer := chrome.ListenEvent(nav, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
-	go chromedp.Run(nav, chromedp.ActionFunc(func(ctx context.Context) error {
+	rainviewerCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+	rainviewer := chrome.ListenEvent(rainviewerCtx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
+	go chromedp.Run(rainviewerCtx, chromedp.ActionFunc(func(ctx context.Context) error {
 		return input.DispatchKeyEvent(input.KeyDown).
 			WithKey("r").
 			WithCode("KeyR").
@@ -179,11 +180,9 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	}))
 	select {
 	case <-rainviewer:
-	case <-nav.Done():
-		err = nav.Err()
-		return
+	case <-rainviewerCtx.Done():
 	}
-	if err = chromedp.Run(nav, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
+	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
 	click, cancel := context.WithTimeout(ctx, 5*time.Second)
