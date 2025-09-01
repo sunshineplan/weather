@@ -17,7 +17,6 @@ import (
 
 	"github.com/chromedp/cdproto/domstorage"
 	"github.com/chromedp/cdproto/fetch"
-	"github.com/chromedp/cdproto/input"
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/weather/maps"
@@ -168,20 +167,20 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 		err = nav.Err()
 		return
 	}
-	rainviewerCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
-	rainviewer := chrome.ListenEvent(rainviewerCtx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
-	go chromedp.Run(rainviewerCtx, chromedp.ActionFunc(func(ctx context.Context) error {
-		return input.DispatchKeyEvent(input.KeyDown).
-			WithKey("r").
-			WithCode("KeyR").
-			WithWindowsVirtualKeyCode(82).
-			Do(ctx)
-	}))
-	select {
-	case <-rainviewer:
-	case <-rainviewerCtx.Done():
-	}
+	//rainviewerCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	//defer cancel()
+	//rainviewer := chrome.ListenEvent(rainviewerCtx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
+	//go chromedp.Run(rainviewerCtx, chromedp.ActionFunc(func(ctx context.Context) error {
+	//	return input.DispatchKeyEvent(input.KeyDown).
+	//		WithKey("r").
+	//		WithCode("KeyR").
+	//		WithWindowsVirtualKeyCode(82).
+	//		Do(ctx)
+	//}))
+	//select {
+	//case <-rainviewer:
+	//case <-rainviewerCtx.Done():
+	//}
 	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
