@@ -3,6 +3,7 @@ package zoomearth
 import (
 	"errors"
 	"image/jpeg"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -18,16 +19,19 @@ func TestZoomEarth(t *testing.T) {
 	}
 	c := chrome.Headless().NoSandbox()
 	defer c.Close()
-	_, img, err := MapWithContext(c, "satellite", time.Time{}, coordinates.New(0, 0), nil)
-	if err != nil && !errors.Is(err, maps.ErrInsufficientColor) {
-		t.Fatal(err)
-	}
-	f, err := os.Create("test.jpg")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
-	if err := jpeg.Encode(f, img, nil); err != nil {
-		t.Fatal(err)
+	for _, path := range []string{"satellite", "precipitation"} {
+		log.Println("Test", path)
+		_, img, err := MapWithContext(c, path, time.Time{}, coordinates.New(0, 0), nil)
+		if err != nil && !errors.Is(err, maps.ErrInsufficientColor) {
+			t.Fatal(err)
+		}
+		f, err := os.Create(path + ".jpg")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer f.Close()
+		if err := jpeg.Encode(f, img, nil); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
