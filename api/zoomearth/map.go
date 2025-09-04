@@ -17,6 +17,7 @@ import (
 
 	"github.com/chromedp/cdproto/domstorage"
 	"github.com/chromedp/cdproto/fetch"
+	"github.com/chromedp/cdproto/input"
 	"github.com/chromedp/chromedp"
 	"github.com/sunshineplan/chrome"
 	"github.com/sunshineplan/weather/maps"
@@ -32,21 +33,29 @@ var (
 
 var mapPath = map[maps.MapType]string{
 	maps.Satellite:     "satellite",
-	maps.Radar:         "radar",
 	maps.Precipitation: "precipitation",
 	maps.Wind:          "wind-speed",
 	maps.Temperature:   "temperature",
 	maps.Humidity:      "humidity",
 	maps.DewPoint:      "dew-point",
 	maps.Pressure:      "pressure",
+	// maps.Radar:      "radar",
 }
 
 var defaultMapOptions = MapOptions{
 	width:    800,
 	height:   600,
 	zoom:     4,
-	overlays: []string{"radar", "wind"},
+	overlays: []string{"wind"},
 	timezone: time.Local,
+	listenList: []any{
+		regexp.MustCompile(`https://tiles.zoom.earth/static/.*\.webp`),             // static
+		"https://tiles.zoom.earth/times/icon.json",                                 // icon
+		regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), // wind
+	},
+	keyEvents: []KeyEvent{
+		//{"r", "KeyR", 82, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), false},
+	},
 }
 
 var (
@@ -80,6 +89,14 @@ func (o *MapOptions) SetOverlays(overlays []string) *MapOptions {
 }
 func (o *MapOptions) SetTimeZone(timezone *time.Location) *MapOptions {
 	o.timezone = timezone
+	return o
+}
+func (o *MapOptions) SetListenList(listenList []any) *MapOptions {
+	o.listenList = listenList
+	return o
+}
+func (o *MapOptions) SetKeyEvents(keyEvents []KeyEvent) *MapOptions {
+	o.keyEvents = keyEvents
 	return o
 }
 
@@ -122,6 +139,12 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 		if opt.timezone != nil {
 			o.timezone = opt.timezone
 		}
+		if len(opt.listenList) > 0 {
+			o.listenList = opt.listenList
+		}
+		if len(opt.keyEvents) > 0 {
+			o.keyEvents = opt.keyEvents
+		}
 	}
 	nav, cancel := context.WithTimeout(ctx, DefaultTimeout)
 	defer cancel()
@@ -141,7 +164,6 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	storageID := &domstorage.StorageID{StorageKey: domstorage.SerializedStorageKey(root + "/"), IsLocalStorage: true}
 	for k, v := range map[string]string{
 		"ze_distanceUnit": "metric",
-		"ze_introsLayer":  "satellite",
 		"ze_timeControl":  "timeline",
 		"ze_timeFormat":   "hour24",
 		"ze_timeZone":     "utc",
@@ -151,13 +173,10 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 			return
 		}
 	}
-	geocolor := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/geocolor/.*\.jpg`), "GET", false)             // satellite
-	icon := chrome.ListenEvent(nav, "https://tiles.zoom.earth/times/icon.json", "GET", false)                                      // wind
-	windspeed := chrome.ListenEvent(nav, regexp.MustCompile(`https://tiles.zoom.earth/icon/v1/wind-speed/.*\.webp`), "GET", false) // wind
 	var wg sync.WaitGroup
-	wg.Go(func() { <-geocolor })
-	wg.Go(func() { <-icon })
-	wg.Go(func() { <-windspeed })
+	for _, url := range o.listenList {
+		wg.Go(func() { <-chrome.ListenEvent(nav, url, "", false) })
+	}
 	done := make(chan struct{})
 	go func() { wg.Wait(); close(done) }()
 	go chromedp.Run(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
@@ -167,20 +186,26 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 		err = nav.Err()
 		return
 	}
-	//rainviewerCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
-	//defer cancel()
-	//rainviewer := chrome.ListenEvent(rainviewerCtx, regexp.MustCompile(`https://tilecache.rainviewer.com/.*\.webp`), "GET", false)
-	//go chromedp.Run(rainviewerCtx, chromedp.ActionFunc(func(ctx context.Context) error {
-	//	return input.DispatchKeyEvent(input.KeyDown).
-	//		WithKey("r").
-	//		WithCode("KeyR").
-	//		WithWindowsVirtualKeyCode(82).
-	//		Do(ctx)
-	//}))
-	//select {
-	//case <-rainviewer:
-	//case <-rainviewerCtx.Done():
-	//}
+	for _, event := range o.keyEvents {
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+		c := chrome.ListenEvent(ctx, event.Listen, "", false)
+		go chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+			return input.DispatchKeyEvent(input.KeyDown).
+				WithKey(event.Key).
+				WithCode(event.Code).
+				WithWindowsVirtualKeyCode(event.WindowsVirtualKeyCode).
+				Do(ctx)
+		}))
+		select {
+		case <-c:
+		case <-ctx.Done():
+			if event.MustListen {
+				err = ctx.Err()
+				return
+			}
+		}
+	}
 	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
@@ -211,7 +236,13 @@ $('.timeline').style.margin='0 auto'`, nil),
 	}
 	var parseErr error
 	if t, parseErr = time.Parse("Monday _2 January, 15:04MST", utcTime); parseErr != nil {
-		t, parseErr = time.Parse("Mon _2 Jan, 15:04MST", utcTime)
+		if t, parseErr = time.Parse("Mon _2 Jan, 15:04MST", utcTime); parseErr != nil {
+			if t, parseErr = time.Parse("Now 15:04MST", utcTime); parseErr == nil {
+				year, month, day := time.Now().Date()
+				hour, min, sec := t.Clock()
+				t = time.Date(year, month, day, hour, min, sec, 0, o.timezone)
+			}
+		}
 	}
 	if parseErr, _ = maps.ParseTimeError(parseErr); parseErr == nil {
 		t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
