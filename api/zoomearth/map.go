@@ -139,6 +139,12 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 		if opt.timezone != nil {
 			o.timezone = opt.timezone
 		}
+		if len(opt.listenList) > 0 {
+			o.listenList = opt.listenList
+		}
+		if len(opt.keyEvents) > 0 {
+			o.keyEvents = opt.keyEvents
+		}
 	}
 	nav, cancel := context.WithTimeout(ctx, DefaultTimeout)
 	defer cancel()
