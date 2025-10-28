@@ -13,6 +13,10 @@ updates:
     directory: "/server"
     schedule:
       interval: "daily"
+    groups:
+      chrome:
+        patterns:
+          - "*sunshine*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
