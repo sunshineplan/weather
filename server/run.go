@@ -108,7 +108,7 @@ func run() error {
 	run := func() *scheduler.Scheduler {
 		if *debug {
 			svc.SetLevel(slog.LevelDebug)
-			return scheduler.NewScheduler().WithDebug(slog.New(svc.Logger.LoggerHandler()))
+			return scheduler.NewScheduler().WithDebug(slog.New(svc.Logger.SlogHandler()))
 		}
 		return scheduler.NewScheduler()
 	}
