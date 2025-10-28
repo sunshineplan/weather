@@ -9,8 +9,8 @@ require (
 	github.com/sunshineplan/ai v1.0.22
 	github.com/sunshineplan/database/mongodb v1.0.14
 	github.com/sunshineplan/metadata v1.1.2
-	github.com/sunshineplan/service v1.0.22
-	github.com/sunshineplan/utils v0.1.80
+	github.com/sunshineplan/service v1.0.24
+	github.com/sunshineplan/utils v0.1.82
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.6
 	golang.org/x/sync v0.17.0
@@ -85,7 +85,7 @@ require (
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 	google.golang.org/genai v1.17.0 // indirect
