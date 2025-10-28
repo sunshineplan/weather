@@ -33,7 +33,7 @@ func initWeather() (err error) {
 	}
 	if err = retry.Do(func() error {
 		return meta.Get("weather", &res)
-	}, 3, 20); err != nil {
+	}, 3, 20*time.Second); err != nil {
 		return
 	}
 	realtime = weatherapi.New(res.WeatherAPI)
