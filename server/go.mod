@@ -3,7 +3,7 @@ module weather
 go 1.25
 
 require (
-	github.com/HugoSmits86/nativewebp v1.2.0
+	github.com/HugoSmits86/nativewebp v1.2.1
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/sunshineplan/ai v1.0.22
