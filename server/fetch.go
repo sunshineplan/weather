@@ -22,9 +22,9 @@ func getCoords(query string, api coordinates.GeoLocator) (res coordinates.Coordi
 	if api != nil {
 		res, err = api.Coordinates(query)
 	} else {
-		res, err = forecast.Coordinates(query)
+		res, err = forecastAPI.Coordinates(query)
 		if err != nil {
-			res, err = realtime.Coordinates(query)
+			res, err = realtimeAPI.Coordinates(query)
 		}
 	}
 	if err != nil {
@@ -61,14 +61,14 @@ func getWeather(query string, n int, t time.Time, realtime bool) (current weathe
 	go func() {
 		var err error
 		if realtime {
-			current, err = forecast.Realtime(query)
+			current, err = realtimeAPI.Realtime(query)
 		}
 		c <- err
 	}()
 	var forecasts []weather.Day
 	go func() {
 		var err error
-		forecasts, err = forecast.Forecast(query, n)
+		forecasts, err = forecastAPI.Forecast(query, n)
 		if err != nil {
 			c <- err
 		} else if len(forecasts) < n {
@@ -82,10 +82,10 @@ func getWeather(query string, n int, t time.Time, realtime bool) (current weathe
 	var yesterday weather.Day
 	go func() {
 		var err error
-		yesterday, err = history.History(query, t.AddDate(0, 0, -1))
+		yesterday, err = historyAPI.History(query, t.AddDate(0, 0, -1))
 		c <- err
 	}()
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		if err = <-c; err != nil {
 			return
 		}
@@ -100,14 +100,14 @@ func getWeatherByCoordinates(coords coordinates.Coordinates, n int, t time.Time,
 	go func() {
 		var err error
 		if realtime {
-			current, err = forecast.RealtimeByCoordinates(coords)
+			current, err = realtimeAPI.RealtimeByCoordinates(coords)
 		}
 		c <- err
 	}()
 	var forecasts []weather.Day
 	go func() {
 		var err error
-		forecasts, err = forecast.ForecastByCoordinates(coords, n)
+		forecasts, err = forecastAPI.ForecastByCoordinates(coords, n)
 		if err != nil {
 			c <- err
 		} else if len(forecasts) < n {
@@ -121,7 +121,7 @@ func getWeatherByCoordinates(coords coordinates.Coordinates, n int, t time.Time,
 	var yesterday weather.Day
 	go func() {
 		var err error
-		yesterday, err = history.HistoryByCoordinates(coords, t.AddDate(0, 0, -1))
+		yesterday, err = historyAPI.HistoryByCoordinates(coords, t.AddDate(0, 0, -1))
 		c <- err
 	}()
 	for i := 0; i < 3; i++ {
@@ -137,7 +137,7 @@ func getAQI(aqiType aqi.Type, q string) (aqi.Current, error) {
 	if res, err := aqiAPI.Realtime(aqiType, q); err == nil {
 		return res, nil
 	}
-	coords, err := getCoords(q, forecast)
+	coords, err := getCoords(q, forecastAPI)
 	if err != nil {
 		return nil, err
 	}
