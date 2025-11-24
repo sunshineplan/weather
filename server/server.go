@@ -180,7 +180,7 @@ func runServer() error {
 		if q = c.Query("q"); q == "" {
 			q = *query
 		}
-		forecasts, err := forecast.Forecast(q, 2)
+		forecasts, err := forecastAPI.Forecast(q, 2)
 		if err != nil {
 			coords, err := getCoords(q, nil)
 			if err != nil {
@@ -188,7 +188,7 @@ func runServer() error {
 				c.Status(400)
 				return
 			}
-			forecasts, err = forecast.ForecastByCoordinates(coords, 2)
+			forecasts, err = forecastAPI.ForecastByCoordinates(coords, 2)
 			if err != nil {
 				svc.Print(err)
 				c.Status(500)
@@ -246,7 +246,7 @@ func runServer() error {
 		if q == "" {
 			q = c.ClientIP()
 		}
-		resp, err := realtime.Request("current.json", url.Values{"q": {q}})
+		resp, err := realtimeAPI.Request("current.json", url.Values{"q": {q}})
 		if err != nil {
 			svc.Print(err)
 			c.Status(500)

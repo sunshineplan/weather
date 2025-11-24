@@ -119,6 +119,10 @@ func fullHTML(
 		html.Div().AppendContent(
 			html.Span().Style("display:list-item;margin-left:15px").Content("Today"),
 			days[1],
+			html.Span().Style("display:list-item;margin-left:15px").AppendContent(
+				"Hourly ",
+				html.A().Href("/hourly").Attribute("target", "_blank").Content("↗"),
+			),
 			days[1].Hourly(current.Datetime != "", hours...),
 		),
 		html.Br(),
@@ -405,6 +409,7 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 		html.Th("Date").Colspan(2),
 		html.Th("Temp"),
 		html.Th("FeelsLike"),
+		html.Th("RH"),
 		html.Th("Rain"),
 		html.Th("Wind"),
 	}
@@ -422,6 +427,7 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 			html.Td(day.Condition.Img(day.Icon)),
 			html.Td(html.HTML(strings.ReplaceAll(string(day.TempMax.HTML()), "°C", "")) + " / " + day.TempMin.HTML()),
 			html.Td(html.HTML(strings.ReplaceAll(string(day.FeelsLikeMax.HTML()), "°C", "")) + " / " + day.FeelsLikeMin.HTML()),
+			html.Td(day.Humidity),
 			html.Td(html.Background().AppendChild(
 				html.Span().Contentf("%gmm", day.Precip),
 				html.Span().Content(day.PrecipProb),

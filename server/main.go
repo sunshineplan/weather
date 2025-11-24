@@ -26,12 +26,12 @@ var (
 	dialer mail.Dialer
 	to     mail.Receipts
 
-	realtime *weatherapi.WeatherAPI
-	forecast weather.API
-	history  weather.API
-	mapAPI   maps.MapAPI
-	stormAPI storm.API
-	aqiAPI   aqi.API
+	realtimeAPI *weatherapi.WeatherAPI
+	forecastAPI weather.API
+	historyAPI  weather.API
+	mapAPI      maps.MapAPI
+	stormAPI    storm.API
+	aqiAPI      aqi.API
 
 	chatbot ai.AI
 	model   string

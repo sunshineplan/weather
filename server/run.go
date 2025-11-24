@@ -36,18 +36,18 @@ func initWeather() (err error) {
 	}, 3, 20*time.Second); err != nil {
 		return
 	}
-	realtime = weatherapi.New(res.WeatherAPI)
+	realtimeAPI = weatherapi.New(res.WeatherAPI)
 	switch *provider {
 	case "weatherapi":
-		forecast = realtime
+		forecastAPI = realtimeAPI
 	default:
-		forecast = visualcrossing.New(res.VisualCrossing)
+		forecastAPI = visualcrossing.New(res.VisualCrossing)
 	}
-	location, err = getCoords(*query, forecast)
+	location, err = getCoords(*query, forecastAPI)
 	if err != nil {
 		return
 	}
-	history = forecast
+	historyAPI = forecastAPI
 	mapAPI = zoomearth.ZoomEarthAPI{}
 	stormAPI = zoomearth.ZoomEarthAPI{}
 	aqiAPI = airmatters.New(res.AirMatters)
@@ -78,12 +78,12 @@ func test() (err error) {
 		db.Close()
 	}
 
-	_, e2 := realtime.Realtime("Shanghai")
+	_, e2 := realtimeAPI.Realtime("Shanghai")
 	if e2 != nil {
 		fmt.Println("Failed to fetch realtime weather:", e2)
 	}
 
-	_, e3 := history.History("Shanghai", time.Now().AddDate(0, 0, -1))
+	_, e3 := historyAPI.History("Shanghai", time.Now().AddDate(0, 0, -1))
 	if e3 != nil {
 		fmt.Println("Failed to fetch history weather:", e2)
 	}
