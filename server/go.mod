@@ -9,8 +9,8 @@ require (
 	github.com/sunshineplan/ai v1.0.22
 	github.com/sunshineplan/database/mongodb v1.0.14
 	github.com/sunshineplan/metadata v1.1.2
-	github.com/sunshineplan/service v1.0.24
-	github.com/sunshineplan/utils v0.1.82
+	github.com/sunshineplan/service v1.0.25
+	github.com/sunshineplan/utils v0.1.83
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.6
 	golang.org/x/sync v0.18.0
@@ -26,6 +26,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20250724212937-08a3db8b4327 // indirect
 	github.com/chromedp/chromedp v0.14.2 // indirect
 	github.com/chromedp/sysutil v1.1.0 // indirect
+	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
@@ -53,6 +54,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/openai/openai-go v1.11.1 // indirect
@@ -63,6 +65,7 @@ require (
 	github.com/quic-go/quic-go v0.54.1 // indirect
 	github.com/sunshineplan/chrome v1.1.26 // indirect
 	github.com/sunshineplan/cipher v1.0.7 // indirect
+	github.com/sunshineplan/progressbar v1.0.1 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
