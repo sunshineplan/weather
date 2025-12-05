@@ -417,7 +417,7 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 		th = append(th, html.Th("Dir"))
 	}
 	table.AppendChild(html.Thead().AppendChild(html.Tr(th...)))
-	tbody := html.Tbody()
+	tbody := html.Tbody().Style("white-space:nowrap")
 	for _, day := range days {
 		td := []*html.TableCell{
 			html.Td(html.Background().AppendChild(
