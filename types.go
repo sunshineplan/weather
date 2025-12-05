@@ -243,7 +243,7 @@ func (day Day) Hourly(dir bool, highlight ...int) html.HTML {
 		th = append(th, html.Th("Dir"))
 	}
 	table.AppendChild(html.Thead().AppendChild(html.Tr(th...)))
-	tbody := html.Tbody()
+	tbody := html.Tbody().Style("white-space:nowrap")
 	for _, hour := range day.Hours {
 		t := hour.TimeEpoch.Time()
 		var hourContent any
