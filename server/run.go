@@ -29,6 +29,7 @@ func initWeather() (err error) {
 		Mongo          driver.Client
 		Dialer         mail.Dialer
 		Subscriber     mail.Receipts
+		Gotify         string
 		AI             ai.ClientConfig
 	}
 	if err = retry.Do(func() error {
@@ -58,6 +59,7 @@ func initWeather() (err error) {
 	db = &res.Mongo
 	dialer = res.Dialer
 	to = res.Subscriber
+	gotifyURL = res.Gotify
 
 	if res.AI.LLMs != "" {
 		chatbot, err = client.New(res.AI)

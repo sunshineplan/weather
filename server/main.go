@@ -20,11 +20,12 @@ import (
 )
 
 var (
-	svc    = service.New()
-	meta   metadata.Server
-	db     mongodb.Client
-	dialer mail.Dialer
-	to     mail.Receipts
+	svc       = service.New()
+	meta      metadata.Server
+	db        mongodb.Client
+	dialer    mail.Dialer
+	to        mail.Receipts
+	gotifyURL string
 
 	realtimeAPI *weatherapi.WeatherAPI
 	forecastAPI weather.API
