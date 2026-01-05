@@ -136,8 +136,8 @@ github.com/sunshineplan/chrome v1.1.26 h1:8riWUQ4GWhxWfDrPUiBKSXKkuxhJsIN5CH/l8C
 github.com/sunshineplan/chrome v1.1.26/go.mod h1:is1GBjZZDKCmLt1WvNkAptnJM7h/MDp2a/I/PYsCRBQ=
 github.com/sunshineplan/cipher v1.0.7 h1:uC2BwJWO8wDHZu/yUsrMVlhjL400rIco542GCywOw04=
 github.com/sunshineplan/cipher v1.0.7/go.mod h1:7AXZEo7seaA5/Zd2id+1pi4yNHQ2eAmIN5YNjmrGelQ=
-github.com/sunshineplan/database/mongodb v1.0.14 h1:woP+s1l8MUW2UN5vgcNQve+wiguyJY1wTWf1TezxBe8=
-github.com/sunshineplan/database/mongodb v1.0.14/go.mod h1:STkWsNjiLk39IjC6KOUElmnaJJhKu84zKu5vo6wgCtc=
+github.com/sunshineplan/database/mongodb v1.0.15 h1:EG7SuJhoXN8pzTzBYLBQdnKioHSVzRdNKVCWl5nNBno=
+github.com/sunshineplan/database/mongodb v1.0.15/go.mod h1:q8yEiWP4+Fkr5Hlan7PT+FIhYq+xsH6HnwNH5ortDPw=
 github.com/sunshineplan/metadata v1.1.2 h1:QaVM9vILH4v9zf0nl6n3fUT3JFcsVQUWA+vjx4kxMQY=
 github.com/sunshineplan/metadata v1.1.2/go.mod h1:AMRz7H4/Y8eXXid010zVj2oe19FADG36Ao7Sqjf51g8=
 github.com/sunshineplan/progressbar v1.0.1 h1:elihSbf9rtXthvbcJkveg40yu4LrpV3SKJBODcD1zPM=
@@ -171,8 +171,8 @@ github.com/xdg-go/stringprep v1.0.4/go.mod h1:mPGuuIYwz7CmR2bT9j4GbQqutWS1zV24gi
 github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 h1:ilQV1hzziu+LLM3zUTJ0trRztfwgjqKnBWNtSRkbmwM=
 github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78/go.mod h1:aL8wCCfTfSfmXjznFBSZNN13rSJjlIOI1fUNAtF7rmI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-go.mongodb.org/mongo-driver/v2 v2.2.3 h1:72uiGYXeSnUEQk37xvV9r067xzFQod4SOeAoOuq3+GM=
-go.mongodb.org/mongo-driver/v2 v2.2.3/go.mod h1:qQkDMhCGWl3FN509DfdPd4GRBLU/41zqF/k8eTRceps=
+go.mongodb.org/mongo-driver/v2 v2.4.1 h1:hGDMngUao03OVQ6sgV5csk+RWOIkF+CuLsTPobNMGNI=
+go.mongodb.org/mongo-driver/v2 v2.4.1/go.mod h1:jHeEDJHJq7tm6ZF45Issun9dbogjfnPySb1vXA7EeAI=
 go.opentelemetry.io/auto/sdk v1.1.0 h1:cH53jehLUN6UFLY71z+NDOiNJqDdPRaXzTel0sJySYA=
 go.opentelemetry.io/auto/sdk v1.1.0/go.mod h1:3wSPjt5PWp2RhlCcmmOial7AvC4DQqZb7a7wCow3W8A=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0 h1:sbiXRNDSWJOTobXh5HyQKjq6wUC5tNybqjIqDpAY4CU=
