@@ -1,6 +1,6 @@
 module weather
 
-go 1.25
+go 1.26
 
 require (
 	github.com/HugoSmits86/nativewebp v1.2.1
@@ -10,7 +10,7 @@ require (
 	github.com/sunshineplan/database/mongodb v1.0.15
 	github.com/sunshineplan/metadata v1.1.2
 	github.com/sunshineplan/service v1.0.26
-	github.com/sunshineplan/utils v0.1.83
+	github.com/sunshineplan/utils v0.1.84
 	github.com/sunshineplan/weather v0.0.0-00010101000000-000000000000
 	github.com/sunshineplan/workers v1.0.6
 	golang.org/x/sync v0.19.0
