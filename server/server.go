@@ -35,6 +35,9 @@ func runServer() error {
 		svc.Println("AI:", chatbot.LLMs())
 		svc.Println("Model:", model)
 	}
+	if gotifyURL != "" {
+		svc.Println("Gotify:", gotifyURL)
+	}
 
 	router := gin.Default()
 	router.Use(cors.Default())

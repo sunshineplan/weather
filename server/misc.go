@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -23,6 +25,9 @@ var (
 )
 
 func sendMail[T ~string](subject string, body T, contentType mail.ContentType, attachments []*mail.Attachment, force bool) {
+	if dialer.Server == "" {
+		return
+	}
 	if !force && !mailSchedule.IsMatched(time.Now()) {
 		return
 	}
@@ -38,6 +43,13 @@ func sendMail[T ~string](subject string, body T, contentType mail.ContentType, a
 			svc.Print(err)
 		}
 	}
+}
+
+func gotify(title, message string) {
+	if gotifyURL == "" {
+		return
+	}
+	http.PostForm(gotifyURL, url.Values{"title": {title}, "message": {message}})
 }
 
 func lastImage(path string) (img image.Image, err error) {

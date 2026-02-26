@@ -269,9 +269,13 @@ func alert(t time.Time) {
 	})
 }
 
-func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element, []*mail.Attachment)) {
-	if subject, body, attach := fn(days); subject != "" {
+func runAlert(days []weather.Day, fn func([]weather.Day) (string, *html.Element, string, []*mail.Attachment, bool)) {
+	if subject, body, msg, attach, notify := fn(days); subject != "" {
 		svc.Print(subject)
+		if notify && gotifyURL != "" {
+			gotify(subject, msg)
+			return
+		}
 		body := html.Div().Style("font-family:system-ui;margin:0").AppendChild(body).HTML()
 		if attach != nil {
 			body = body +
@@ -304,13 +308,12 @@ func isRainSnow(t time.Time, day weather.Day) (now, next bool) {
 	return
 }
 
-func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attch []*mail.Attachment) {
+func alertRainSnow(days []weather.Day) (subject string, body *html.Element, msg string, attch []*mail.Attachment, gotify bool) {
 	if len(rainSnow) > 0 {
 		if rainSnow[0].IsExpired() {
 			rainSnow = rainSnow[1:]
 		}
 	}
-
 	body = html.Background()
 	if res := weather.WillRainSnow(days); len(res) > 0 {
 		now := time.Now()
@@ -322,9 +325,12 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 					rainSnow[0].Duration() != i.Duration() {
 					subject = "[Weather]Rain Snow Alert - " + start.Date + timestamp()
 					if isRainNow || isRainNext {
+						gotify = true
+						msg = start.Precipitation()
 						attch = attachLast()
 					}
 				} else if isRainNow || isRainNext {
+					gotify = true
 					var s string
 					var hour int
 					if isRainNow {
@@ -343,6 +349,7 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 							i.Days()[index].PrecipitationHTML(),
 						)
 					}
+					msg = start.Precipitation()
 					attch = attachLast()
 					return
 				}
@@ -361,13 +368,12 @@ func alertRainSnow(days []weather.Day) (subject string, body *html.Element, attc
 	return
 }
 
-func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element, _ []*mail.Attachment) {
+func alertTempRiseFall(days []weather.Day) (subject string, body *html.Element, _ string, _ []*mail.Attachment, _ bool) {
 	if len(tempRiseFall) > 0 {
 		if tempRiseFall[0].IsExpired() {
 			tempRiseFall = tempRiseFall[1:]
 		}
 	}
-
 	body = html.Background()
 	if res := weather.WillTempRiseFall(days, *difference); len(res) > 0 {
 		for index, i := range res {
@@ -444,7 +450,8 @@ func forecastHTML(days []weather.Day, dir bool) html.HTML {
 
 var aqiStandard int
 
-func alertAQI(_ []weather.Day) (subject string, body *html.Element, _ []*mail.Attachment) {
+func alertAQI(_ []weather.Day) (subject string, body *html.Element, msg string, _ []*mail.Attachment, gotify bool) {
+	gotify = true
 	current, err := aqiAPI.Realtime(aqiType, *query)
 	if err != nil {
 		svc.Print(err)
@@ -453,6 +460,7 @@ func alertAQI(_ []weather.Day) (subject string, body *html.Element, _ []*mail.At
 	if index := current.AQI(); index.Value() >= aqiStandard {
 		subject = "[Weather]Air Quality Alert - " + index.Level().String() + timestamp()
 		body = html.Background().Content(aqi.CurrentHTML(current))
+		msg = fmt.Sprintf("%d %s", index.Value(), index.Level())
 	}
 	return
 }
