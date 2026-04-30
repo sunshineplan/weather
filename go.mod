@@ -5,7 +5,7 @@ go 1.26
 require (
 	github.com/chromedp/cdproto v0.0.0-20260321001828-e3e3800016bc
 	github.com/chromedp/chromedp v0.15.1
-	github.com/sunshineplan/chrome v1.1.26
+	github.com/sunshineplan/chrome v1.1.27
 	github.com/sunshineplan/utils v0.1.84
 )
 
