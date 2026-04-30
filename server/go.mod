@@ -64,7 +64,7 @@ require (
 	github.com/pschlump/ansi v1.0.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.0 // indirect
-	github.com/sunshineplan/chrome v1.1.26 // indirect
+	github.com/sunshineplan/chrome v1.1.27 // indirect
 	github.com/sunshineplan/cipher v1.0.7 // indirect
 	github.com/sunshineplan/progressbar v1.0.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
