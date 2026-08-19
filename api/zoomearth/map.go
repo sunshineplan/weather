@@ -206,7 +206,7 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 			}
 		}
 	}
-	if err = chromedp.Run(ctx, chromedp.Evaluate("id=window.setTimeout(' ');for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
+	if err = chromedp.Run(ctx, chromedp.Evaluate("id=setTimeout(()=>{},0);for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
 		return
 	}
 	click, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -229,7 +229,11 @@ $('.timeline').style.left='calc(50px + env(safe-area-inset-left))'
 $('.timeline').style.right='calc(50px + env(safe-area-inset-right))'
 $('.timeline').style.height='36px'
 $('.timeline').style.width='150px'
-$('.timeline').style.margin='0 auto'`, nil),
+$('.timeline').style.margin='0 auto'
+$('.time-tooltip').style.lineHeight='36px'
+$('.time-tooltip').style.fontSize='16px'
+$('.time-tooltip').style.fontWeight='700'
+$('.time-tooltip').style.whiteSpace='nowrap'`, nil),
 		chromedp.Text("div.time-tooltip", &utcTime),
 	); err != nil {
 		return
@@ -247,7 +251,7 @@ $('.timeline').style.margin='0 auto'`, nil),
 	if parseErr, _ = maps.ParseTimeError(parseErr); parseErr == nil {
 		t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
 		if err = chromedp.Run(nav, chromedp.EvaluateAsDevTools(
-			fmt.Sprintf("$('.time-tooltip>.text').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
+			fmt.Sprintf("$('.time-tooltip').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
 			return
 		}
 	}
