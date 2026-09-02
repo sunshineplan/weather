@@ -239,8 +239,9 @@ $('.time-tooltip').style.whiteSpace='nowrap'`, nil),
 		return
 	}
 	var parseErr error
-	if t, parseErr = time.Parse("Monday _2 January, 15:04MST", utcTime); parseErr != nil {
-		if t, parseErr = time.Parse("Mon _2 Jan, 15:04MST", utcTime); parseErr != nil {
+	if t, parseErr = time.Parse("Monday _2 January 15:04MST", utcTime); parseErr != nil {
+		utcTime = strings.ReplaceAll(utcTime, "Sept", "Sep")
+		if t, parseErr = time.Parse("Mon _2 Jan 15:04MST", utcTime); parseErr != nil {
 			if t, parseErr = time.Parse("Now 15:04MST", utcTime); parseErr == nil {
 				year, month, day := time.Now().Date()
 				hour, min, sec := t.Clock()
