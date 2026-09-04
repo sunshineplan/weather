@@ -6,7 +6,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20260714215040-dc233986426f
 	github.com/chromedp/chromedp v0.16.0
 	github.com/sunshineplan/chrome v1.1.28
-	github.com/sunshineplan/utils v0.1.85
+	github.com/sunshineplan/utils v0.1.86
 )
 
 require (

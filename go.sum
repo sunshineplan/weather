@@ -18,8 +18,8 @@ github.com/orisano/pixelmatch v0.0.0-20220722002657-fb0b55479cde h1:x0TT0RDC7UhA
 github.com/orisano/pixelmatch v0.0.0-20220722002657-fb0b55479cde/go.mod h1:nZgzbfBr3hhjoZnS66nKrHmduYNpc34ny7RK4z5/HM0=
 github.com/sunshineplan/chrome v1.1.28 h1:XnI4x5/AFIn9vJAEFAA3TOj0iFHOj2AiJPVjI+P3rmQ=
 github.com/sunshineplan/chrome v1.1.28/go.mod h1:AoR1V7aUrigjDdPBtMpRX8MggdDeWt/kmJ73xYs3djw=
-github.com/sunshineplan/utils v0.1.85 h1:SpxYIEIz6QuYcGOiSwD660zwVGrmAq+Z/qmjJGkJ/3w=
-github.com/sunshineplan/utils v0.1.85/go.mod h1:K5M8sNh+F47+aHfABZIiFJHVhC2DhiNhGZ9SgBQPPdE=
+github.com/sunshineplan/utils v0.1.86 h1:TiJTbK4sywK1pOE01lDxHrfb+ounWHQBebyTrIzM+8Y=
+github.com/sunshineplan/utils v0.1.86/go.mod h1:K5M8sNh+F47+aHfABZIiFJHVhC2DhiNhGZ9SgBQPPdE=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.47.0 h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs=
 golang.org/x/sys v0.47.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
