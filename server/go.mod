@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/HugoSmits86/nativewebp v1.3.0
-	github.com/gin-contrib/cors v1.7.8
+	github.com/gin-contrib/cors v1.7.9
 	github.com/gin-gonic/gin v1.12.0
 	github.com/sunshineplan/ai v1.0.23
 	github.com/sunshineplan/database/mongodb v1.0.15
@@ -84,7 +84,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	golang.org/x/arch v0.29.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/image v0.41.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
