@@ -155,7 +155,7 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	}
 	u, _ := url.Parse(root)
 	chrome.SetCookies(nav, u, []*http.Cookie{{Name: "ze_language", Value: "en"}})
-	if err = chromedp.Run(nav,
+	if err = chromedp.Do(nav,
 		chromedp.EmulateViewport(int64(o.width), int64(o.height)),
 		chromedp.Navigate(root+"/assets/images/icon-100.jpg"),
 	); err != nil {
@@ -179,7 +179,7 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 	}
 	done := make(chan struct{})
 	go func() { wg.Wait(); close(done) }()
-	go chromedp.Run(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
+	go chromedp.Do(nav, chromedp.Navigate(URL(path, dt, coords, o.zoom, o.overlays)))
 	select {
 	case <-done:
 	case <-nav.Done():
@@ -190,13 +190,12 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 		c := chrome.ListenEvent(ctx, event.Listen, "", false)
-		go chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
-			return input.DispatchKeyEvent(input.KeyDown).
-				WithKey(event.Key).
-				WithCode(event.Code).
-				WithWindowsVirtualKeyCode(event.WindowsVirtualKeyCode).
-				Do(ctx)
-		}))
+		go chromedp.Call(ctx, input.DispatchKeyEvent, input.DispatchKeyEventParams{
+			Type:                  input.DispatchKeyEventTypeKeyDown,
+			Key:                   event.Key,
+			Code:                  event.Code,
+			WindowsVirtualKeyCode: event.WindowsVirtualKeyCode,
+		})
 		select {
 		case <-c:
 		case <-ctx.Done():
@@ -206,16 +205,15 @@ func MapWithContext(ctx context.Context, path string, dt time.Time, coords coord
 			}
 		}
 	}
-	if err = chromedp.Run(ctx, chromedp.Evaluate("id=setTimeout(()=>{},0);for(i=1;i<id;i++)window.clearTimeout(i)", nil)); err != nil {
+	if err = chromedp.Do(ctx, chromedp.Evaluate[chromedp.Void]("id=setTimeout(()=>{},0);for(i=1;i<id;i++)window.clearTimeout(i)")); err != nil {
 		return
 	}
 	click, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	chromedp.Run(click, chromedp.Click(".welcome .continue", chromedp.NodeVisible))
-	var utcTime string
-	if err = chromedp.Run(
+	chromedp.Do(click, chromedp.Click(".welcome .continue", chromedp.NodeVisible))
+	if err = chromedp.Do(
 		nav,
-		chromedp.EvaluateAsDevTools(`
+		chromedp.EvaluateAsDevTools[chromedp.Void](`
 $$('nav.panel').forEach(i=>i.remove())
 $$('.group').forEach(i=>i.remove())
 $$('button').forEach(i=>i.remove())
@@ -233,9 +231,12 @@ $('.timeline').style.margin='0 auto'
 $('.time-tooltip').style.lineHeight='36px'
 $('.time-tooltip').style.fontSize='16px'
 $('.time-tooltip').style.fontWeight='700'
-$('.time-tooltip').style.whiteSpace='nowrap'`, nil),
-		chromedp.Text("div.time-tooltip", &utcTime),
+$('.time-tooltip').style.whiteSpace='nowrap'`),
 	); err != nil {
+		return
+	}
+	utcTime, err := chromedp.Run(nav, chromedp.Text("div.time-tooltip"))
+	if err != nil {
 		return
 	}
 	var parseErr error
@@ -251,8 +252,8 @@ $('.time-tooltip').style.whiteSpace='nowrap'`, nil),
 	}
 	if parseErr, _ = maps.ParseTimeError(parseErr); parseErr == nil {
 		t = t.AddDate(time.Now().UTC().Year(), 0, 0).In(o.timezone)
-		if err = chromedp.Run(nav, chromedp.EvaluateAsDevTools(
-			fmt.Sprintf("$('.time-tooltip').innerText='%s'", t.Format("Jan _2, 15:04")), nil)); err != nil {
+		if err = chromedp.Do(nav, chromedp.EvaluateAsDevTools[chromedp.Void](
+			fmt.Sprintf("$('.time-tooltip').innerText='%s'", t.Format("Jan _2, 15:04")))); err != nil {
 			return
 		}
 	}
@@ -263,7 +264,8 @@ $('.time-tooltip').style.whiteSpace='nowrap'`, nil),
 			time.Sleep(10 * time.Second)
 		}
 		var b []byte
-		if err = chromedp.Run(nav, chromedp.FullScreenshot(&b, 100)); err != nil {
+		b, err = chromedp.Run(nav, chromedp.FullScreenshot(100))
+		if err != nil {
 			return
 		}
 		img, err = png.Decode(bytes.NewReader(b))
