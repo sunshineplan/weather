@@ -1,6 +1,6 @@
 module weather
 
-go 1.26.0
+go 1.27
 
 require (
 	github.com/HugoSmits86/nativewebp v1.3.0
@@ -25,15 +25,15 @@ require (
 	github.com/bytedance/sonic v1.15.2 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/chromedp/cdproto v0.0.0-20260714215040-dc233986426f // indirect
-	github.com/chromedp/chromedp v0.16.0 // indirect
-	github.com/chromedp/sysutil v1.1.0 // indirect
+	github.com/chromedp/cdproto v0.157.9 // indirect
+	github.com/chromedp/chromedp v0.20.1 // indirect
+	github.com/chromedp/chromedp/remote v0.2.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/gin-contrib/sse v1.1.1 // indirect
-	github.com/go-json-experiment/json v0.0.0-20260623181947-01eb4420fa68 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/pschlump/ansi v1.0.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.60.0 // indirect
-	github.com/sunshineplan/chrome v1.1.28 // indirect
+	github.com/sunshineplan/chrome v1.2.0 // indirect
 	github.com/sunshineplan/cipher v1.0.7 // indirect
 	github.com/sunshineplan/progressbar v1.0.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect

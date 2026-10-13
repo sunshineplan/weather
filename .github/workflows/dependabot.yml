@@ -28,7 +28,6 @@ jobs:
           cd server
           go mod tidy
           go build -v ./...
-          go build -v -tags webp ./...
           go clean
           cd ..
 
