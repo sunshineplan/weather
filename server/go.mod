@@ -25,7 +25,7 @@ require (
 	github.com/bytedance/sonic v1.15.2 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/chromedp/cdproto v0.157.10 // indirect
+	github.com/chromedp/cdproto v0.157.11 // indirect
 	github.com/chromedp/chromedp v0.20.1 // indirect
 	github.com/chromedp/chromedp/remote v0.2.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
