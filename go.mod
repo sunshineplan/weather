@@ -4,7 +4,7 @@ go 1.27
 
 require (
 	github.com/chromedp/cdproto v0.159.0
-	github.com/chromedp/chromedp v0.21.0
+	github.com/chromedp/chromedp v0.21.1
 	github.com/sunshineplan/chrome v1.2.3
 	github.com/sunshineplan/utils v0.1.86
 )
