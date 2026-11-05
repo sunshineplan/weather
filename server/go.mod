@@ -26,7 +26,7 @@ require (
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chromedp/cdproto v0.159.0 // indirect
-	github.com/chromedp/chromedp v0.21.0 // indirect
+	github.com/chromedp/chromedp v0.21.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
