@@ -3,8 +3,8 @@ module github.com/sunshineplan/weather
 go 1.27
 
 require (
-	github.com/chromedp/cdproto v0.159.1
-	github.com/chromedp/chromedp v0.21.1
+	github.com/chromedp/cdproto v0.159.2
+	github.com/chromedp/chromedp v0.23.0
 	github.com/sunshineplan/chrome v1.2.3
 	github.com/sunshineplan/utils v0.1.86
 )
