@@ -25,7 +25,7 @@ require (
 	github.com/bytedance/sonic v1.15.2 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/chromedp/cdproto v0.159.2 // indirect
+	github.com/chromedp/cdproto v0.159.3 // indirect
 	github.com/chromedp/chromedp v0.23.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
@@ -60,7 +60,7 @@ require (
 	github.com/pschlump/ansi v1.0.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.60.0 // indirect
-	github.com/sunshineplan/chrome v1.2.3 // indirect
+	github.com/sunshineplan/chrome v1.2.4 // indirect
 	github.com/sunshineplan/cipher v1.0.7 // indirect
 	github.com/sunshineplan/progressbar v1.0.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
