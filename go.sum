@@ -1,10 +1,10 @@
-github.com/chromedp/cdproto v0.159.2 h1:tKn8DG0Nx5+ZfPSxQMm4KtCR9onPrF4kCify/oZQYNQ=
-github.com/chromedp/cdproto v0.159.2/go.mod h1:h68JaIuFr9o3yiayxEYhBdvaxgYO3shDrPSYhNlyfu0=
+github.com/chromedp/cdproto v0.159.3 h1:GQnqLDVD3WFBif2MpAXeCGCs3sfXqnHodh08q7ZisOI=
+github.com/chromedp/cdproto v0.159.3/go.mod h1:h68JaIuFr9o3yiayxEYhBdvaxgYO3shDrPSYhNlyfu0=
 github.com/chromedp/chromedp v0.23.0 h1:iNGzFz+exVgG4OynS2CnYzlAjHiOFW++fUPbbmSwy0w=
 github.com/chromedp/chromedp v0.23.0/go.mod h1:hJcPsoPrgxu4ulIXhO1WmtKjosCD8jbZh0+TeVFsod8=
 github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3 h1:UADEEmDKgfXbtnGJZ97beY5XLo9ZechG1nlU4KnRrkE=
 github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3/go.mod h1:tphK2c80bpPhMOI4v6bIc2xWywPfbqi1Z06+RcrMkDg=
-github.com/sunshineplan/chrome v1.2.3 h1:PZWuZmoWBrGhZYKU0sCBZPHAlqr/WGy3KBPK167G1mE=
-github.com/sunshineplan/chrome v1.2.3/go.mod h1:6R76OMBC9omZ5fETIJMWH+chmQjwB5fEVKjR/LU9zfo=
+github.com/sunshineplan/chrome v1.2.4 h1:o5d7NzeZDRrFjRwrBbneJYKTVXJ7CNNZRkU+mtqJHto=
+github.com/sunshineplan/chrome v1.2.4/go.mod h1:9LSKv+aCrLFxejKkBnN/Yg4s6F7J91yS9NuAl/jLfmc=
 github.com/sunshineplan/utils v0.1.86 h1:TiJTbK4sywK1pOE01lDxHrfb+ounWHQBebyTrIzM+8Y=
 github.com/sunshineplan/utils v0.1.86/go.mod h1:K5M8sNh+F47+aHfABZIiFJHVhC2DhiNhGZ9SgBQPPdE=
