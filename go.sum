@@ -1,7 +1,7 @@
-github.com/chromedp/cdproto v0.160.1 h1:70dLyj3MfhJG6CzwUSdbSszo0QdXpr5bYM/q+w78KBc=
-github.com/chromedp/cdproto v0.160.1/go.mod h1:h68JaIuFr9o3yiayxEYhBdvaxgYO3shDrPSYhNlyfu0=
-github.com/chromedp/chromedp v0.23.0 h1:iNGzFz+exVgG4OynS2CnYzlAjHiOFW++fUPbbmSwy0w=
-github.com/chromedp/chromedp v0.23.0/go.mod h1:hJcPsoPrgxu4ulIXhO1WmtKjosCD8jbZh0+TeVFsod8=
+github.com/chromedp/cdproto v0.160.2 h1:VSgRQWUSKDxohb2KUbL06qGKQZcF84pogqu272Nb9QE=
+github.com/chromedp/cdproto v0.160.2/go.mod h1:h68JaIuFr9o3yiayxEYhBdvaxgYO3shDrPSYhNlyfu0=
+github.com/chromedp/chromedp v0.23.1 h1:CbK1Knbhe9H/m/KT3qfmuSG1c6ErR8ZjmmpHb4Fadz8=
+github.com/chromedp/chromedp v0.23.1/go.mod h1:cz9BPo2oR1YBCu7e+KTdO+7uMvTTuEYh11fErlxdCuQ=
 github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3 h1:UADEEmDKgfXbtnGJZ97beY5XLo9ZechG1nlU4KnRrkE=
 github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3/go.mod h1:tphK2c80bpPhMOI4v6bIc2xWywPfbqi1Z06+RcrMkDg=
 github.com/sunshineplan/chrome v1.2.4 h1:o5d7NzeZDRrFjRwrBbneJYKTVXJ7CNNZRkU+mtqJHto=
